@@ -291,6 +291,16 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .pf-filtro{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
 .pf-aviso{font-size:12.5px;color:var(--mut);background:var(--peach);border-radius:12px;padding:8px 12px}
 .pf-carregando{color:var(--mut);font-size:13px;padding:10px 0}
+.kpi.filtro{cursor:pointer}
+.kpi.filtro:hover{transform:translateY(-2px)}
+.kpi.filtro.sel{outline:3px solid var(--sun);outline-offset:2px}
+.kpis.filtrando .kpi.filtro:not(.sel){opacity:.45}
+.tbusca{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;min-width:200px;margin:0 0 10px}
+.tb-vazio td{color:var(--mut);padding:16px!important}
+.gv-filtro{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px 10px}
+.gv-filtro button{border:0;background:var(--line2);color:var(--mut);font:inherit;font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;cursor:pointer}
+.gv-filtro button.on{background:var(--sun);color:var(--ink);font-weight:600}
+.limpar{border:0;background:none;color:var(--red2);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -339,6 +349,13 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
       <div class="tx"><small id="hojeData"></small><h2 id="hojeTitulo">Lista do dia</h2><p id="hojeDesc"></p><button class="urgentes hidden" id="hojeUrg"></button></div>
     </div>
     <div class="kpis" id="hojeResumo"></div>
+    <div class="toolbar" id="hojeFiltros">
+      <input type="search" id="hBusca" placeholder="Buscar nome, bairro ou motivo" style="min-width:230px">
+      <select id="hMotivo"></select>
+      <select id="hBairro"></select>
+      <label class="muted" style="font-size:13px"><input type="checkbox" id="hOcultar"> esconder quem já marquei</label>
+      <button class="limpar hidden" id="hLimpar">Limpar filtros</button>
+    </div>
     <div id="hojeBlocos"></div>
   </section>
 
@@ -488,6 +505,7 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 <div id="veu"></div>
 <aside id="gaveta" aria-label="Alertas">
   <div class="gv-topo"><h3>Alertas</h3><span class="vivo hidden" id="vivo">ao vivo</span><button id="gvFechar" title="Fechar">✕</button></div>
+  <div class="gv-filtro" id="gvFiltro"></div>
   <div class="gv-lista" id="gvLista"></div>
 </aside>
 <div id="pings"></div>
@@ -960,25 +978,74 @@ function renderHoje(){
     (idade>30?`<br><b>Atenção:</b> os dados são de ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}. Rode "Atualizar painel".`:'');
   $('#qtHoje').dataset.base=tot; $('#qtHoje').textContent=tot||'';
   const CURTO={avaliacao:'Avaliações ruins',aniversario:'Aniversários',segundo:'Boas-vindas',lembrete:'Dia de costume',reativar:'Sumidos',migrou:'Foram pros apps'};
-  $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi"><div class="lbl">${CURTO[b.id]}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos',migrou:'iFood / 99'}[b.id]}</div></div>`).join('');
-  let h='';
-  BLOCOS.forEach(b=>{ const itens=L[b.id]; if(!itens.length) return;
-    h+=`<div class="card" style="margin-top:20px"><h2>${b.nome} <span class="cont">${itens.length}</span></h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Cliente</th><th></th><th>Feito</th><th>Por quê</th><th class="num">Total gasto</th></tr>`;
+  $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi filtro ${HF.bloco===b.id?'sel':''}" data-b="${b.id}" title="Clique para ver só esta lista"><div class="lbl">${CURTO[b.id]}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos',migrou:'iFood / 99'}[b.id]}</div></div>`).join('');
+  $('#hojeResumo').classList.toggle('filtrando',!!HF.bloco);
+  $('#hojeResumo').querySelectorAll('.kpi.filtro').forEach(k=>k.onclick=()=>{ HF.bloco=HF.bloco===k.dataset.b?null:k.dataset.b; renderHoje(); });
+  HOJE_L=L; setTimeout(()=>{ const bu=$('#hojeUrg'); if(bu) bu.onclick=()=>abrirGaveta(); renderAlertas(); },0);
+  renderHojeBlocos();
+}
+let HF={bloco:null}, HOJE_L=null;
+const semAc=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const BAIRRO_CLI={}; function bairroCli(cli){ if(cli in BAIRRO_CLI) return BAIRRO_CLI[cli]; const m={}; P.forEach(p=>{ if(p.cli===cli&&p.b>=0) m[p.b]=(m[p.b]||0)+1; }); const k=Object.keys(m).sort((a,b)=>m[b]-m[a])[0]; return BAIRRO_CLI[cli]=k!=null?D.bairros[k]:''; }
+function motivosItem(bid,it){
+  const t=[]; const pf=PERF[it.cli]||[];
+  if(bid==='avaliacao'&&it.aval){ String(it.aval[4]||'').split(',').forEach(x=>{ const n=x.replace(/\d+(\.\d+)?\s*$/,'').trim(); if(n) t.push('Nota baixa: '+n); }); if(it.aval[3]) t.push('Deixou comentário'); t.push('Nota '+Math.round(it.aval[2])); }
+  if(bid==='aniversario') t.push(it.ord===0?'Aniversário hoje':'Aniversário nos próximos dias');
+  if(bid==='migrou'){ if(/iFood/.test(it.motivo)) t.push('Foi para o iFood'); if(/99Food/.test(it.motivo)) t.push('Foi para o 99Food'); }
+  if(pf[0]&&bid!=='avaliacao') t.push('Favorito: '+pf[0]);
+  if(pf[5]!=null&&D.turnos[pf[5]]){ const n=D.turnos[pf[5]].toLowerCase(); t.push('Cliente '+(/^(noite|tarde)/.test(n)?'da ':'do ')+n); }
+  if(it.x&&it.x.n>=10) t.push('10 pedidos ou mais');
+  return t;
+}
+function renderHojeBlocos(){
+  const L=HOJE_L; if(!L) return;
+  const q=semAc($('#hBusca').value.trim()), mot=$('#hMotivo').value, bai=$('#hBairro').value, ocultar=$('#hOcultar').checked;
+  // opções dos filtros a partir do que está na tela
+  const cntM={}, cntB={};
+  BLOCOS.forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return; L[b.id].forEach(it=>{ it._m=it._m||motivosItem(b.id,it); it._m.forEach(m=>cntM[m]=(cntM[m]||0)+1); const bb=it.cli>=0?bairroCli(it.cli):''; if(bb) cntB[bb]=(cntB[bb]||0)+1; }); });
+  const opts=(sel,cnt,todos)=>{ const ks=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b)); if(sel.value&&!cnt[sel.value]) ks.unshift(sel.value);
+    const v=sel.value; sel.innerHTML=`<option value="">${todos}</option>`+ks.map(k=>`<option value="${esc(k)}">${esc(k)} (${cnt[k]||0})</option>`).join(''); sel.value=v; };
+  opts($('#hMotivo'),cntM,'Todos os motivos'); opts($('#hBairro'),cntB,'Todos os bairros');
+  const ativo=!!(q||mot||bai||ocultar||HF.bloco); $('#hLimpar').classList.toggle('hidden',!ativo);
+  let h='', vis=0;
+  BLOCOS.forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return;
+    const itens=L[b.id].filter(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
+      if(mot && !(it._m||[]).includes(mot)) return false;
+      if(bai && (it.cli<0||bairroCli(it.cli)!==bai)) return false;
+      if(ocultar && c && cInfo(c.id)) return false;
+      if(q && !semAc([c?c.nome:'', c?c.tel:'', it.cli>=0?bairroCli(it.cli):'', it.motivo].join(' ')).includes(q)) return false;
+      return true; });
+    if(!itens.length) return; vis+=itens.length;
+    h+=`<div class="card" style="margin-top:20px"><h2>${b.nome} <span class="cont">${itens.length}${itens.length<L[b.id].length?' de '+L[b.id].length:''}</span></h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Cliente</th><th></th><th>Feito</th><th>Por quê</th><th class="num">Total gasto</th></tr>`;
     itens.forEach(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
       if(!c){ h+=`<tr><td class="muted">Cliente não identificado (pedido ${esc(it.aval?it.aval[5]:'')})</td><td>—</td><td></td><td class="why">${esc(it.motivo)}</td><td></td></tr>`; return; }
       const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
       const msg=b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da pizzaria. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
-      const w=waLink(c,msg); const feito=!!cInfo(c.id);
-      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${c.app?`<span class="sub"><span class="tag">${esc(c.app)}</span></span>`:''}</td>
+      const w=waLink(c,msg); const feito=!!cInfo(c.id); const bb=bairroCli(it.cli);
+      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${c.app||bb?`<span class="sub">${esc(bb)}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</span>`:''}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:'<span class="muted">sem telefone</span>'}</td>
         <td class="ck"><input type="checkbox" data-id="${c.id}" data-camp="${b.camp||'avaliacao'}" ${feito?'checked':''}></td>
         <td class="why">${esc(it.motivo)}</td>
         <td class="num">${it.x?fmtR(it.x.v):''}${it.x?`<span class="sub">${fmtN(it.x.n)} pedidos</span>`:''}</td></tr>`; });
     h+='</table></div></div>'; });
-  if(!tot) h='';
-  setTimeout(()=>{ const bu=$('#hojeUrg'); if(bu) bu.onclick=()=>abrirGaveta(); renderAlertas(); },0);
+  if(!vis && ativo) h='<div class="card" style="margin-top:20px"><p class="muted" style="margin:0">Ninguém com esses filtros. <button class="limpar" onclick="limparHoje()">Limpar filtros</button></p></div>';
   $('#hojeBlocos').innerHTML=h;
-  $('#hojeBlocos').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, cb.dataset.camp, cb.checked); });
+  $('#hojeBlocos').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, cb.dataset.camp, cb.checked); if($('#hOcultar').checked) renderHojeBlocos(); });
+}
+function limparHoje(){ HF.bloco=null; $('#hBusca').value=''; $('#hMotivo').value=''; $('#hBairro').value=''; $('#hOcultar').checked=false; renderHoje(); }
+$('#hBusca').addEventListener('input',renderHojeBlocos); ['#hMotivo','#hBairro','#hOcultar'].forEach(x=>$(x).addEventListener('change',renderHojeBlocos)); $('#hLimpar').onclick=limparHoje;
+
+// ------------------------------------------------------------ busca em qualquer tabela
+const SEM_BUSCA=new Set(['tbCli','tbPromo']);
+function filtrarTabela(tb,inp){ const q=semAc(inp.value.trim()); const rows=[...tb.querySelectorAll('tr')].filter(r=>!r.querySelector('th')&&!r.classList.contains('tb-vazio'));
+  let n=0; rows.forEach(r=>{ const ok=!q||semAc(r.textContent).includes(q); r.style.display=ok?'':'none'; if(ok)n++; });
+  let v=tb.querySelector('tr.tb-vazio'); if(q&&!n&&rows.length){ if(!v){ v=document.createElement('tr'); v.className='tb-vazio'; v.innerHTML='<td colspan="20">Nada encontrado com essa busca.</td>'; (tb.tBodies[0]||tb).appendChild(v);} } else if(v) v.remove(); }
+function prepararBuscas(){
+  document.querySelectorAll('main .tablebox > table').forEach(tb=>{ if(tb.dataset.busca||SEM_BUSCA.has(tb.id)||tb.closest('#hojeBlocos')) return; tb.dataset.busca='1';
+    const inp=document.createElement('input'); inp.type='search'; inp.className='tbusca hidden'; inp.placeholder='Filtrar esta tabela…';
+    tb.parentElement.before(inp); inp.addEventListener('input',()=>filtrarTabela(tb,inp));
+    const ver=()=>{ const n=[...tb.querySelectorAll('tr')].filter(r=>!r.querySelector('th')).length; inp.classList.toggle('hidden',n<6&&!inp.value); if(inp.value) filtrarTabela(tb,inp); };
+    new MutationObserver(m=>{ if(m.some(x=>[...x.addedNodes].some(n=>!(n.classList&&n.classList.contains('tb-vazio'))))) ver(); }).observe(tb,{childList:true,subtree:true}); ver(); });
 }
 
 // ------------------------------------------------------------ RESULTADOS
@@ -1036,9 +1103,15 @@ function msgAlerta(a){
     .replace(/\{base\}/g,a.favorito||'').replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
 }
 function quandoTxt(s){ const d=parseD(s); const m=Math.round((new Date()-d)/6e4); return m<1?'agora':m<60?`há ${m} min`:m<1440?`há ${Math.round(m/60)} h`:d.toLocaleDateString('pt-BR'); }
+let AF='all';
 function renderAlertas(focoId){
-  const L=alertasAtivos(); const urg=L.filter(a=>a.prio===1).length;
-  $('#sinoN').textContent=L.length||''; $('#qtHoje').textContent=(+($('#qtHoje').dataset.base||0)+urg)||'';
+  const LT=alertasAtivos(); const urg=LT.filter(a=>a.prio===1).length;
+  const tipos={}; LT.forEach(a=>tipos[a.tipo]=(tipos[a.tipo]||0)+1);
+  if(AF!=='all'&&AF!=='urg'&&!tipos[AF]) AF='all';
+  $('#gvFiltro').innerHTML=LT.length?[['all','Todos',LT.length]].concat(urg&&urg<LT.length?[['urg','Urgentes',urg]]:[]).concat(Object.keys(tipos).map(t=>[t,(ICONE[t]||'')+' '+(ROTULO[t]||t),tipos[t]])).map(([v,l,n])=>`<button data-v="${v}" class="${AF===v?'on':''}">${esc(l)} ${n}</button>`).join(''):'';
+  $('#gvFiltro').querySelectorAll('button').forEach(b=>b.onclick=()=>{ AF=b.dataset.v; renderAlertas(null); });
+  const L=AF==='all'?LT:LT.filter(a=>AF==='urg'?a.prio===1:a.tipo===AF);
+  $('#sinoN').textContent=LT.length||''; $('#qtHoje').textContent=(+($('#qtHoje').dataset.base||0)+urg)||'';
   const bu=$('#hojeUrg'); if(bu){ bu.classList.toggle('hidden',!urg); bu.textContent=`🔔 ${urg} ${urg===1?'alerta urgente':'alertas urgentes'} agora`; }
   if(!L.length){ $('#gvLista').innerHTML='<div class="gv-vazio"><b>Tudo em dia 🎉</b>Quando aparecer uma oportunidade, ela chega aqui e no canto da tela.</div>'; return; }
   $('#gvLista').innerHTML=L.map(a=>{ const c=a.cliente||{}; const msg=msgAlerta(a); const w=c.tel?waLink(c,msg):null;
@@ -1262,7 +1335,7 @@ document.addEventListener('click',e=>{ const a=e.target.closest('a.cli'); if(a){
 
 // ------------------------------------------------------------ início
 function render(){
-  marcarFiltros();
+  marcarFiltros(); prepararBuscas();
   if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else renderResultados();
 }
 (function init(){

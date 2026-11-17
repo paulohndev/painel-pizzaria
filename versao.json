@@ -1,6 +1,6 @@
 {
- "versao": "1.4.0",
- "notas": "Clientes em mais de um canal: junta iFood/99/proprio, detecta quem migrou para os apps",
+ "versao": "1.4.1",
+ "notas": "Filtros: lista de Hoje por tipo, motivo e bairro; alertas por tipo; busca em todas as tabelas",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -16,7 +16,7 @@
   "alertas.py": "91105b3485a9c5ca5f1f0c25f3b41ce822a1f84bc4a5e12bf62ed66fedb6d7c4",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "c8023ef7316ca1b58f067005d95f320cf4e363ebfee989d2f912f74b432625bb",
+  "painel_modelo.html": "9e45e2fba940b810d8c3c77164968a06a88de9c1a165e8b08eb7aa094df8636c",
   "pizzaria.py": "0aa513963b7a2043f0a143338246ae58edeb20cdf1a27bd0bfd98921cf3d40dd",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
   "vigia.py": "dc03c18faa7e3b349fbc06bdc85dde1300fa1a0606c26a59cf725f13fda81cf8"
