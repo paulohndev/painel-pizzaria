@@ -1,6 +1,6 @@
 {
- "versao": "1.3.0",
- "notas": "Perfil completo do cliente: clique no nome em qualquer lista ou alerta",
+ "versao": "1.3.1",
+ "notas": "Filtro de turno no perfil; filtro iFood/99Food/proprio nas listas de clientes",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -16,9 +16,9 @@
   "alertas.py": "91105b3485a9c5ca5f1f0c25f3b41ce822a1f84bc4a5e12bf62ed66fedb6d7c4",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "1a7356ac239d3eac06ff8685ca3578dddcd9aa2289e267738b4485662721322b",
+  "painel_modelo.html": "a2b649f483b1e7fb216dee774fcadee42afb9dc0b0073bce7ff028c688dae08c",
   "pizzaria.py": "dd6964236f689de5ad76a5b4fd8a399bace25810d1303b531839b59b9f435362",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "1466f9a1321d97fdefa7549a12cc2c09eb3683a873e5b65615463f6f9d3ef386"
+  "vigia.py": "12cf986b471d01a06fa11059c0cf92b20dffe4733b868b88c6580b5e7e1ebf07"
  }
 }

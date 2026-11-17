@@ -514,13 +514,14 @@ def perfil_cliente(chave):
                                                  "cidade": end.get("city") or "", "vezes": 0, "ultimo": ""})
                     e["vezes"] += 1
                     e["ultimo"] = max(e["ultimo"], (criado or "")[:10])
+                end_p = {"texto": k, "complemento": end.get("complement") or "", "referencia": end.get("reference") or ""} if (end.get("street") or end.get("neighborhood")) else None
                 pag = [PAGTO_PT.get(x.get("payment_method"), x.get("payment_method") or "") for x in (d.get("payments") or [])]
                 cup = next((x.get("coupon_code") or x.get("coupon_name") for x in (d.get("discounts") or []) if x.get("coupon_code") or x.get("coupon_name")), None)
                 pedidos.append({"id": pid, "num": d.get("display_id"), "data": (criado or "")[:16].replace("T", " "),
                                 "status": STATUS_PT.get(st, st), "cancelado": st == "canceled", "canal": P.CANAIS.get(canal, canal),
                                 "tipo": P.TIPOS.get(tipo, tipo), "total": d.get("total"), "taxa": d.get("delivery_fee"),
                                 "desconto": sum((x.get("total") or 0) for x in (d.get("discounts") or [])), "cupom": cup,
-                                "pagamento": ", ".join(x for x in pag if x), "obs": d.get("observation"), "itens": itens})
+                                "pagamento": ", ".join(x for x in pag if x), "obs": d.get("observation"), "itens": itens, "end": end_p})
         pedidos.sort(key=lambda x: x["data"], reverse=True)
         av = [{"data": a[0], "nota": a[2], "comentario": a[3], "baixas": a[4]} for a in D.get("avaliacoes") or [] if a[1] == cli]
         cont = db.execute("SELECT data, campanha FROM contatos WHERE cliente_id=?", (str(c.get("id")),)).fetchone()

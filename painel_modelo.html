@@ -288,6 +288,7 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .pf-ped.open .seta{transform:rotate(90deg)}
 @media(max-width:700px){.pf-ped .det{margin-left:0}}
 .pf-sec .linha .sub{display:block;font-size:12px;color:var(--soft);margin-top:2px}
+.pf-filtro{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
 .pf-aviso{font-size:12.5px;color:var(--mut);background:var(--peach);border-radius:12px;padding:8px 12px}
 .pf-carregando{color:var(--mut);font-size:13px;padding:10px 0}
 .heat{width:auto}
@@ -506,14 +507,18 @@ function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); local
 
 // ------------------------------------------------------------ preparo
 const REF = parseD(D.gerado_em);
-const P = D.pedidos.map(p=>({d:parseD(p[0]), k:p[0], t:p[1], c:p[2], tipo:p[3], v:p[4], cli:p[5], b:p[6], cancel:p[7]===1, taxa:p[8], desc:p[9], cup:p[10]}));
+const P = D.pedidos.map(p=>({d:parseD(p[0]), k:p[0], t:p[1], c:p[2], tipo:p[3], v:p[4], cli:p[5], b:p[6], cancel:p[7]===1, taxa:p[8], desc:p[9], cup:p[10], pid:p[11]}));
+const GRUPO_CANAL = D.canais.map(c=>c.id==='ifood'?'ifood':c.id==='food99'?'food99':'proprio');
+const TURNO_PID = {}; P.forEach(p=>{ if(p.pid!=null) TURNO_PID[p.pid]=p.t; });
+const CLI_GRP = {}; P.forEach(p=>{ if(p.cancel||p.cli<0) return; (CLI_GRP[p.cli]=CLI_GRP[p.cli]||new Set()).add(GRUPO_CANAL[p.c]); });
 const IFOOD = new Set(D.canais.map((c,i)=>c.ifood?i:-1).filter(i=>i>=0));
 const NT = D.turnos.length;
 const turnoUsado = new Array(NT).fill(0); P.forEach(p=>turnoUsado[p.t]++);
 const TURNOS_VIS = D.turnos.map((n,i)=>i).filter(i=>i<NT-1 || turnoUsado[i]>0);
 
 let F = {turno:'all', canal:'all'};
-function okCanal(p){ if(F.canal==='all') return true; const f=IFOOD.has(p.c); return F.canal==='ifood'?f:!f; }
+function okCanal(p){ return F.canal==='all' || GRUPO_CANAL[p.c]===F.canal; }
+function cliCanal(cli){ return F.canal==='all' || (cli>=0 && CLI_GRP[cli] && CLI_GRP[cli].has(F.canal)); }
 function okTurno(p){ return F.turno==='all' || p.t===F.turno; }
 const ok = p => okCanal(p) && okTurno(p);
 
@@ -524,9 +529,9 @@ function montarFiltros(){
     const b=document.createElement('button'); b.textContent=l; b.title=(v==='all'?'':D.turnos_horario[v]||'');
     b.onclick=()=>{F.turno=v;render();}; b.dataset.v=v; ft.appendChild(b);});
   const fc=$('#fCanal'); fc.innerHTML='';
-  const temIfood = IFOOD.size>0;
-  [['all','Todos'],['proprio','Próprio']].concat(temIfood?[['ifood','Apps (iFood/99)']]:[]).forEach(([v,l])=>{
-    const b=document.createElement('button'); b.textContent=l; b.onclick=()=>{F.canal=v;render();}; b.dataset.v=v; fc.appendChild(b);});
+  const tem=new Set(GRUPO_CANAL);
+  [['all','Todos'],['proprio','Próprio']].concat(tem.has('ifood')?[['ifood','iFood']]:[]).concat(tem.has('food99')?[['food99','99Food']]:[]).forEach(([v,l])=>{
+    const b=document.createElement('button'); b.textContent=l; b.title=v==='proprio'?'App/cardápio digital, WhatsApp, balcão e portal':''; b.onclick=()=>{F.canal=v;render();}; b.dataset.v=v; fc.appendChild(b);});
 }
 function marcarFiltros(){
   document.querySelectorAll('#fTurno button').forEach(b=>b.classList.toggle('on', String(F.turno)===b.dataset.v));
@@ -690,7 +695,7 @@ function waLink(c, texto){
 let ultimaLista=[];
 function renderClientes(){
   const L=calcClientes(); const totV=L.reduce((s,c)=>s+c.gasto,0)||1;
-  $('#segDesc').innerHTML=`Clique num grupo para filtrar a lista. Contagem considerando ${F.turno==='all'?'todos os turnos':'só o turno <b>'+esc(D.turnos[F.turno])+'</b>'} e ${F.canal==='all'?'todos os canais':F.canal==='ifood'?'só apps de entrega':'só canal próprio'}.`;
+  $('#segDesc').innerHTML=`Clique num grupo para filtrar a lista. Contagem considerando ${F.turno==='all'?'todos os turnos':'só o turno <b>'+esc(D.turnos[F.turno])+'</b>'} e ${F.canal==='all'?'todos os canais':F.canal==='ifood'?'só iFood':F.canal==='food99'?'só 99Food':'só canal próprio'}.`;
   $('#chips').innerHTML=SEGS.map(s=>{const g=L.filter(c=>c.seg===s.id); const v=g.reduce((a,c)=>a+c.gasto,0);
     return `<button class="chip ${segSel===s.id?'on':''}" data-s="${s.id}" title="${esc(s.dica)}"><div class="n">${fmtN(g.length)}</div><div class="l">${s.nome}</div><div class="p">${fmtP(v/totV)} do faturamento</div></button>`;}).join('');
   document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{segSel=segSel===b.dataset.s?null:b.dataset.s; pag=0; renderClientes();});
@@ -734,7 +739,7 @@ $('#btnCsv').onclick=()=>{
 };
 
 // ------------------------------------------------------------ PRODUTOS
-function okIT(t,c){ if(F.turno!=='all'&&t!==F.turno) return false; if(F.canal==='all') return true; const f=IFOOD.has(c); return F.canal==='ifood'?f:!f; }
+function okIT(t,c){ if(F.turno!=='all'&&t!==F.turno) return false; return F.canal==='all' || GRUPO_CANAL[c]===F.canal; }
 function tabelaRank(el, linhas, cab){
   const tv=linhas.reduce((s,l)=>s+l.v,0)||1, mx=Math.max(1,...linhas.map(l=>l.ord));
   let h=`<tr><th>#</th><th>${cab}</th><th class="num">Qtd.</th><th class="num">Faturamento</th><th class="num">% do fat.</th><th style="width:22%"></th></tr>`;
@@ -796,7 +801,7 @@ function msgPromo(r, rec){
     .replace(/\{base\}/g,rec.base||fav).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
 }
 function promoFiltrada(){
-  return PR.filter(r=>{ if(F.turno!=='all' && r.turno!==F.turno) return false; return true; });
+  return PR.filter(r=>{ if(F.turno!=='all' && r.turno!==F.turno) return false; return cliCanal(r.cli); });
 }
 function renderPromocoes(){
   const L=promoFiltrada();
@@ -884,6 +889,7 @@ function listaDoDia(){
   pc.forEach((x,cli)=>{ const c=D.clientes[cli]; if(!c||!waLink(c,'')) return;
     const dias=diasEntre(x.ult,hoje); const pf=PERF[cli]||[];
     if(F.turno!=='all' && pf[5]!==undefined && pf[5]!==F.turno) return;
+    if(!cliCanal(cli)) return;
     // aniversário
     if(c.nasc && c.nasc.length>=10){ const a=new Date(hoje.getFullYear(),+c.nasc.slice(5,7)-1,+c.nasc.slice(8,10),12);
       if(a<hoje && diasEntre(a,hoje)>0) a.setFullYear(a.getFullYear()+1);
@@ -898,9 +904,10 @@ function listaDoDia(){
   Object.values(REC_DE).filter(r=>r.recs[0].tipo==='reativar').sort((a,b)=>b.gasto-a.gasto).forEach(r=>{
     const c=D.clientes[r.cli]; if(!waLink(c,'')||contatadoRecente(c,30)) return;
     if(F.turno!=='all' && r.turno!==F.turno) return;
+    if(!cliCanal(r.cli)) return;
     out.reativar.push({cli:r.cli, x:{n:r.n,v:r.gasto}, ord:-r.gasto, motivo:r.recs[0].motivo}); });
   // avaliações ruins (7 dias)
-  AVAL.forEach(a=>{ const d=parseD(a[0]); if(diasEntre(d,hoje)>7 || a[2]>3) return; const cli=a[1];
+  AVAL.forEach(a=>{ const d=parseD(a[0]); if(diasEntre(d,hoje)>7 || a[2]>3) return; const cli=a[1]; if(F.canal!=='all' && !cliCanal(cli)) return;
     if(cli>=0){ const ci=cInfo(D.clientes[cli].id); if(ci && ci.d>=new Date(d.getFullYear(),d.getMonth(),d.getDate())) return; }
     out.avaliacao.push({cli, x:cli>=0?pc.get(cli)||null:null, ord:a[2], aval:a, motivo:`Nota ${String(a[2]).replace('.',',')} em ${d.toLocaleDateString('pt-BR')}${a[4]?' · notas baixas: '+a[4]:''}${a[3]?' · "'+a[3]+'"':''}`}); });
   Object.keys(out).forEach(k=>{ out[k].sort((a,b)=>a.ord-b.ord); out[k]=out[k].slice(0,MAX_BLOCO[k]); });
@@ -946,7 +953,7 @@ function renderResultados(){
   const idCli={}; D.clientes.forEach((c,i)=>{ if(c.id!=null) idCli[c.id]=i; });
   const ped=new Map(); P.forEach(p=>{ if(p.cancel||p.cli<0) return; (ped.get(p.cli)||ped.set(p.cli,[]).get(p.cli)).push(p); });
   const res={};
-  Object.keys(contatos).forEach(id=>{ const inf=cInfo(id); const cli=idCli[id]; if(!inf||cli==null) return;
+  Object.keys(contatos).forEach(id=>{ const inf=cInfo(id); const cli=idCli[id]; if(!inf||cli==null||!cliCanal(cli)) return;
     if(diasEntre(inf.d,hoje)>dias) return;
     const r=res[inf.c]=res[inf.c]||{n:0,cedo:0,volt:0,fat:0,base:0,nb:0};
     r.n++;
@@ -1045,7 +1052,9 @@ $('#novoDado').onclick=()=>location.reload();
 const IDX_CHAVE={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.chave) IDX_CHAVE[c.chave]=i; });
 function fmtTel(t){ t=(t||'').replace(/\D/g,''); if(t.length===11) return `(${t.slice(0,2)}) ${t.slice(2,7)}-${t.slice(7)}`; if(t.length===10) return `(${t.slice(0,2)}) ${t.slice(2,6)}-${t.slice(6)}`; return t; }
 function iniciais(n){ const p=(n||'?').trim().split(/\s+/); return ((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase(); }
+let PF_T='all', PF_CTX=null;
 function abrirPerfil(ref){
+  PF_T='all';
   let cli = ref.i!=null ? +ref.i : IDX_CHAVE[ref.chave];
   const c = cli!=null ? D.clientes[cli] : null;
   if(!c){ if(ref.chave && AO_VIVO) return carregarPerfil(ref.chave, null, null); return; }
@@ -1064,10 +1073,25 @@ function carregarPerfil(chave, c, cli){
     renderPerfil(c, cli, ps, r);
   }).catch(()=>{});
 }
-function renderPerfil(c, cli, ps, R){
+function renderPerfil(c, cli, psAll, RAll){
+  PF_CTX={c,cli,ps:psAll,R:RAll};
+  const tsCli=[...new Set(psAll.filter(p=>!p.cancel).map(p=>p.t))].filter(t=>t!=null).sort();
+  if(PF_T!=='all' && !tsCli.includes(PF_T)) PF_T='all';
+  const ps = PF_T==='all'?psAll:psAll.filter(p=>p.t===PF_T);
+  let R = RAll;
+  if(RAll && RAll.pedidos){
+    const ped = PF_T==='all'?RAll.pedidos:RAll.pedidos.filter(x=>TURNO_PID[x.id]===PF_T);
+    const em={}; ped.forEach(x=>{ const e=x.end; if(!e) return; const k=e.texto; const o=em[k]=em[k]||{texto:k,complemento:e.complemento||'',referencia:e.referencia||'',vezes:0,ultimo:''}; o.vezes++; if(x.data.slice(0,10)>o.ultimo) o.ultimo=x.data.slice(0,10); });
+    const temEnd = RAll.pedidos.some(x=>x.end!==undefined);
+    R = Object.assign({}, RAll, {pedidos:ped, enderecos: temEnd?Object.values(em).sort((a,b)=>b.vezes-a.vezes):RAll.enderecos});
+  }
   const ok=ps.filter(p=>!p.cancel); const n=ok.length; const gasto=ok.reduce((s,p)=>s+(p.v||0),0);
   const ult=ok[0]?ok[0].d:null, pri=ok.length?ok[ok.length-1].d:null; const dias=ult?Math.floor((new Date()-ult)/864e5):null;
   const pf=PERF[cli]||[]; const rec=REC_DE[cli];
+  const rot=(()=>{ if(ok.length<3) return null; const dw=new Array(7).fill(0), hs=[]; ok.forEach(p=>{ dw[p.d.getDay()]++; hs.push(p.d.getHours()+p.d.getMinutes()/60); });
+    const best=dw.indexOf(Math.max(...dw)); hs.sort((a,b)=>a-b); const hm=hs[Math.floor(hs.length/2)];
+    const asc=ok.slice().sort((a,b)=>a.d-b.d); const iv=[]; for(let i=1;i<asc.length;i++){ const g=(asc[i].d-asc[i-1].d)/864e5; if(g>=0.5) iv.push(g); } iv.sort((a,b)=>a-b);
+    return {dia:best, share:dw[best]/ok.length, hora:Math.round(hm), ritmo:iv.length?Math.round(iv[Math.floor(iv.length/2)]):null}; })();
   const seg=dias!=null?SEGS.find(s=>s.f(n,dias)):null;
   const ci=cInfo(c.id);
   const msg=($('#msg').value||CFG.mensagem||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{pontos\}/g,c.pontos||0);
@@ -1096,16 +1120,17 @@ function renderPerfil(c, cli, ps, R){
       <div class="pf-tags">${seg?`<span class="y">${esc(seg.nome)}</span>`:''}${c.app?`<span>só ${esc(c.app)}</span>`:''}${(cad.pontos||c.pontos)?`<span>${fmtN(cad.pontos||c.pontos)} pontos</span>`:''}${(cad.nascimento||c.nasc)?`<span>🎂 ${new Date((cad.nascimento||c.nasc).slice(0,10)+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>`:''}${ci?`<span>contatado em ${esc(ci.txt)}</span>`:''}</div></div></div>
     <div class="pf-acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:''}${c.tel?`<button id="pfCopiar">Copiar telefone</button>`:''}${cad.email?`<button disabled style="cursor:default">${esc(cad.email)}</button>`:''}</div></div>
   <div class="pf-corpo">
+    ${tsCli.length>1&&cli>=0?`<div class="pf-filtro"><span>Ver pedidos de</span><div class="seg" id="pfTurno">${[['all','Todos os turnos']].concat(tsCli.map(t=>[t,D.turnos[t]])).map(([v,l])=>`<button data-v="${v}" class="${String(PF_T)===String(v)?'on':''}">${esc(l)}</button>`).join('')}</div></div>`:''}
     <div class="pf-kpis kpis">
       <div class="kpi"><div class="lbl">Pedidos</div><div class="val">${fmtN(n)}</div><div class="cmp">${ps.length-n?fmtN(ps.length-n)+' cancelado(s)':'nenhum cancelado'}</div></div>
-      <div class="kpi"><div class="lbl">Total gasto</div><div class="val">${fmtR0(gasto)}</div><div class="cmp">em toda a história</div></div>
+      <div class="kpi"><div class="lbl">Total gasto</div><div class="val">${fmtR0(gasto)}</div><div class="cmp">${PF_T==='all'?'em toda a história':'no '+esc((D.turnos[PF_T]||'').toLowerCase())}</div></div>
       <div class="kpi"><div class="lbl">Ticket médio</div><div class="val">${fmtR(n?gasto/n:0)}</div><div class="cmp">por pedido</div></div>
       <div class="kpi"><div class="lbl">Último pedido</div><div class="val">${dias==null?'—':dias===0?'hoje':dias+' d'}</div><div class="cmp">${ult?ult.toLocaleDateString('pt-BR'):''}</div></div>
     </div>
     <div class="pf-2">
       <div class="pf-sec"><h3>Rotina</h3>
-        ${pf[1]!=null&&pf[3]>=0.25?`<div class="linha"><span>Dia preferido</span><span>${DIAS_N[pf[1]]} (${Math.round(pf[3]*100)}% dos pedidos)</span></div><div class="linha"><span>Horário</span><span>por volta das ${pf[2]+1}h</span></div>`:''}
-        ${pf[4]?`<div class="linha"><span>Ritmo</span><span>pede a cada ${pf[4]} dia${pf[4]===1?'':'s'}</span></div>`:''}
+        ${rot&&rot.share>=0.25?`<div class="linha"><span>Dia preferido</span><span>${DIAS_N[rot.dia]} (${Math.round(rot.share*100)}% dos pedidos)</span></div>`:''}${rot?`<div class="linha"><span>Horário</span><span>por volta das ${rot.hora}h</span></div>`:''}
+        ${rot&&rot.ritmo?`<div class="linha"><span>Ritmo</span><span>pede a cada ${rot.ritmo} dia${rot.ritmo===1?'':'s'}</span></div>`:''}${!rot?'<div class="pf-carregando">Poucos pedidos para ver a rotina.</div>':''}
         <div style="margin-top:10px;font-size:12px;color:var(--soft);font-weight:600;letter-spacing:.06em;text-transform:uppercase">Turnos</div>${barra(tcNome,corT)}
         <div style="margin-top:10px;font-size:12px;color:var(--soft);font-weight:600;letter-spacing:.06em;text-transform:uppercase">Canais</div>${barra(cc,(k,i)=>PAL[i%PAL.length])}
       </div>
@@ -1118,6 +1143,7 @@ function renderPerfil(c, cli, ps, R){
   </div>`;
   $('#perfil').innerHTML=h;
   $('#pfFechar').onclick=fecharPerfil;
+  $('#perfil').querySelectorAll('#pfTurno button').forEach(b=>b.onclick=()=>{ PF_T=b.dataset.v==='all'?'all':+b.dataset.v; const k=PF_CTX; renderPerfil(k.c,k.cli,k.ps,k.R); });
   const cp=$('#pfCopiar'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(c.tel); cp.textContent='Copiado ✓'; }catch(e){} };
   $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open'));
   const mais=$('#pfMais'); if(mais) mais.onclick=()=>{ $('#pfPedidos').innerHTML=pedidosPerfil(ps,R,true); $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open')); };
