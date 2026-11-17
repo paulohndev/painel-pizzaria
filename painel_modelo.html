@@ -330,6 +330,13 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .ia-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .ia-acoes .btn{font-weight:600}
 .ia-acoes .principal{background:#25D366;color:#fff;border:0}
+.ia-acoes #iaAuto{background:var(--sun);color:var(--ink)}
+.ia-acoes #iaEnviar{background:#25D366;color:#fff}
+.ia-acoes #iaAuto.forcar{background:#fff;color:var(--tomato);box-shadow:0 0 0 1px var(--tomato)}
+.ia-freq{font-size:13px;line-height:1.5;border-radius:12px;padding:8px 12px;margin-bottom:10px;background:#FFF3DC;color:#8a5a00}
+.ia-freq.ruim{background:#FDECEA;color:var(--tomato)}
+.ia-ok{font-size:13.5px;margin-top:10px;padding:8px 12px;border-radius:12px;background:#E7F4EC;color:#1d6b40}
+.ia-ok.erro{background:#FDECEA;color:var(--tomato)}
 .gira{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--red2);animation:gira .8s linear infinite;display:inline-block}
 @keyframes gira{to{transform:rotate(360deg)}}
 .ia-resumo{margin-top:16px;background:#fff;border-radius:22px;box-shadow:var(--sh);padding:18px 22px;position:relative}
@@ -647,10 +654,12 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 <aside id="perfil" aria-label="Perfil do cliente"></aside>
 <div class="ia-modal hidden" id="iaModal"><div class="ia-box">
   <div class="ia-cab"><h3 id="iaTitulo">Mensagem</h3><button id="iaFechar" title="Fechar">✕</button></div>
+  <div class="ia-freq hidden" id="iaFreq"></div>
   <div class="ia-status" id="iaStatus"></div>
   <textarea id="iaTxt"></textarea>
   <div id="iaPub" class="hidden"><label>Resposta pública para a avaliação (copie e cole no Cardápio Web / iFood)</label><textarea id="iaPubTxt" style="min-height:90px"></textarea></div>
-  <div class="ia-acoes"><button class="btn principal" id="iaEnviar">Abrir no WhatsApp</button><button class="btn" id="iaOutra">✨ Escrever outra</button><button class="btn" id="iaPadrao">Usar a mensagem padrão</button><button class="btn hidden" id="iaCopiarPub">Copiar resposta pública</button></div>
+  <div class="ia-ok hidden" id="iaOk"></div>
+  <div class="ia-acoes"><button class="btn principal hidden" id="iaAuto">📨 Enviar pelo sistema</button><button class="btn principal" id="iaEnviar">Abrir no WhatsApp</button><button class="btn" id="iaOutra">✨ Escrever outra</button><button class="btn" id="iaPadrao">Usar a mensagem padrão</button><button class="btn hidden" id="iaCopiarPub">Copiar resposta pública</button></div>
 </div></div>
 <aside id="chat" aria-label="Pergunte ao painel">
   <div class="gv-topo"><h3>✨ Pergunte ao painel</h3><button id="chFechar" title="Fechar">✕</button></div>
@@ -1469,7 +1478,11 @@ function iaAbrir(a){
   IA_CTX={num, ref, cli, chave:c.chave, motivo, tipo, base:a.href.split('?')[0], a};
   $('#iaTitulo').textContent='Mensagem para '+primeiroNome(c);
   $('#iaTxt').value=ref; $('#iaPub').classList.add('hidden'); $('#iaCopiarPub').classList.add('hidden');
-  $('#iaModal').classList.remove('hidden'); iaGerar(false); return true;
+  $('#iaOk').classList.add('hidden'); $('#iaOutra').classList.toggle('hidden',!IA_ON);
+  if(typeof prepararEnvioModal==='function') prepararEnvioModal(cli);
+  $('#iaModal').classList.remove('hidden');
+  if(IA_ON) iaGerar(false); else { $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem pronta. Pode editar antes de enviar.'; }
+  return true;
 }
 function iaGerar(nova){
   const k=IA_CTX.chave+'|'+IA_CTX.ref+'|'+IA_CTX.tipo; const st=$('#iaStatus');
@@ -1493,8 +1506,7 @@ $('#iaOutra').onclick=()=>iaGerar(true);
 $('#iaPadrao').onclick=()=>{ $('#iaTxt').value=IA_CTX.ref; $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem padrão.'; };
 $('#iaCopiarPub').onclick=()=>{ try{ navigator.clipboard.writeText($('#iaPubTxt').value); $('#iaCopiarPub').textContent='Copiada ✓'; setTimeout(()=>$('#iaCopiarPub').textContent='Copiar resposta pública',1500);}catch(e){} };
 $('#iaEnviar').onclick=()=>{ window.open(IA_CTX.base+'?text='+encodeURIComponent($('#iaTxt').value),'_blank','noopener'); if(IA_CTX.a) marcarPeloBotao(IA_CTX.cli, IA_CTX.a); iaFechar(); };
-if(IA_ON) document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.button) return;
-  if(iaAbrir(a)) e.preventDefault(); },true);
+
 
 // resumo do dia
 function iaResumo(novo){
@@ -1556,7 +1568,7 @@ function envTexto(e){
 }
 function envSelo(cli){ const e=envDe(cli); const t=envTexto(e); return t?` <span class="env-b ${e.st}" title="${esc(e.mot||'')}">${esc(t)}</span>`:''; }
 // aviso ao clicar no WhatsApp de quem não deveria receber agora
-window.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a) return;
+window.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||MODAL_WA) return;
   const u=new URL(a.href); const num=(u.pathname.match(/\d+/)||[''])[0]; const cli=TEL_IDX[num.slice(-11)]; if(cli==null) return;
   const en=envDe(cli); if(!en||!['aguardar','pausado','bloqueado'].includes(en.st)) return;
   const c=D.clientes[cli]; const txt=en.st==='bloqueado'?`${primeiroNome(c)} pediu para não receber mensagens.`:
@@ -1569,6 +1581,47 @@ document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||
 function marcarPeloBotao(cli, a){ const c=D.clientes[cli]; if(!c) return; const row=a&&a.closest('tr,.al'); const cb=row&&row.querySelector('td.ck input[type=checkbox]');
   if(cb&&!cb.checked){ cb.checked=true; cb.dispatchEvent(new Event('change')); return; }
   if(cb) return; const i=cInfo(c.id); if(i&&diasEntre(i.d,new Date())===0) return; marcar(c.id,'whatsapp',true); }
+
+
+// janela ao clicar em WhatsApp: IA e/ou envio automático direto para o cliente
+const MODAL_WA = AO_VIVO && (IA_ON || ENVCFG.ativo);
+if(MODAL_WA) document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.button) return;
+  if(iaAbrir(a)){ e.preventDefault(); e.stopPropagation(); } },true);
+function campanhaDaLinha(a){
+  const row=a&&a.closest('tr,.al'); const cb=row&&row.querySelector('td.ck input[data-camp]');
+  if(cb) return cb.dataset.camp; if(a&&a.closest('.al')) return 'alerta';
+  if(aba==='promocoes'&&typeof campSel!=='undefined') return campSel; if(aba==='clientes') return segSel?'seg_'+segSel:'clientes';
+  return 'whatsapp';
+}
+function prepararEnvioModal(cli){
+  const e=envDe(cli); const fq=$('#iaFreq'); const b=$('#iaAuto');
+  let aviso='', ruim=false, forcar=false, pode=true;
+  if(e){
+    if(e.st==='bloqueado'){ aviso='🚫 Este cliente pediu para não receber mensagens.'; ruim=true; pode=false; }
+    else if(e.st==='na_fila'){ aviso='🕒 Já tem uma mensagem na fila para este cliente ('+dtCurta(e.fila)+').'; pode=false; }
+    else if(e.st==='aguardar'||e.st==='pausado'){ aviso=(e.st==='pausado'?'⏸ ':'⏳ ')+(e.ult?'Recebeu mensagem em '+e.ult.toLocaleDateString('pt-BR')+'. ':'')+(e.mot||'').charAt(0).toUpperCase()+(e.mot||'').slice(1)+'. O recomendado é esperar até '+dtCurta((e.lib||'').slice(0,10))+'.'; forcar=true; }
+    else if(e.st==='so_app'){ aviso='O telefone deste cliente veio do app de entrega ('+esc(D.clientes[cli].app||'')+'). Mandar marketing pode ir contra os termos do app.'; forcar=true; }
+    else if(e.ult){ aviso='📨 Última mensagem em '+e.ult.toLocaleDateString('pt-BR')+'. Perfil '+(ENV_PERFIL[e.pf]||e.pf)+': pode receber.'; }
+  }
+  fq.textContent=aviso; fq.className='ia-freq'+(ruim||forcar?' ruim':'')+(aviso?'':' hidden');
+  b.classList.toggle('hidden',!ENVCFG.ativo||!pode); b.classList.toggle('forcar',forcar);
+  b.textContent=forcar?'📨 Enviar pelo sistema mesmo assim':'📨 Enviar pelo sistema'; b.disabled=false; b.dataset.forcar=forcar?'1':'';
+}
+$('#iaAuto').onclick=()=>{
+  const ctx=IA_CTX; if(!ctx) return; const b=$('#iaAuto'); const c=D.clientes[ctx.cli]; const camp=campanhaDaLinha(ctx.a);
+  const txt=$('#iaTxt').value.trim(); if(!txt) return;
+  b.disabled=true; b.textContent='Colocando na fila…';
+  api('/api/envios/agendar',{mensagens:[{chave:c.chave, texto:txt, campanha:camp}], imediato:true, forcar:!!b.dataset.forcar}).then(r=>{
+    const ok=$('#iaOk'); ok.classList.remove('hidden','erro');
+    if(r.erro||!r.agendados){ ok.classList.add('erro'); ok.textContent=r.erro||('Não entrou na fila: '+((r.pulados||[])[0]||{}).motivo); b.disabled=false; b.textContent='📨 Enviar pelo sistema'; return; }
+    const hoje=new Date().toDateString()===new Date(r.inicio.replace(' ','T')).toDateString();
+    ok.textContent='✓ Mensagem na fila. Sai '+(hoje?'por volta das '+r.inicio.slice(11,16):'em '+dtCurta(r.inicio))+' (o sistema mantém o intervalo entre mensagens e o horário de envio).';
+    if(ENV[ctx.cli]){ ENV[ctx.cli][2]='na_fila'; ENV[ctx.cli][7]=r.inicio; }
+    contatos[c.id]={d:hojeISO(), c:camp}; store('contatos',JSON.stringify(contatos));
+    b.classList.add('hidden'); setTimeout(()=>{ if(IA_CTX===ctx){ iaFechar(); render(); } },2200);
+    if(EV&&EV.estado) evAtualizar();
+  }).catch(()=>{ b.disabled=false; b.textContent='📨 Enviar pelo sistema'; const ok=$('#iaOk'); ok.classList.remove('hidden'); ok.classList.add('erro'); ok.textContent='Não consegui falar com o vigia.'; });
+};
 
 let EV={fonte:'', tpl:'', textos:{}, desmarcados:new Set(), marcados:new Set(), estado:null, timer:null};
 function fontesEnvio(){

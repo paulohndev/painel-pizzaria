@@ -598,7 +598,7 @@ def envios_post(db, caminho, dado):
                           "texto": texto, "ia": bool(dado.get("ia"))})
         if not itens:
             return {"agendados": 0, "pulados": pulados}, 200
-        lote, res = E.agendar(db, itens, regras)
+        lote, res = E.agendar_ja(db, itens[0], regras) if dado.get("imediato") and len(itens) == 1 else E.agendar(db, itens, regras)
         log("envios: %d mensagem(ns) agendada(s) (lote %s), de %s até %s" % (len(res), lote, res[0][1].strftime("%d/%m %H:%M"),
                                                                             res[-1][1].strftime("%d/%m %H:%M")))
         pedir_recalculo()

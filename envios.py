@@ -271,6 +271,21 @@ def agendar(db, itens, regras, lote=None):
     return lote, res
 
 
+def agendar_ja(db, it, regras):
+    """Envio avulso pedido na hora: vai na frente da fila, respeitando horário e limites (o despachante mantém o intervalo mínimo)."""
+    agora = datetime.now()
+    ocupados = [_dt(r[0]) for r in db.execute(
+        "SELECT enviado FROM envios WHERE via='auto' AND status='enviado' AND enviado >= ?", ((agora - timedelta(days=1)).strftime("%Y-%m-%d"),))]
+    t = proximo_horario(db, regras, agora + timedelta(seconds=10), [x for x in ocupados if x])
+    lote = "avulso-" + uuid.uuid4().hex[:6]
+    db.execute("INSERT INTO envios (cliente_id, chave, nome, numero, campanha, texto, lote, criado, agendado, status, via, ia) "
+               "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+               (it.get("cliente_id"), it.get("chave"), it.get("nome"), it.get("numero"), it.get("campanha"), it.get("texto"),
+                lote, agora_txt(agora), agora_txt(t), "fila", "auto", 0))
+    db.commit()
+    return lote, [(it, t)]
+
+
 def reagendar_pendentes(db, regras):
     """Depois de uma pausa (ou PC desligado), espalha de novo o que ficou para trás, sem mandar tudo de uma vez."""
     agora = datetime.now()

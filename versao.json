@@ -1,6 +1,6 @@
 {
- "versao": "1.7.0",
- "notas": "Envios pelo WhatsApp: grupos, fila espaçada, limite de frequência por perfil",
+ "versao": "1.7.1",
+ "notas": "Enviar pelo sistema direto do botão WhatsApp de cada cliente",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -15,14 +15,14 @@
   "agendar.ps1": "d21373a5cfbd94d6475eec9e50e739be17f8f3d2eeb4c23d14fb924873437f9c",
   "alertas.py": "c947a0718d60486735bf8cba32f33383f2b3fe6aab2b24b2bfad941c848e6c02",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
-  "envios.py": "37f282afb3ac934438e1fe027dbd1aab35643b74bc200522871042acf168536c",
+  "envios.py": "c30b0c914a098e19b0beb664da6496e44a244aa15b6e4afcb23bea3947cb92d6",
   "ia.py": "1000f8e4c948cad47672817421ff50c76e3761bfb925fc17a6d3bf1801835c3a",
   "ia_painel.py": "1c33e391d6bf4282109a0927c19e16567aa408033c686ebb1a236bee25b14a53",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "14dcba423a65c2e3331c4d4ff7abb22bd9313e36881fc8ba48afcf60cd916576",
+  "painel_modelo.html": "7d3eae6866b1b6b55cd04626e683f2eae196c7be4d3d3fccfafc54aa9931032c",
   "pizzaria.py": "27cd5246a42d0ca26d80c15fe069ab16df9755bd8ea55f625f575b0d86cbf6b8",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "56a352a91348acf457154b04b62994fc60419e9586d10adbc5ea726120b8328c",
+  "vigia.py": "a2bbadd160313093d8e30446406094dde7058bcfecc03bb465c5a9ee3b90476e",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }
