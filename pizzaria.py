@@ -21,6 +21,7 @@ import re
 import sqlite3
 import sys
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -255,6 +256,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     cadastro TEXT, pontos INTEGER, cashback REAL, json TEXT
 );
 CREATE TABLE IF NOT EXISTS meta (chave TEXT PRIMARY KEY, valor TEXT);
+CREATE TABLE IF NOT EXISTS vinculos (chave_app TEXT PRIMARY KEY, chave_principal TEXT, decisao TEXT, em TEXT);
 CREATE TABLE IF NOT EXISTS avaliacoes (
     id INTEGER PRIMARY KEY, order_id INTEGER, customer_id INTEGER,
     nota REAL, comentario TEXT, criada TEXT, json TEXT
@@ -478,6 +480,7 @@ def montar_dados(db, cfg, nome_loja):
     abertos = []   # pedidos em andamento (para o alerta de combo ao vivo)
     idx_cupom, lista_cupom = {}, []
     cid_cli = {}   # id do cliente no Cardápio Web -> índice no painel
+    info_cli = {}  # índice -> {"ends": set(endereços), "canais": set()}
 
     for (pid, status, otype, canal, created, det) in db.execute(
             "SELECT id,status,order_type,sales_channel,created_at,detalhe_json FROM pedidos ORDER BY created_at"):
@@ -533,6 +536,12 @@ def montar_dados(db, cfg, nome_loja):
                 elif reg.get("app") and reg["app"] != CANAIS.get(canal):
                     reg["app"] = "iFood/99"
             end = d.get("delivery_address") or {}
+            if cli_i >= 0:
+                inf = info_cli.setdefault(cli_i, {"ends": set(), "canais": set()})
+                inf["canais"].add(canal)
+                ne = norm_endereco(end)
+                if ne:
+                    inf["ends"].add(ne)
             bairro = (end.get("neighborhood") or "").strip().title()
             if bairro:
                 bai_i = idx(idx_bairro, lista_bairro, bairro)
@@ -582,6 +591,27 @@ def montar_dados(db, cfg, nome_loja):
             0 if status in ("closed", "canceled") else 1,
         ])
 
+    # ---- mesma pessoa em canais diferentes (iFood não passa telefone)
+    uniao, sugestoes = achar_vinculos(db, lista_cli, info_cli)
+    if uniao:
+        for a, (p, origem) in uniao.items():
+            ra, rp = lista_cli[a], lista_cli[p]
+            ra["uniu_em"] = p
+            rp.setdefault("unidos", []).append({"chave": ra["chave"], "nome": ra["nome"], "app": ra.get("app") or "iFood", "origem": origem})
+            if rp.get("app") and ra.get("app") and rp["app"] != ra["app"]:
+                rp["app"] = "iFood/99"
+            if not rp.get("nome"):
+                rp["nome"] = ra["nome"]
+        m = lambda i: uniao[i][0] if i in uniao else i
+        for row in pedidos:
+            row[5] = m(row[5])
+        for cp in compras:
+            cp["cli"] = m(cp["cli"])
+        for ab in abertos:
+            ab["cli"] = m(ab["cli"])
+        for k in list(cid_cli):
+            cid_cli[k] = m(cid_cli[k])
+
     avaliacoes = []
     for (oid, cust, nota, coment, criada, js) in db.execute(
             "SELECT order_id, customer_id, nota, comentario, criada, json FROM avaliacoes ORDER BY criada DESC LIMIT 3000"):
@@ -616,7 +646,109 @@ def montar_dados(db, cfg, nome_loja):
         "cupons": lista_cupom,
         "avaliacoes": avaliacoes,
         "abertos": abertos,
+        "vinc_sug": sugestoes,
     }
+
+
+# ---------------------------------------------------------------- mesma pessoa em vários canais
+
+_PALAVRAS_FORA = {"de", "da", "do", "das", "dos", "e"}
+_NOMES_PROPRIOS = set("""joao jose maria ana pedro paulo carlos luiz luis antonio miguel rafael gabriel lucas mateus matheus marcelo
+vitor victor henrique eduardo eduarda luiza luisa beatriz clara julia fernanda cristina cecilia alice sophia sofia vitoria heloisa
+gustavo felipe augusto vinicius ricardo roberto fernando gabriela isabel isabela isabella carolina lucia helena laura manuela valentina
+livia luana leticia rodrigo rosa rita francisco teresa tereza aparecida fatima conceicao carmen emilly emily vitoria arthur artur davi
+daniel daniela guilherme bruno bruna camila amanda jessica larissa mariana marina raquel renata sandra simone tiago thiago diego
+andre andrea andreia alexandre antonia marcos marco mario cesar caio enzo bernardo lorenzo heitor theo samuel benjamin nicolas joaquim
+eduarda yasmin ester esther rebeca sara sarah luciana patricia adriana juliana silvia sergio jorge edson elias""".split())
+_TIPOS_RUA = {"r", "rua", "av", "avenida", "tv", "travessa", "trav", "estrada", "est", "rod", "rodovia", "al", "alameda", "pc", "praca", "largo", "lg"}
+
+
+def _sem_acento(t):
+    return "".join(ch for ch in unicodedata.normalize("NFD", t or "") if unicodedata.category(ch) != "Mn").lower()
+
+
+def norm_nome(n):
+    return [w for w in re.findall(r"[a-z]+", _sem_acento(n)) if w not in _PALAVRAS_FORA and len(w) > 1]
+
+
+def norm_endereco(e):
+    rua = [w for w in re.findall(r"[a-z0-9]+", _sem_acento(e.get("street"))) if w not in _TIPOS_RUA and w not in _PALAVRAS_FORA]
+    num = re.sub(r"\D", "", str(e.get("number") or ""))
+    if not rua or not num:
+        return ""
+    return " ".join(rua) + "|" + num
+
+
+def _primeiro_igual(a, b):
+    if a == b:
+        return True
+    if min(len(a), len(b)) < 5 or abs(len(a) - len(b)) > 1:
+        return False
+    # diferença de uma letra (Andrea / Andreia, Thiago / Tiago)
+    i = 0
+    while i < min(len(a), len(b)) and a[i] == b[i]:
+        i += 1
+    return a[i + (len(a) > len(b)):] == b[i + (len(b) > len(a)):] or a[i + 1:] == b[i + 1:]
+
+
+def nomes_compativeis(a, b):
+    """Nome do app (às vezes abreviado) bate com o nome completo do cadastro."""
+    if len(a) < 2 or len(b) < 2 or not _primeiro_igual(a[0], b[0]):
+        return False
+    curto, longo = (a, b) if len(a) <= len(b) else (b, a)
+    return set(curto[1:]) <= set(longo[1:])
+
+
+def achar_vinculos(db, clientes, info):
+    """Liga clientes do iFood (sem telefone) ao cadastro com telefone da mesma pessoa.
+    Junta sozinho quando nome e endereço batem; quando só o nome bate, vira sugestão para confirmar."""
+    try:
+        dec = {r[0]: (r[1], r[2]) for r in db.execute("SELECT chave_app, chave_principal, decisao FROM vinculos")}
+    except sqlite3.Error:
+        dec = {}
+    por_chave = {c["chave"]: i for i, c in enumerate(clientes)}
+    com_tel, por_primeiro = [], {}
+    for i, c in enumerate(clientes):
+        if c.get("tel"):
+            nn = norm_nome(c.get("nome"))
+            if len(nn) >= 2:
+                com_tel.append(i)
+                por_primeiro.setdefault(nn[0][:4], []).append((i, nn))
+    # palavras que não identificam ninguém: nomes próprios (João Vitor, Maria Luiza) e sobrenomes muito comuns (Silva)
+    freq, como_primeiro = {}, {}
+    for c in clientes:
+        nn = norm_nome(c.get("nome"))
+        if nn:
+            como_primeiro[nn[0]] = como_primeiro.get(nn[0], 0) + 1
+        for w in set(nn):
+            freq[w] = freq.get(w, 0) + 1
+    limite = max(5, len(clientes) // 250)
+    distintivo = lambda w: w not in _NOMES_PROPRIOS and como_primeiro.get(w, 0) < 2 and freq.get(w, 0) <= limite
+    uniao, sugestoes = {}, []
+    for i, c in enumerate(clientes):
+        if c.get("tel") or i not in info:
+            continue
+        if not (info[i]["canais"] <= APPS_ENTREGA):
+            continue
+        d = dec.get(c["chave"])
+        if d and d[1] == "sim" and d[0] in por_chave:
+            uniao[i] = (por_chave[d[0]], "manual")
+            continue
+        nn = norm_nome(c.get("nome"))
+        if len(nn) < 2:
+            continue
+        cands = [j for j, nj in por_primeiro.get(nn[0][:4], []) if nomes_compativeis(nn, nj)]
+        if d and d[1] == "nao":
+            cands = [j for j in cands if clientes[j]["chave"] != d[0]]
+        if not cands:
+            continue
+        ends = info[i]["ends"]
+        mesmo_end = [j for j in cands if ends & info.get(j, {}).get("ends", set())]
+        if len(mesmo_end) == 1:
+            uniao[i] = (mesmo_end[0], "auto")
+        elif len(cands) == 1 and any(distintivo(w) for w in set(nn[1:]) & set(norm_nome(clientes[cands[0]].get("nome"))[1:])):
+            sugestoes.append([i, cands[0], "mesmo nome"])
+    return uniao, sugestoes
 
 
 def html_painel(dados):

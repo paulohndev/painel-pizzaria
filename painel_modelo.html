@@ -415,6 +415,12 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
     </div>
     <div class="tablebox"><table id="tbCli"></table></div>
     <div class="pager" id="pager"></div>
+    <div class="card" style="margin-top:20px">
+      <h2>Clientes em mais de um canal</h2>
+      <p class="desc">O iFood não passa o telefone do cliente, então o painel junta os pedidos da mesma pessoa pelo nome e pelo endereço de entrega. Quando só o nome bate, pede para você confirmar.</p>
+      <div class="seg" id="mcSeg" style="margin-bottom:12px"></div>
+      <div class="tablebox"><table id="tbMc"></table></div>
+    </div>
   </section>
 
   <!-- PRODUTOS -->
@@ -511,6 +517,29 @@ const P = D.pedidos.map(p=>({d:parseD(p[0]), k:p[0], t:p[1], c:p[2], tipo:p[3], 
 const GRUPO_CANAL = D.canais.map(c=>c.id==='ifood'?'ifood':c.id==='food99'?'food99':'proprio');
 const TURNO_PID = {}; P.forEach(p=>{ if(p.pid!=null) TURNO_PID[p.pid]=p.t; });
 const CLI_GRP = {}; P.forEach(p=>{ if(p.cancel||p.cli<0) return; (CLI_GRP[p.cli]=CLI_GRP[p.cli]||new Set()).add(GRUPO_CANAL[p.c]); });
+const NOME_GRUPO = {proprio:'Próprio', ifood:'iFood', food99:'99Food'};
+const ORDEM_GRUPO = ['proprio','ifood','food99'];
+// por cliente: pedidos e último pedido em cada grupo de canal
+const CLI_CAN = {}; P.forEach(p=>{ if(p.cancel||p.cli<0) return; const g=GRUPO_CANAL[p.c]; const m=CLI_CAN[p.cli]=CLI_CAN[p.cli]||{}; const x=m[g]=m[g]||{n:0,v:0,ult:null,pri:null}; x.n++; x.v+=p.v||0; if(!x.ult||p.d>x.ult)x.ult=p.d; if(!x.pri||p.d<x.pri)x.pri=p.d; });
+function situacaoCanal(cli){
+  const m=CLI_CAN[cli]; if(!m) return null; const gs=ORDEM_GRUPO.filter(g=>m[g]); if(gs.length<2) return null;
+  const dd=d=>Math.floor((REF-d)/864e5);
+  const pr=m.proprio; const apps=['ifood','food99'].filter(g=>m[g]);
+  if(pr){
+    const depois=apps.map(g=>({g, n:P.filter(p=>!p.cancel&&p.cli===cli&&GRUPO_CANAL[p.c]===g&&p.d>pr.ult).length, ult:m[g].ult})).filter(x=>x.n>0);
+    const nDep=depois.reduce((s,x)=>s+x.n,0);
+    const ultApp=depois.length?depois.reduce((a,x)=>x.ult>a?x.ult:a,depois[0].ult):null;
+    if(nDep && dd(pr.ult)>=21 && dd(ultApp)<=45){
+      const onde=depois.map(x=>NOME_GRUPO[x.g]).join(' e ');
+      return {tipo:'migrou', ord:-(nDep*1000+dd(pr.ult)), curto:'Migrou para '+onde,
+        txt:`Não pede no canal próprio há ${dd(pr.ult)} dias, mas pediu ${nDep} ${nDep===1?'vez':'vezes'} pelo ${onde} depois disso (último há ${dd(ultApp)} dia${dd(ultApp)===1?'':'s'}).`};
+    }
+    const appsUlt=apps.length?apps.map(g=>m[g].ult).reduce((a,b)=>a>b?a:b):null;
+    if(appsUlt && pr.ult>appsUlt && pr.pri>apps.map(g=>m[g].pri).reduce((a,b)=>a<b?a:b) && (appsUlt-pr.pri)/864e5<=14)
+      return {tipo:'voltou', ord:0, curto:'Passou para o próprio', txt:`Pedia pelos apps e agora pede pelo canal próprio (último há ${dd(pr.ult)} dias).`};
+  }
+  return {tipo:'mistura', ord:0, curto:'Usa '+gs.map(g=>NOME_GRUPO[g]).join(', '), txt:'Pede por '+gs.map(g=>`${NOME_GRUPO[g]} (${m[g].n})`).join(', ')+'.'};
+}
 const IFOOD = new Set(D.canais.map((c,i)=>c.ifood?i:-1).filter(i=>i>=0));
 const NT = D.turnos.length;
 const turnoUsado = new Array(NT).fill(0); P.forEach(p=>turnoUsado[p.t]++);
@@ -779,6 +808,8 @@ const CAMP = {
     msg:'Oi {nome}! Que bom ter você com a gente 😊 Esperamos que tenha gostado! No seu próximo pedido pelo nosso app tem {oferta}, válido até domingo.'},
   reativar:{nome:'Reativar sumidos', dica:'Já foram clientes frequentes e pararam. A oferta vai no item favorito de cada um, que é o que tem mais chance de trazer de volta.', oferta:'R$ 8 de desconto',
     msg:'Oi {nome}! Faz tempo que você não pede {favorito} com a gente, sentimos sua falta! Pra matar a saudade: {oferta} no próximo pedido pelo app, até domingo.'},
+  canal_proprio:{nome:'Voltar para o canal próprio', dica:'Pediam direto com você e passaram para o iFood/99. Um benefício pequeno no app próprio costuma sair mais barato que a comissão.', oferta:'a entrega grátis',
+    msg:'Oi {nome}! Vi que você tem pedido a gente pelo app de entrega 😊 Pedindo direto pelo nosso app sai mais em conta: no seu próximo pedido por lá vai {oferta}!'},
   lembrete:{nome:'Lembrete (sem desconto)', dica:'Clientes ativos que já passaram do próprio ritmo de pedidos. Eles iam pedir de qualquer jeito: um lembrete basta, não precisa dar desconto.', oferta:'',
     msg:'Oi {nome}! Bateu a vontade de {favorito} hoje? 😋 Tô por aqui, é só pedir pelo nosso app!'},
   conhecer_noite:{nome:'Almoço → pizzaria', dica:'Pedem só no almoço e nunca pediram pizza. Já confiam na casa: é o cliente mais fácil de ganhar para a noite.', oferta:'R$ 10 de desconto',
@@ -871,8 +902,9 @@ const BLOCOS = [
   {id:'segundo', nome:'Boas-vindas (fizeram o 1º pedido há 2 a 5 dias)', camp:'segundo', dica:'O melhor momento para puxar o 2º pedido é logo depois do 1º.'},
   {id:'lembrete', nome:'Costumam pedir neste dia da semana', camp:'lembrete', dica:'Clientes ativos que pedem principalmente neste dia da semana e ainda não pediram esta semana. Só lembrar, sem desconto.'},
   {id:'reativar', nome:'Sumidos que mais gastavam', camp:'reativar', dica:'Os 10 clientes sumidos que mais gastaram, que você ainda não chamou no último mês.'},
+  {id:'migrou', nome:'Migraram para o iFood / 99', camp:'canal_proprio', dica:'Pediam pelo canal próprio e passaram a pedir pelos apps de entrega, onde você paga comissão. Não sumiram: vale convidar para voltar a pedir direto.'},
 ];
-const MAX_BLOCO = {aniversario:30, segundo:20, lembrete:20, reativar:10, avaliacao:20};
+const MAX_BLOCO = {aniversario:30, segundo:20, lembrete:20, reativar:10, avaliacao:20, migrou:15};
 function diasEntre(a,b){ return Math.floor((b-a)/864e5); }
 function porCliente(){
   const m=new Map(); P.forEach(p=>{ if(p.cancel||p.cli<0) return; let x=m.get(p.cli); if(!x){x={n:0,v:0,pri:p.d,ult:p.d}; m.set(p.cli,x);} x.n++; x.v+=p.v||0; if(p.d<x.pri)x.pri=p.d; if(p.d>x.ult)x.ult=p.d; }); return m; }
@@ -910,6 +942,10 @@ function listaDoDia(){
   AVAL.forEach(a=>{ const d=parseD(a[0]); if(diasEntre(d,hoje)>7 || a[2]>3) return; const cli=a[1]; if(F.canal!=='all' && !cliCanal(cli)) return;
     if(cli>=0){ const ci=cInfo(D.clientes[cli].id); if(ci && ci.d>=new Date(d.getFullYear(),d.getMonth(),d.getDate())) return; }
     out.avaliacao.push({cli, x:cli>=0?pc.get(cli)||null:null, ord:a[2], aval:a, motivo:`Nota ${String(a[2]).replace('.',',')} em ${d.toLocaleDateString('pt-BR')}${a[4]?' · notas baixas: '+a[4]:''}${a[3]?' · "'+a[3]+'"':''}`}); });
+  pc.forEach((x,cli)=>{ const c=D.clientes[cli]; if(!c||!waLink(c,'')||!cliCanal(cli)) return; const pf=PERF[cli]||[];
+    if(F.turno!=='all' && pf[5]!==undefined && pf[5]!==F.turno) return;
+    const st=situacaoCanal(cli); if(!st||st.tipo!=='migrou'||contatadoRecente(c,30)) return;
+    out.migrou.push({cli, x, ord:st.ord, motivo:st.txt}); });
   Object.keys(out).forEach(k=>{ out[k].sort((a,b)=>a.ord-b.ord); out[k]=out[k].slice(0,MAX_BLOCO[k]); });
   return out;
 }
@@ -923,8 +959,8 @@ function renderHoje(){
   $('#hojeDesc').innerHTML=(tot?'Clique em <b>WhatsApp</b>, envie a mensagem que já vai pronta e marque como contatado. Quem você já chamou não volta para a lista.':'Todo mundo que precisava de contato já foi chamado. Volte amanhã!')+
     (idade>30?`<br><b>Atenção:</b> os dados são de ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}. Rode "Atualizar painel".`:'');
   $('#qtHoje').dataset.base=tot; $('#qtHoje').textContent=tot||'';
-  const CURTO={avaliacao:'Avaliações ruins',aniversario:'Aniversários',segundo:'Boas-vindas',lembrete:'Dia de costume',reativar:'Sumidos'};
-  $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi"><div class="lbl">${CURTO[b.id]}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos'}[b.id]}</div></div>`).join('');
+  const CURTO={avaliacao:'Avaliações ruins',aniversario:'Aniversários',segundo:'Boas-vindas',lembrete:'Dia de costume',reativar:'Sumidos',migrou:'Foram pros apps'};
+  $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi"><div class="lbl">${CURTO[b.id]}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos',migrou:'iFood / 99'}[b.id]}</div></div>`).join('');
   let h='';
   BLOCOS.forEach(b=>{ const itens=L[b.id]; if(!itens.length) return;
     h+=`<div class="card" style="margin-top:20px"><h2>${b.nome} <span class="cont">${itens.length}</span></h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Cliente</th><th></th><th>Feito</th><th>Por quê</th><th class="num">Total gasto</th></tr>`;
@@ -1048,14 +1084,57 @@ function acompanhar(){
 $('#novoDado').onclick=()=>location.reload();
 
 
+
+// ------------------------------------------------------------ CLIENTES EM MAIS DE UM CANAL
+let MC_ABA='migrou';
+const VSUG=(D.vinc_sug||[]).filter(v=>D.clientes[v[0]]&&D.clientes[v[1]]);
+function celCanal(m,g){ const x=m&&m[g]; if(!x) return '<span class="muted">—</span>'; const d=Math.floor((REF-x.ult)/864e5); return `${fmtN(x.n)} pedido${x.n>1?'s':''}<span class="sub">último há ${d} d</span>`; }
+function renderMultiCanal(){
+  const L=[]; Object.keys(CLI_CAN).forEach(k=>{ const cli=+k; if(!cliCanal(cli)) return; const st=situacaoCanal(cli); if(st) L.push({cli,st}); });
+  const mig=L.filter(x=>x.st.tipo==='migrou').sort((a,b)=>a.st.ord-b.st.ord);
+  const abas=[['migrou','Migraram para os apps',mig.length],['todos','Todos em mais de um canal',L.length],['confirmar','Confirmar se é a mesma pessoa',VSUG.length]];
+  $('#mcSeg').innerHTML=abas.map(([v,l,n])=>`<button data-v="${v}" class="${MC_ABA===v?'on':''}">${l} (${fmtN(n)})</button>`).join('');
+  $('#mcSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ MC_ABA=b.dataset.v; renderMultiCanal(); });
+  let h='';
+  if(MC_ABA==='confirmar'){
+    h='<tr><th>No iFood aparece como</th><th>Parece ser</th><th></th></tr>';
+    VSUG.forEach(([a,p])=>{ const ca=D.clientes[a], cp=D.clientes[p]; const na=(CLI_CAN[a]&&CLI_CAN[a].ifood||{}).n||0;
+      h+=`<tr><td><a class="cli" data-i="${a}">${esc(ca.nome)}</a><span class="sub">${fmtN(na)} pedido${na===1?'':'s'} pelo ${esc(ca.app||'iFood')}</span></td>
+        <td><a class="cli" data-i="${p}">${esc(cp.nome)}</a><span class="sub">${esc(fmtTel(cp.tel))}</span></td>
+        <td style="white-space:nowrap">${AO_VIVO?`<button class="btn" data-vinc="sim" data-a="${esc(ca.chave)}" data-p="${esc(cp.chave)}">É a mesma pessoa</button> <button class="btn" data-vinc="nao" data-a="${esc(ca.chave)}" data-p="${esc(cp.chave)}">Não é</button>`:'<span class="muted">abra pelo atalho Painel Mariá</span>'}</td></tr>`; });
+    if(!VSUG.length) h+='<tr><td colspan="3" class="muted" style="padding:20px">Nada para confirmar agora.</td></tr>';
+  } else {
+    const LL=MC_ABA==='migrou'?mig:L.slice().sort((a,b)=>(a.st.tipo==='migrou'?0:1)-(b.st.tipo==='migrou'?0:1)||a.st.ord-b.st.ord);
+    h='<tr><th>Cliente</th><th>Próprio</th><th>iFood</th><th>99Food</th><th>Situação</th><th></th></tr>';
+    LL.slice(0,200).forEach(({cli,st})=>{ const c=D.clientes[cli]; const m=CLI_CAN[cli];
+      const msg=msgTipo('canal_proprio',cli); const w=st.tipo==='migrou'?waLink(c,msg):null; const feito=!!cInfo(c.id);
+      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${(c.unidos||[]).length?`<span class="sub">juntado com o iFood</span>`:''}</td>
+        <td>${celCanal(m,'proprio')}</td><td>${celCanal(m,'ifood')}</td><td>${celCanal(m,'food99')}</td>
+        <td class="why"><b>${esc(st.curto)}</b><br>${esc(st.txt)}</td>
+        <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:''}</td></tr>`; });
+    if(!LL.length) h+=`<tr><td colspan="6" class="muted" style="padding:20px">${MC_ABA==='migrou'?'Ninguém migrou para os apps com esses filtros.':'Nenhum cliente em mais de um canal com esses filtros.'}</td></tr>`;
+  }
+  $('#tbMc').innerHTML=h;
+  $('#tbMc').querySelectorAll('button[data-vinc]').forEach(b=>b.onclick=()=>decidirVinculo(b.dataset.a,b.dataset.p,b.dataset.vinc,b));
+}
+function decidirVinculo(app, principal, decisao, btn){
+  if(btn){ btn.disabled=true; btn.textContent='Salvando…'; }
+  api('/api/vinculo',{app, principal, decisao}).then(()=>{
+    if(btn){ btn.textContent=decisao==='sim'?'Juntando os pedidos…':'Anotado ✓'; }
+    return api('/api/estado').then(e0=>{ let n=0;
+      const t=setInterval(()=>{ n++; api('/api/estado').then(e=>{ if(e.versao!==e0.versao||n>40){ clearInterval(t); location.reload(); } }).catch(()=>{}); },1500); });
+  }).catch(()=>{ if(btn){ btn.disabled=false; btn.textContent='Tente de novo'; } });
+}
+
 // ------------------------------------------------------------ PERFIL DO CLIENTE
-const IDX_CHAVE={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.chave) IDX_CHAVE[c.chave]=i; });
+const IDX_CHAVE={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.chave) IDX_CHAVE[c.chave]=c.uniu_em!=null?c.uniu_em:i; });
 function fmtTel(t){ t=(t||'').replace(/\D/g,''); if(t.length===11) return `(${t.slice(0,2)}) ${t.slice(2,7)}-${t.slice(7)}`; if(t.length===10) return `(${t.slice(0,2)}) ${t.slice(2,6)}-${t.slice(6)}`; return t; }
 function iniciais(n){ const p=(n||'?').trim().split(/\s+/); return ((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase(); }
 let PF_T='all', PF_CTX=null;
 function abrirPerfil(ref){
   PF_T='all';
   let cli = ref.i!=null ? +ref.i : IDX_CHAVE[ref.chave];
+  if(cli!=null && D.clientes[cli] && D.clientes[cli].uniu_em!=null) cli=D.clientes[cli].uniu_em;
   const c = cli!=null ? D.clientes[cli] : null;
   if(!c){ if(ref.chave && AO_VIVO) return carregarPerfil(ref.chave, null, null); return; }
   const chave=c.chave;
@@ -1136,6 +1215,7 @@ function renderPerfil(c, cli, psAll, RAll){
       </div>
       <div class="pf-sec"><h3>O que mais pede</h3>${favs||'<div class="pf-carregando">Sem itens registrados ainda.</div>'}</div>
     </div>
+    ${secCanais(c,cli)}
     ${sugs.length?`<div class="pf-sec"><h3>Sugestões para este cliente</h3>${sugs.map(x=>`<div class="pf-sug"><b>${esc(x.t)}</b>${esc(x.m)}</div>`).join('')}</div>`:''}
     ${R&&R.enderecos&&R.enderecos.length?`<div class="pf-sec"><h3>Endereços</h3>${R.enderecos.map(e=>`<div class="linha"><span>${esc(e.texto)}${e.complemento?`<span class="sub">${esc(e.complemento)}${e.referencia?' · '+esc(e.referencia):''}</span>`:''}</span><span>${fmtN(e.vezes)} pedido${e.vezes>1?'s':''}<span class="sub">último ${new Date(e.ultimo+'T12:00').toLocaleDateString('pt-BR')}</span></span></div>`).join('')}</div>`:''}
     <div class="pf-sec"><h3>Pedidos</h3><div id="pfPedidos">${pedidosPerfil(ps,R)}</div></div>
@@ -1146,7 +1226,25 @@ function renderPerfil(c, cli, psAll, RAll){
   $('#perfil').querySelectorAll('#pfTurno button').forEach(b=>b.onclick=()=>{ PF_T=b.dataset.v==='all'?'all':+b.dataset.v; const k=PF_CTX; renderPerfil(k.c,k.cli,k.ps,k.R); });
   const cp=$('#pfCopiar'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(c.tel); cp.textContent='Copiado ✓'; }catch(e){} };
   $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open'));
+  $('#perfil').querySelectorAll('button[data-vinc]').forEach(b=>b.onclick=()=>decidirVinculo(b.dataset.a,b.dataset.p,b.dataset.vinc,b));
   const mais=$('#pfMais'); if(mais) mais.onclick=()=>{ $('#pfPedidos').innerHTML=pedidosPerfil(ps,R,true); $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open')); };
+}
+function secCanais(c,cli){
+  if(cli<0) return '';
+  const m=CLI_CAN[cli]||{}; const gs=ORDEM_GRUPO.filter(g=>m[g]);
+  const st=situacaoCanal(cli);
+  const sug=VSUG.filter(v=>v[0]===cli||v[1]===cli);
+  const unidos=c.unidos||[];
+  if(gs.length<2 && !sug.length && !unidos.length) return '';
+  let h=`<div class="pf-sec"><h3>Canais</h3>`;
+  if(st&&st.tipo==='migrou') h+=`<div class="pf-sug" style="border-left-color:var(--tomato)"><b>${esc(st.curto)}</b>${esc(st.txt)}</div>`;
+  else if(st&&st.tipo==='voltou') h+=`<div class="pf-sug" style="border-left-color:#2E7D52;background:#EEF7F1"><b>${esc(st.curto)}</b>${esc(st.txt)}</div>`;
+  h+=gs.map(g=>{ const x=m[g]; const d=Math.floor((REF-x.ult)/864e5); return `<div class="linha"><span><b>${NOME_GRUPO[g]}</b><span class="sub">desde ${x.pri.toLocaleDateString('pt-BR')}</span></span><span>${fmtN(x.n)} pedido${x.n>1?'s':''} · ${fmtR0(x.v)}<span class="sub">último ${x.ult.toLocaleDateString('pt-BR')} (há ${d} d)</span></span></div>`; }).join('');
+  unidos.forEach(u=>{ h+=`<div class="pf-aviso" style="margin-top:8px">Os pedidos do ${esc(u.app)} como <b>${esc(u.nome)}</b> foram juntados aqui ${u.origem==='auto'?'(mesmo nome e endereço de entrega)':'(você confirmou)'}.${AO_VIVO?` <button class="btn" style="padding:2px 10px;font-size:12px" data-vinc="nao" data-a="${esc(u.chave)}" data-p="${esc(c.chave)}">Não é a mesma pessoa</button>`:''}</div>`; });
+  sug.forEach(([a,p])=>{ const o=D.clientes[a===cli?p:a]; const app=D.clientes[a], pr=D.clientes[p];
+    h+=`<div class="pf-aviso" style="margin-top:8px">${a===cli?'Pode ser a mesma pessoa que':'Pode ser a mesma pessoa que pede no iFood como'} <a class="cli" data-i="${a===cli?p:a}"><b>${esc(o.nome)}</b></a>${a===cli&&o.tel?' ('+esc(fmtTel(o.tel))+')':''}.
+      ${AO_VIVO?`<div style="margin-top:6px"><button class="btn" data-vinc="sim" data-a="${esc(app.chave)}" data-p="${esc(pr.chave)}">É a mesma pessoa</button> <button class="btn" data-vinc="nao" data-a="${esc(app.chave)}" data-p="${esc(pr.chave)}">Não é</button></div>`:''}</div>`; });
+  return h+'</div>';
 }
 function pedidosPerfil(ps,R,todos){
   if(R&&R.pedidos){ const L=todos?R.pedidos:R.pedidos.slice(0,15);
@@ -1165,7 +1263,7 @@ document.addEventListener('click',e=>{ const a=e.target.closest('a.cli'); if(a){
 // ------------------------------------------------------------ início
 function render(){
   marcarFiltros();
-  if(aba==='geral') renderGeral(); else if(aba==='clientes') renderClientes(); else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else renderResultados();
+  if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else renderResultados();
 }
 (function init(){
   if(!D){ document.body.innerHTML='<p style="padding:40px">Este é o modelo do painel. Rode o programa <b>pizzaria.py</b> para gerar o painel com os seus dados.</p>'; return; }

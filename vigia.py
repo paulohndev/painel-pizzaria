@@ -262,7 +262,7 @@ class Vigia:
         with ESTADO["trava"]:
             ESTADO["html"], ESTADO["alertas"], ESTADO["gerado_em"] = html, ativos, D["gerado_em"]
             ESTADO["D"] = D
-            ESTADO["por_chave"] = {c.get("chave"): i for i, c in enumerate(D["clientes"])}
+            ESTADO["por_chave"] = {c.get("chave"): c.get("uniu_em", i) for i, c in enumerate(D["clientes"])}
             ESTADO["versao"] += 1
         try:
             P.gerar_painel(D, os.path.join(PASTA, "painel.html"))  # a versão em arquivo também fica atual
@@ -469,6 +469,16 @@ class Painel(BaseHTTPRequestHandler):
                     ESTADO["alertas"] = [a for a in ESTADO["alertas"] if a["id"] != aid]
                     ESTADO["versao"] += 1
                 return self._json({"ok": True})
+            if u.path == "/api/vinculo":
+                app, princ, dec = str(dado.get("app") or ""), str(dado.get("principal") or ""), dado.get("decisao")
+                if not app or dec not in ("sim", "nao"):
+                    return self._json({"erro": "dados"}, 400)
+                db.execute("INSERT OR REPLACE INTO vinculos VALUES (?,?,?,?)", (app, princ, dec, datetime.now().strftime("%Y-%m-%d %H:%M")))
+                db.commit()
+                v = ESTADO.get("vigia")
+                if v is not None:
+                    v.mudou = True
+                return self._json({"ok": True})
             return self._json({"erro": "não encontrado"}, 404)
         finally:
             db.close()
@@ -557,6 +567,7 @@ def main():
     SERVIDOR["s"] = srv
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     v = Vigia(cfg, base, chave)
+    ESTADO["vigia"] = v
     if "--abrir" in sys.argv:
         threading.Timer(3, lambda: webbrowser.open(ENDERECO)).start()
     v.rodar()
