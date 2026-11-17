@@ -20,7 +20,7 @@
   --seq1:#FDEFD6;--seq2:#F9D79C;--seq3:#F3B45C;--seq4:#E08A35;--seq5:#B9521F;--seq6:#6e0000;
 }
 *{box-sizing:border-box}
-html{background:var(--bg)}
+html{background:var(--bg);overflow-x:hidden}
 body{margin:0;font:14px/1.5 var(--body);color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font-family:var(--body)}
 ::selection{background:rgba(255,178,30,.4)}
@@ -64,7 +64,8 @@ body.fixo #lado{box-shadow:none}
 body.fixo .pe button{background:rgba(255,178,30,.2);color:var(--sun)}
 
 /* ---------- área principal ---------- */
-#area{margin-left:var(--w0);min-height:100vh;transition:margin-left .18s var(--ease)}
+#area{margin-left:var(--w0);min-height:100vh;transition:margin-left .18s var(--ease);min-width:0;overflow-x:hidden}
+main>*,.grid>*,section>*{min-width:0}
 body.fixo #area{margin-left:var(--w1)}
 header{position:sticky;top:0;z-index:20;background:rgba(251,247,242,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
 .top{max-width:1320px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
@@ -79,7 +80,9 @@ header{position:sticky;top:0;z-index:20;background:rgba(251,247,242,.86);backdro
 main{max-width:1320px;margin:0 auto;padding:24px 32px 80px}
 .grid{display:grid;gap:20px}
 .two{grid-template-columns:1fr 1fr}
-@media(max-width:1000px){.two{grid-template-columns:1fr}.top,main{padding-left:18px;padding-right:18px}}
+main{container-type:inline-size}
+@container (max-width:1080px){.two{grid-template-columns:1fr}}
+@media(max-width:1000px){.top,main{padding-left:18px;padding-right:18px}}
 @keyframes surge{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
 main>section:not(.hidden)>*{animation:surge .45s var(--ease) both}
@@ -126,7 +129,7 @@ main>section:not(.hidden)>:nth-child(2){animation-delay:.05s}main>section:not(.h
 
 /* chips de grupos/campanhas */
 .chips{display:flex;gap:12px;flex-wrap:wrap}
-.chip{border:0;background:var(--bg);border-radius:18px;padding:14px 16px;cursor:pointer;text-align:left;color:var(--ink);min-width:128px;flex:1 1 128px;max-width:240px;
+.chip{border:0;background:var(--bg);border-radius:18px;padding:12px 14px;cursor:pointer;text-align:left;color:var(--ink);min-width:128px;flex:1 1 128px;max-width:240px;
   box-shadow:inset 0 0 0 1px var(--line);transition:transform .2s var(--ease),box-shadow .2s,background .2s}
 .chip:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px var(--sun),var(--sh)}
 .chip .n{font-family:var(--display);font-size:24px;font-weight:700;line-height:1.1}
@@ -148,10 +151,19 @@ label.muted{display:inline-flex;align-items:center;gap:6px;font-size:13px}
 input[type=checkbox]{accent-color:var(--red);width:16px;height:16px;cursor:pointer;vertical-align:-3px}
 
 /* tabelas */
-.tablebox{overflow:auto;max-height:640px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px var(--line2)}
+.tablebox{overflow-y:auto;overflow-x:auto;max-height:640px;max-width:100%;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px var(--line2)}
 .card .tablebox{box-shadow:none;border-radius:0;margin:0 -8px}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
-th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line2);white-space:nowrap}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line2);vertical-align:middle}
+td.num,th.num,.nw{white-space:nowrap}
+td .sub{display:block;font-size:11.5px;color:var(--soft);margin-top:1px;line-height:1.35}
+td .sub .tag{font-size:10.5px;padding:1px 7px}
+td.why{font-size:13px;line-height:1.45;min-width:200px}
+td.why .tags{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap}
+td.ck{width:44px;text-align:center}
+td.ck .sub{font-size:10.5px}
+.tag{white-space:nowrap}
+a.wa{white-space:nowrap}
 th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);background:#fff;position:sticky;top:0;z-index:1}
 th.sort{cursor:pointer;user-select:none}th.sort:hover{color:var(--ink)}
 td.num,th.num{text-align:right}
@@ -180,7 +192,7 @@ a.wa:hover{background:#D3EBDD;transform:translateY(-1px)}
 .tip i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
-.heat td.c{width:30px;height:26px;border:3px solid #fff;border-radius:8px}
+.heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
 .heat th{background:none;border:0;font-weight:500;color:var(--soft);text-align:center;padding:2px;font-size:11px;position:static;letter-spacing:0;text-transform:none}
 .heat th.r{text-align:right;padding-right:8px}
 .heat tr:hover td{background:none}
@@ -482,9 +494,9 @@ function renderGeral(){
 
   // resumo por turno
   const tot=fech.reduce((s,p)=>s+(p.v||0),0);
-  let h='<table><tr><th>Turno</th><th class="num">Pedidos</th><th class="num">Faturamento</th><th class="num">% do total</th><th class="num">Ticket</th><th class="num">Clientes</th></tr>';
+  let h='<table><tr><th>Turno</th><th class="num">Pedidos</th><th class="num">Faturamento</th><th class="num">Ticket</th><th class="num">Clientes</th></tr>';
   TURNOS_VIS.forEach(t=>{const L=fech.filter(p=>p.t===t); const v=L.reduce((s,p)=>s+(p.v||0),0); const nv=L.filter(p=>p.v!=null).length;
-    h+=`<tr><td><span class="dot" style="background:${corTurno(t)}"></span>${esc(D.turnos[t])} <span class="muted">${esc(D.turnos_horario[t]||'')}</span></td><td class="num">${fmtN(L.length)}</td><td class="num">${fmtR0(v)}</td><td class="num">${fmtP(tot?v/tot:0)}</td><td class="num">${fmtR(nv?v/nv:0)}</td><td class="num">${fmtN(new Set(L.filter(p=>p.cli>=0).map(p=>p.cli)).size)}</td></tr>`;});
+    h+=`<tr><td class="nw"><span class="dot" style="background:${corTurno(t)}"></span>${esc(D.turnos[t])}<span class="sub" style="margin-left:17px">${esc(D.turnos_horario[t]||'')}</span></td><td class="num">${fmtN(L.length)}</td><td class="num">${fmtR0(v)}<span class="sub">${fmtP(tot?v/tot:0)} do total</span></td><td class="num">${fmtR(nv?v/nv:0)}</td><td class="num">${fmtN(new Set(L.filter(p=>p.cli>=0).map(p=>p.cli)).size)}</td></tr>`;});
   $('#tbTurno').innerHTML=h+'</table>';
 
   // heatmap
@@ -584,16 +596,16 @@ function renderClientes(){
   F2.sort((a,b)=>{const x=a[k],y=b[k]; return (x>y?1:x<y?-1:0)*dir;});
   ultimaLista=F2;
   const nPag=Math.max(1,Math.ceil(F2.length/PAG)); if(pag>=nPag)pag=nPag-1;
-  const cols=[['nome','Nome'],['wa','WhatsApp',0],['ok','Contatado',0],['seg','Grupo'],['dias','Dias sem pedir',1],['n','Pedidos',1],['gasto','Total gasto',1],['tk','Ticket médio',1],['ult','Último pedido',1],['perfil','Pedidos por turno'],['bairro','Bairro'],['pontos','Pontos',1]];
+  const cols=[['nome','Cliente'],['wa','',0],['ok','Feito',0],['seg','Grupo'],['dias','Sem pedir',1],['n','Pedidos',1],['gasto','Total gasto',1]];
   let h='<tr>'+cols.map(c=>`<th class="${c[2]?'num ':''}${c[2]===0?'':'sort'}" data-k="${c[0]}">${c[1]}${ordCli.k===c[0]?(ordCli.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   F2.slice(pag*PAG,(pag+1)*PAG).forEach(c=>{const w=waLink(c); const feito=!!contatos[c.id];
     const turnosTxt=c.tc.map((n,t)=>n?`${D.turnos[t].slice(0,1)}${n}`:null).filter(Boolean).join(' · ');
-    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</td>
+    const sub=[c.bairro, c.pontos?fmtN(c.pontos)+' pts':''].filter(Boolean).join(' · ');
+    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome)}<span class="sub">${esc(sub)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
-      <td><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}> ${feito?`<span class="muted" style="font-size:11px">${esc(cInfo(c.id).txt)}</span>`:''}</td>
-      <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?' <span class="tag" title="Sumiu deste turno, mas pediu recentemente em outro turno" style="background:transparent;border:1px solid var(--line)">ativo em outro turno</span>':''}</td>
-      <td class="num">${fmtN(c.dias)}</td><td class="num">${fmtN(c.n)}</td><td class="num">${fmtR(c.gasto)}</td><td class="num">${fmtR(c.tk)}</td>
-      <td class="num">${c.ult.toLocaleDateString('pt-BR')}</td><td title="${esc(c.perfil)}">${esc(turnosTxt)}</td><td>${esc(c.bairro)}</td><td class="num">${fmtN(c.pontos)}</td></tr>`;});
+      <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
+      <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?'<span class="sub">ativo em outro turno</span>':''}</td>
+      <td class="num">${fmtN(c.dias)} dias<span class="sub">${c.ult.toLocaleDateString('pt-BR')}</span></td><td class="num" title="${esc(c.perfil)}">${fmtN(c.n)}<span class="sub">${esc(turnosTxt)}</span></td><td class="num">${fmtR(c.gasto)}<span class="sub">ticket ${fmtR(c.tk)}</span></td></tr>`;});
   if(!F2.length) h+=`<tr><td colspan="${cols.length}" class="muted" style="padding:20px">Nenhum cliente com esses filtros.</td></tr>`;
   $('#tbCli').innerHTML=h;
   $('#tbCli').querySelectorAll('th.sort').forEach(th=>th.onclick=()=>{const k=th.dataset.k; ordCli = ordCli.k===k?{k,dir:-ordCli.dir}:{k,dir:(k==='nome'||k==='perfil'||k==='bairro'||k==='seg')?1:-1}; renderClientes();});
@@ -704,16 +716,16 @@ function renderPromocoes(){
   G.sort((a,b)=>b.gasto-a.gasto);
   ultimaPromo=G;
   const nPag=Math.max(1,Math.ceil(G.length/PAG)); if(pPag>=nPag) pPag=nPag-1;
-  let h='<tr><th>Nome</th><th>WhatsApp</th><th>Contatado</th><th>Por que este cliente</th><th>Sugestão</th><th>Melhor momento p/ mandar</th><th class="num">Pedidos</th><th class="num">Total gasto</th><th>Outras ideias</th></tr>';
+  let h='<tr><th>Cliente</th><th></th><th>Feito</th><th>Por que este cliente</th><th>Sugestão</th><th class="num">Total gasto</th></tr>';
   G.slice(pPag*PAG,(pPag+1)*PAG).forEach(r=>{ const c=D.clientes[r.cli]; const rec=r.recs[0]; const m=msgPromo(r,rec); const w=waLink(c,m); const feito=!!contatos[c.id];
     const outras=r.recs.slice(1).map(x=>`<span class="tag" title="${esc(x.motivo)}">${esc(CAMP[x.tipo]?CAMP[x.tipo].nome:x.titulo)}${x.sugestao?': '+esc(x.sugestao):''}</span>`).join(' ');
-    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</td>
+    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}<span class="sub">mandar ${esc(r.quando)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(m)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
-      <td><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}> ${feito?`<span class="muted" style="font-size:11px">${esc(cInfo(c.id).txt)}</span>`:''}</td>
-      <td style="white-space:normal;min-width:280px;max-width:420px;font-size:13px">${esc(rec.motivo)}</td>
-      <td>${esc(rec.sugestao||rec.fav||r.favorito||'')}</td><td>${esc(r.quando)}</td>
-      <td class="num">${fmtN(r.n)}</td><td class="num">${fmtR(r.gasto)}</td><td style="white-space:normal;min-width:160px">${outras}</td></tr>`; });
-  if(!G.length) h+='<tr><td colspan="9" class="muted" style="padding:20px">Nenhum cliente com esses filtros.</td></tr>';
+      <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
+      <td class="why">${esc(rec.motivo)}${outras?`<div class="tags">${outras}</div>`:''}</td>
+      <td>${esc(rec.sugestao||rec.fav||r.favorito||'')}</td>
+      <td class="num">${fmtR(r.gasto)}<span class="sub">${fmtN(r.n)} pedidos</span></td></tr>`; });
+  if(!G.length) h+='<tr><td colspan="6" class="muted" style="padding:20px">Nenhum cliente com esses filtros.</td></tr>';
   $('#tbPromo').innerHTML=h;
   $('#tbPromo').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, campSel, cb.checked); renderPromocoes();});
   $('#pPager').innerHTML=`${fmtN(G.length)} clientes · página ${pPag+1} de ${nPag} <button class="btn" ${pPag?'':'disabled'} id="ppA">‹ Anterior</button><button class="btn" ${pPag<nPag-1?'':'disabled'} id="ppP">Próxima ›</button>`;
@@ -797,17 +809,17 @@ function renderHoje(){
   $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi"><div class="lbl">${CURTO[b.id]}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos'}[b.id]}</div></div>`).join('');
   let h='';
   BLOCOS.forEach(b=>{ const itens=L[b.id]; if(!itens.length) return;
-    h+=`<div class="card" style="margin-top:20px"><h2>${b.nome} <span class="cont">${itens.length}</span></h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Nome</th><th></th><th>Feito</th><th>Por quê</th><th class="num">Pedidos</th><th class="num">Total gasto</th></tr>`;
+    h+=`<div class="card" style="margin-top:20px"><h2>${b.nome} <span class="cont">${itens.length}</span></h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Cliente</th><th></th><th>Feito</th><th>Por quê</th><th class="num">Total gasto</th></tr>`;
     itens.forEach(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
-      if(!c){ h+=`<tr><td class="muted">Cliente não identificado (pedido ${esc(it.aval?it.aval[5]:'')})</td><td>—</td><td></td><td style="white-space:normal;min-width:320px">${esc(it.motivo)}</td><td></td><td></td></tr>`; return; }
+      if(!c){ h+=`<tr><td class="muted">Cliente não identificado (pedido ${esc(it.aval?it.aval[5]:'')})</td><td>—</td><td></td><td class="why">${esc(it.motivo)}</td><td></td></tr>`; return; }
       const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
       const msg=b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da pizzaria. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
       const w=waLink(c,msg); const feito=!!cInfo(c.id);
-      h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</td>
+      h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}${c.app?`<span class="sub"><span class="tag">${esc(c.app)}</span></span>`:''}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:'<span class="muted">sem telefone</span>'}</td>
-        <td><input type="checkbox" data-id="${c.id}" data-camp="${b.camp||'avaliacao'}" ${feito?'checked':''}></td>
-        <td style="white-space:normal;min-width:320px;font-size:13px">${esc(it.motivo)}</td>
-        <td class="num">${it.x?fmtN(it.x.n):''}</td><td class="num">${it.x?fmtR(it.x.v):''}</td></tr>`; });
+        <td class="ck"><input type="checkbox" data-id="${c.id}" data-camp="${b.camp||'avaliacao'}" ${feito?'checked':''}></td>
+        <td class="why">${esc(it.motivo)}</td>
+        <td class="num">${it.x?fmtR(it.x.v):''}${it.x?`<span class="sub">${fmtN(it.x.n)} pedidos</span>`:''}</td></tr>`; });
     h+='</table></div></div>'; });
   if(!tot) h='';
   $('#hojeBlocos').innerHTML=h;
@@ -835,10 +847,10 @@ function renderResultados(){
     if(depois.length){ r.volt++; r.fat+=depois.reduce((s,p)=>s+(p.v||0),0); }
   });
   const ks=Object.keys(res).sort((a,b)=>res[b].n-res[a].n);
-  let h='<tr><th>Campanha</th><th class="num">Contatados</th><th class="num">Pediram em até 7 dias</th><th class="num">Taxa</th><th class="num">Pediria de qualquer jeito?</th><th class="num">Faturamento desses pedidos</th></tr>';
+  let h='<tr><th>Campanha</th><th class="num">Contatados</th><th class="num">Pediram em 7 dias</th><th class="num" title="Quanto esse tipo de cliente costuma pedir numa semana normal, sem mensagem">Sem mensagem</th><th class="num">Faturamento</th></tr>';
   ks.forEach(k=>{ const r=res[k]; const tx=r.volt/r.n, base=r.nb?r.base/r.nb:0;
-    h+=`<tr><td>${esc(NOME_CAMP[k]||k)}</td><td class="num">${fmtN(r.n)}${r.cedo?` <span class="muted" title="contatados há menos de 7 dias: ainda podem pedir">(${r.cedo} recentes)</span>`:''}</td><td class="num">${fmtN(r.volt)}</td><td class="num"><b>${fmtP(tx)}</b></td><td class="num">${fmtP(base)}</td><td class="num">${fmtR0(r.fat)}</td></tr>`; });
-  if(!ks.length) h+='<tr><td colspan="6" class="muted" style="padding:20px">Nenhum contato marcado nesse período. Marque "Contatado" nas listas e os resultados aparecem aqui.</td></tr>';
+    h+=`<tr><td>${esc(NOME_CAMP[k]||k)}</td><td class="num">${fmtN(r.n)}${r.cedo?`<span class="sub" title="contatados há menos de 7 dias: ainda podem pedir">${r.cedo} recentes</span>`:''}</td><td class="num"><b>${fmtP(tx)}</b><span class="sub">${fmtN(r.volt)} clientes</span></td><td class="num">${fmtP(base)}</td><td class="num">${fmtR0(r.fat)}</td></tr>`; });
+  if(!ks.length) h+='<tr><td colspan="5" class="muted" style="padding:20px">Nenhum contato marcado nesse período. Marque "Contatado" nas listas e os resultados aparecem aqui.</td></tr>';
   $('#tbRes').innerHTML=h;
   // cupons
   const cup=(D.cupons||[]).map((nome,i)=>({nome,u:0,u30:0,fat:0,desc:0,cl:new Set(),novos:0,ult:null}));
@@ -846,9 +858,9 @@ function renderResultados(){
   P.forEach(p=>{ if(p.cancel||p.cup==null||p.cup<0) return; const c=cup[p.cup]; c.u++; if(diasEntre(p.d,REF)<=30)c.u30++; c.fat+=p.v||0; c.desc+=p.desc||0;
     if(p.cli>=0){ c.cl.add(p.cli); if(+primeiro.get(p.cli)===+p.d) c.novos++; } if(!c.ult||p.d>c.ult)c.ult=p.d; });
   const cs=cup.filter(c=>c.u).sort((a,b)=>b.u30-a.u30||b.u-a.u);
-  let hc='<tr><th>Cupom</th><th class="num">Usos (30 dias)</th><th class="num">Usos (total)</th><th class="num">Clientes</th><th class="num">Era o 1º pedido</th><th class="num">Faturamento</th><th class="num">Desconto dado</th><th class="num" title="Faturamento dos pedidos com o cupom dividido pelo desconto dado">Vendas por R$ 1 de desconto</th><th>Último uso</th></tr>';
-  cs.forEach(c=>{ hc+=`<tr><td><b>${esc(c.nome)}</b></td><td class="num">${fmtN(c.u30)}</td><td class="num">${fmtN(c.u)}</td><td class="num">${fmtN(c.cl.size)}</td><td class="num">${fmtN(c.novos)}</td><td class="num">${fmtR0(c.fat)}</td><td class="num">${fmtR0(c.desc)}</td><td class="num">${c.desc?fmtR(c.fat/c.desc):'—'}</td><td>${c.ult?c.ult.toLocaleDateString('pt-BR'):''}</td></tr>`; });
-  if(!cs.length) hc+='<tr><td colspan="9" class="muted" style="padding:20px">Nenhum cupom usado nos pedidos baixados ainda.</td></tr>';
+  let hc='<tr><th>Cupom</th><th class="num">Usos em 30 dias</th><th class="num">Clientes</th><th class="num">Faturamento</th><th class="num">Desconto dado</th></tr>';
+  cs.forEach(c=>{ hc+=`<tr><td><b>${esc(c.nome)}</b><span class="sub">último uso ${c.ult?c.ult.toLocaleDateString('pt-BR'):'—'}</span></td><td class="num">${fmtN(c.u30)}<span class="sub">${fmtN(c.u)} no total</span></td><td class="num">${fmtN(c.cl.size)}<span class="sub">${fmtN(c.novos)} no 1º pedido</span></td><td class="num">${fmtR0(c.fat)}</td><td class="num">${fmtR0(c.desc)}<span class="sub">${c.desc?fmtR(c.fat/c.desc)+' vendidos por R$ 1':''}</span></td></tr>`; });
+  if(!cs.length) hc+='<tr><td colspan="5" class="muted" style="padding:20px">Nenhum cupom usado nos pedidos baixados ainda.</td></tr>';
   $('#tbCup').innerHTML=hc;
 }
 $('#rPeriodo').onchange=renderResultados;
