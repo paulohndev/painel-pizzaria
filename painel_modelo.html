@@ -847,9 +847,9 @@ function cpTexto(tipo, campo){ const v=store('camp_'+tipo+'_'+campo); return v!=
 // ---- textos naturais: "Camarão" -> "aquela pizza de camarão"; "Quentinha" -> "aquela quentinha"
 function limparNome(n){ n=String(n||'').replace(/\(.*?\)/g,'').replace(/^\s*\d+\s*\/\s*\d+\s+/,'').replace(/^[^:]*(maluca|promo|combo|oferta)[^:]*:\s*/i,'');
   if(n.includes('|')){ const pz=n.split('|').map(x=>x.trim()); n=(/^(marmita|quentinha|prato)/i.test(pz[0])&&pz[1]&&!pz[1].includes(',')&&pz[1].split(/\s+/).length<=4)?pz[0].split(/\s+/)[0]+' de '+pz[1]:pz[0]; }
-  n=n.split(/\s+\+\s+/)[0].replace(/\s*-\s*(serve\s+)?\d+\s*pessoas?.*$/i,'').replace(/\b(individual|executivo|executiva|grandes?|m[ée]dias?|pequenas?|broto)\b/gi,'');
+  n=n.split(/\s+\+\s+/)[0].replace(/\s*-\s*(serve\s+)?\d+\s*pessoas?.*$/i,'').replace(/\s+(para|p\/)\s*\d+(\s*pessoas?)?\b.*$/i,'').replace(/\b(individual|executivo|executiva|grandes?|m[ée]dias?|pequenas?|broto)\b/gi,'');
   return n.replace(/\s+/g,' ').replace(/^[\s\-:|.]+|[\s\-:|.]+$/g,''); }
-const MAIUSC=['Nutella','Ovomaltine','Coca-Cola','Coca','Catupiry','Kit Kat','Kitkat','Sprite','Fanta','Guaraná Antarctica'];
+const MAIUSC=['Mariá','Nutella','Ovomaltine','Coca-Cola','Coca','Catupiry','Kit Kat','Kitkat','Sprite','Fanta','Guaraná Antarctica'];
 function minusc(n){ let t=n.toLowerCase(); MAIUSC.forEach(w=>{ t=t.split(w.toLowerCase()).join(w); }); return t; }
 const SABOR_SET=new Set((D&&D.sabores||[]).filter(x=>/sabor/i.test(x[2]||'')).map(x=>limparNome(x[3]).toLowerCase()));
 function ehSaborPizza(orig){ const n=limparNome(orig).toLowerCase(); return SABOR_SET.has(n)||/pizza|segunda maluca/i.test(orig||''); }

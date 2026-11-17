@@ -1,6 +1,6 @@
 {
- "versao": "1.4.3",
- "notas": "Mensagens falam do prato inteiro: 'aquela pizza de camarão', 'aquela quentinha'",
+ "versao": "1.4.4",
+ "notas": "Ajustes nos nomes dos pratos nas mensagens",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -16,7 +16,7 @@
   "alertas.py": "c947a0718d60486735bf8cba32f33383f2b3fe6aab2b24b2bfad941c848e6c02",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "bb3a454b5e3ca62447ab89ae4cfd210bffcbc49c69e7fff4645822e2de390926",
+  "painel_modelo.html": "efcbbdddc659b7a500c86e6a379bbea30490265b76958a61f096610c4e8f084e",
   "pizzaria.py": "24e8945841c18facc42b9240ede083f571ae0091b4ebe847b3df767f900f14e0",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
   "vigia.py": "dc03c18faa7e3b349fbc06bdc85dde1300fa1a0606c26a59cf725f13fda81cf8"
