@@ -107,7 +107,8 @@ def gerar(D, contatos=None, agora=None, limites=None):
         if n >= 4 and ritmo and dias >= max(ritmo * 1.6, ritmo + 4, 8) and dias <= 120 and not contatado(cli, 20):
             add("afastando", 2, cli, "%s:%s" % (clientes[cli]["chave"], ult.date()),
                 "%s está se afastando" % _primeiro_nome(clientes[cli]["nome"]),
-                "Pedia a cada %d dias e já faz %d. São %d pedidos e R$ %.0f gastos na casa." % (round(ritmo), dias, n, gasto),
+                "Pedia a cada %d dia%s e já faz %d. São %d pedidos e R$ %.0f gastos na casa." % (
+                    round(ritmo), "" if round(ritmo) == 1 else "s", dias, n, gasto),
                 campanha="reativar", favorito=fav, valor=gasto)
 
         # --- voltou depois de sumir / primeiro pedido (nas últimas 6 horas)
