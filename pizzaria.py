@@ -109,6 +109,11 @@ pedidos_fiel = 4
 ; Mensagem padrão do WhatsApp. {nome} vira o primeiro nome do cliente.
 mensagem = Oi {nome}! Tudo bem? Aqui é da pizzaria. Sentimos sua falta! Preparamos um mimo pro seu próximo pedido pelo nosso app 🍕
 
+[alertas]
+; Notificações no canto da tela (sim/nao) e em que horário elas podem aparecer.
+notificacoes = sim
+horario = 09:00-23:30
+
 [atualizacao]
 ; O programa se atualiza sozinho a partir deste repositório do GitHub.
 ; Para desligar, troque "sim" por "nao".
@@ -470,6 +475,7 @@ def montar_dados(db, cfg, nome_loja):
     sabores = {}   # (turno, canal, grupo, nome) -> [qtd, valor]
     sem_detalhe = 0
     compras = []   # pedidos concluídos com cliente, para as recomendações
+    abertos = []   # pedidos em andamento (para o alerta de combo ao vivo)
     idx_cupom, lista_cupom = {}, []
     cid_cli = {}   # id do cliente no Cardápio Web -> índice no painel
 
@@ -499,12 +505,14 @@ def montar_dados(db, cfg, nome_loja):
             if cid:
                 cad = clientes_cad.get(cid, {})
                 tel = so_digitos(cad.get("tel") or cust.get("phone"))
+                if tel.startswith("0800") or tel.startswith("800") or len(set(tel)) <= 2:
+                    tel = ""  # número de central (ex.: iFood), não é do cliente
                 chave = ("t" + tel[-11:]) if len(tel) >= 10 else "c%s" % cid
                 if chave not in idx_cli:
                     ddi = so_digitos(cad.get("ddi") or cust.get("ddi") or "55")
                     idx_cli[chave] = len(lista_cli)
                     lista_cli.append({
-                        "id": cid,
+                        "id": cid, "chave": chave,
                         "nome": (cad.get("nome") or cust.get("name") or "").strip(),
                         "tel": tel, "ddi": ddi or "55",
                         "pontos": cad.get("pontos", 0), "cashback": cad.get("cashback", 0),
@@ -561,11 +569,17 @@ def montar_dados(db, cfg, nome_loja):
                         acc2[1] += (op.get("unit_price") or 0) * q
             if status == "closed" and cli_i >= 0:
                 compras.append(compra)
+            if status not in ("closed", "canceled") and cli_i >= 0 and (datetime.now() - dt).total_seconds() < 4 * 3600:
+                abertos.append({"id": pid, "cli": cli_i, "dt": dt.strftime("%Y-%m-%d %H:%M"), "status": status, "canal": canal,
+                                "itens": [limpar((it.get("name") or "").strip()) for it in (d.get("items") or [])],
+                                "extras": [limpar(op.get("name") or "") for it in (d.get("items") or []) for op in (it.get("options") or [])
+                                           if classificar_opcao(it.get("name"), op.get("option_group_name"), op.get("name")) == "extra"]})
         pedidos.append([
             dt.strftime("%Y-%m-%d %H:%M"), t, ci, ti,
             None if total is None else round(total, 2),
             cli_i, bai_i, 1 if status == "canceled" else 0,
-            round(taxa, 2), round(desc, 2), cup_i,
+            round(taxa, 2), round(desc, 2), cup_i, pid,
+            0 if status in ("closed", "canceled") else 1,
         ])
 
     avaliacoes = []
@@ -601,16 +615,23 @@ def montar_dados(db, cfg, nome_loja):
         "sem_detalhe": sem_detalhe,
         "cupons": lista_cupom,
         "avaliacoes": avaliacoes,
+        "abertos": abertos,
     }
 
 
-def gerar_painel(dados, destino):
+def html_painel(dados):
     with open(os.path.join(PASTA, "painel_modelo.html"), encoding="utf-8") as f:
         html = f.read()
     js = json.dumps(dados, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    html = html.replace("/*__DADOS__*/null", js)
-    with open(destino, "w", encoding="utf-8") as f:
+    return html.replace("/*__DADOS__*/null", js)
+
+
+def gerar_painel(dados, destino):
+    html = html_painel(dados)
+    tmp = destino + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         f.write(html)
+    os.replace(tmp, destino)
 
 
 # ---------------------------------------------------------------- principal

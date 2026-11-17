@@ -190,6 +190,52 @@ a.wa:hover{background:#D3EBDD;transform:translateY(-1px)}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:8px 10px;border-radius:10px;white-space:nowrap;opacity:0;transition:opacity .1s;z-index:3;box-shadow:var(--sh2)}
 .tip .row{display:flex;gap:8px;align-items:center}
 .tip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* ---------- alertas ao vivo ---------- */
+#sino{position:relative;border:0;background:#fff;width:42px;height:42px;border-radius:14px;cursor:pointer;box-shadow:0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink);transition:box-shadow .2s,transform .2s}
+#sino:hover{box-shadow:0 0 0 2px var(--sun);transform:translateY(-1px)}
+#sino svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#sino .n{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--tomato);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--bg)}
+#sino .n:empty{display:none}
+#sino.pulsa{animation:pulsa 1.4s var(--ease) 3}
+@keyframes pulsa{0%,100%{box-shadow:0 0 0 1px var(--line)}50%{box-shadow:0 0 0 7px rgba(194,65,45,.25)}}
+.vivo{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--leaf);font-weight:600}
+.vivo::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--leaf);box-shadow:0 0 0 0 rgba(46,125,82,.5);animation:vivo 2s infinite}
+@keyframes vivo{70%{box-shadow:0 0 0 7px rgba(46,125,82,0)}100%{box-shadow:0 0 0 0 rgba(46,125,82,0)}}
+#gaveta{position:fixed;top:0;right:0;bottom:0;width:min(420px,94vw);background:var(--bg);z-index:50;box-shadow:-20px 0 50px rgba(42,27,23,.18);transform:translateX(105%);transition:transform .28s var(--ease);display:flex;flex-direction:column}
+#gaveta.aberta{transform:none}
+#veu{position:fixed;inset:0;background:rgba(42,27,23,.25);z-index:45;opacity:0;pointer-events:none;transition:opacity .25s}
+#veu.on{opacity:1;pointer-events:auto}
+.gv-topo{padding:20px 22px 12px;display:flex;align-items:center;gap:12px}
+.gv-topo h3{font-family:var(--display);font-size:22px;margin:0;flex:1}
+.gv-topo button{border:0;background:#fff;width:36px;height:36px;border-radius:12px;cursor:pointer;font-size:18px;color:var(--mut);box-shadow:0 0 0 1px var(--line)}
+.gv-lista{flex:1;overflow-y:auto;padding:4px 18px 30px;display:flex;flex-direction:column;gap:12px}
+.al{flex:none;background:#fff;border-radius:18px;padding:14px 16px 14px 18px;box-shadow:var(--sh);position:relative;overflow:hidden;animation:pop .35s var(--ease) both}
+.al::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--s4)}
+.al.p1::before{background:var(--tomato)}.al.p2::before{background:var(--sun)}
+.al.foco{box-shadow:0 0 0 3px var(--sun),var(--sh2)}
+.al .cab{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+.al .cab .urg{color:var(--tomato)}
+.al h4{margin:4px 0 2px;font-size:15px;font-weight:600;line-height:1.3}
+.al p{margin:0;font-size:13px;color:var(--mut);line-height:1.45}
+.al .acoes{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.al .acoes button{border:0;background:var(--line2);color:var(--mut);font:inherit;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:999px;cursor:pointer}
+.al .acoes button:hover{background:var(--peach);color:var(--ink)}
+.al .acoes button.ok{background:var(--sun);color:var(--ink)}
+.gv-vazio{text-align:center;color:var(--mut);padding:50px 20px;font-size:14px}
+.gv-vazio b{display:block;font-family:var(--display);font-size:20px;color:var(--ink);margin-bottom:6px}
+#pings{position:fixed;right:22px;bottom:22px;z-index:60;display:flex;flex-direction:column;gap:10px;width:min(360px,90vw);pointer-events:none}
+.ping{pointer-events:auto;background:linear-gradient(140deg,#2A1B17,#4a0c06);color:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 18px 40px -10px rgba(40,0,0,.55);cursor:pointer;animation:entra .4s var(--ease) both;position:relative}
+.ping small{display:block;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--sun);margin-bottom:3px}
+.ping b{display:block;font-size:14.5px;font-weight:600}
+.ping span{font-size:12.5px;color:#EBDCD2;display:block;margin-top:2px}
+.ping i{position:absolute;top:8px;right:12px;font-style:normal;color:#cfa99b;font-size:16px}
+.ping.sai{animation:sai .3s var(--ease) both}
+@keyframes entra{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes sai{to{opacity:0;transform:translateX(40px)}}
+.novo-dado{display:none;margin-left:10px;border:0;background:var(--peach);color:#6b3d00;font:inherit;font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;cursor:pointer}
+.hero .urgentes{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:var(--sun);color:var(--red3);border:0;font:inherit;font-weight:600;font-size:13.5px;padding:8px 16px;border-radius:999px;cursor:pointer;position:relative}
+.hero .urgentes:hover{transform:translateY(-1px)}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -220,11 +266,12 @@ a.wa:hover{background:#D3EBDD;transform:translateY(-1px)}
   <div class="top">
     <div>
       <h1 id="pgTitulo">Hoje</h1>
-      <div class="sub" id="subtitulo"></div>
+      <div class="sub"><span id="subtitulo"></span><button class="novo-dado" id="novoDado">Dados novos · atualizar</button></div>
     </div>
     <div class="filters">
       <span class="flabel">Turno</span><div class="seg" id="fTurno"></div>
       <span class="flabel">Canal</span><div class="seg" id="fCanal"></div>
+      <button id="sino" title="Alertas"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="n" id="sinoN"></span></button>
     </div>
   </div>
 </header>
@@ -234,7 +281,7 @@ a.wa:hover{background:#D3EBDD;transform:translateY(-1px)}
 
   <section id="t-hoje">
     <div class="hero"><i class="b1"></i><i class="b2"></i><i class="b3"></i>
-      <div class="tx"><small id="hojeData"></small><h2 id="hojeTitulo">Lista do dia</h2><p id="hojeDesc"></p></div>
+      <div class="tx"><small id="hojeData"></small><h2 id="hojeTitulo">Lista do dia</h2><p id="hojeDesc"></p><button class="urgentes hidden" id="hojeUrg"></button></div>
     </div>
     <div class="kpis" id="hojeResumo"></div>
     <div id="hojeBlocos"></div>
@@ -377,6 +424,12 @@ a.wa:hover{background:#D3EBDD;transform:translateY(-1px)}
   </section>
 </main>
 </div>
+<div id="veu"></div>
+<aside id="gaveta" aria-label="Alertas">
+  <div class="gv-topo"><h3>Alertas</h3><span class="vivo hidden" id="vivo">ao vivo</span><button id="gvFechar" title="Fechar">✕</button></div>
+  <div class="gv-lista" id="gvLista"></div>
+</aside>
+<div id="pings"></div>
 
 <script>
 const D = /*__DADOS__*/null;
@@ -547,7 +600,10 @@ function hojeISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getM
 function cInfo(id){ const v=contatos[id]; if(!v) return null;
   if(typeof v==='string'){ const p=v.split('/'); const d=new Date(+p[2],+p[1]-1,+p[0],12); return {d, c:'clientes', txt:v}; }
   const d=new Date(v.d+'T12:00:00'); return {d, c:v.c, txt:d.toLocaleDateString('pt-BR')}; }
-function marcar(id, camp, on){ if(on) contatos[id]={d:hojeISO(), c:camp}; else delete contatos[id]; store('contatos',JSON.stringify(contatos)); }
+const AO_VIVO = location.protocol.indexOf('http')===0;
+function api(caminho, dado){ return fetch(caminho, dado?{method:'POST',headers:{'Content-Type':'application/json','X-Painel':'1'},body:JSON.stringify(dado)}:{cache:'no-store'}).then(r=>r.json()); }
+function marcar(id, camp, on){ if(on) contatos[id]={d:hojeISO(), c:camp}; else delete contatos[id]; store('contatos',JSON.stringify(contatos));
+  if(AO_VIVO) api('/api/contato',{id, camp, on}).catch(()=>{}); }
 $('#msg').value = store('msg') || CFG.mensagem || '';
 $('#msg').oninput=()=>{store('msg',$('#msg').value); renderClientes();};
 
@@ -804,7 +860,7 @@ function renderHoje(){
   $('#hojeTitulo').textContent=tot?`${sauda}! ${tot} ${tot===1?'pessoa':'pessoas'} para chamar hoje`:`${sauda}! Ninguém pendente hoje`;
   $('#hojeDesc').innerHTML=(tot?'Clique em <b>WhatsApp</b>, envie a mensagem que já vai pronta e marque como contatado. Quem você já chamou não volta para a lista.':'Todo mundo que precisava de contato já foi chamado. Volte amanhã!')+
     (idade>30?`<br><b>Atenção:</b> os dados são de ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}. Rode "Atualizar painel".`:'');
-  $('#qtHoje').textContent=tot||'';
+  $('#qtHoje').dataset.base=tot; $('#qtHoje').textContent=tot||'';
   const CURTO={avaliacao:'Avaliações ruins',aniversario:'Aniversários',segundo:'Boas-vindas',lembrete:'Dia de costume',reativar:'Sumidos'};
   $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi"><div class="lbl">${CURTO[b.id]}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos'}[b.id]}</div></div>`).join('');
   let h='';
@@ -822,6 +878,7 @@ function renderHoje(){
         <td class="num">${it.x?fmtR(it.x.v):''}${it.x?`<span class="sub">${fmtN(it.x.n)} pedidos</span>`:''}</td></tr>`; });
     h+='</table></div></div>'; });
   if(!tot) h='';
+  setTimeout(()=>{ const bu=$('#hojeUrg'); if(bu) bu.onclick=()=>abrirGaveta(); renderAlertas(); },0);
   $('#hojeBlocos').innerHTML=h;
   $('#hojeBlocos').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, cb.dataset.camp, cb.checked); });
 }
@@ -865,6 +922,67 @@ function renderResultados(){
 }
 $('#rPeriodo').onchange=renderResultados;
 
+
+// ------------------------------------------------------------ ALERTAS (ao vivo)
+const ICONE={costume:'⏰',combo:'🍕',avaliacao:'⚠️',afastando:'📉',aniversario:'🎂',voltou:'👋',primeiro:'✨'};
+const ROTULO={costume:'Hora do costume',combo:'Combo agora',avaliacao:'Avaliação ruim',afastando:'Se afastando',aniversario:'Aniversário',voltou:'Voltou',primeiro:'Cliente novo'};
+let ALERTAS=(D&&D.alertas)||[]; let vistos=new Set(ALERTAS.map(a=>a.id)); let versaoDados=null;
+const stLocal=JSON.parse(store('alertas_st')||'{}');
+function alertasAtivos(){ return ALERTAS.filter(a=>!stLocal[a.id]); }
+function msgAlerta(a){
+  const c=a.cliente||{}; const nome=primeiroNome(c);
+  if(a.mensagem) return a.mensagem;
+  if(!a.campanha||!CAMP[a.campanha]) return '';
+  const oferta=cpTexto(a.campanha,'oferta').replace(/\{sugestao\}/g,a.sugestao||'');
+  return cpTexto(a.campanha,'msg').replace(/\{nome\}/g,nome).replace(/\{favorito\}/g,a.favorito||'').replace(/\{sugestao\}/g,a.sugestao||'')
+    .replace(/\{base\}/g,a.favorito||'').replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
+}
+function quandoTxt(s){ const d=parseD(s); const m=Math.round((new Date()-d)/6e4); return m<1?'agora':m<60?`há ${m} min`:m<1440?`há ${Math.round(m/60)} h`:d.toLocaleDateString('pt-BR'); }
+function renderAlertas(focoId){
+  const L=alertasAtivos(); const urg=L.filter(a=>a.prio===1).length;
+  $('#sinoN').textContent=L.length||''; $('#qtHoje').textContent=(+($('#qtHoje').dataset.base||0)+urg)||'';
+  const bu=$('#hojeUrg'); if(bu){ bu.classList.toggle('hidden',!urg); bu.textContent=`🔔 ${urg} ${urg===1?'alerta urgente':'alertas urgentes'} agora`; }
+  if(!L.length){ $('#gvLista').innerHTML='<div class="gv-vazio"><b>Tudo em dia 🎉</b>Quando aparecer uma oportunidade, ela chega aqui e no canto da tela.</div>'; return; }
+  $('#gvLista').innerHTML=L.map(a=>{ const c=a.cliente||{}; const msg=msgAlerta(a); const w=c.tel?waLink(c,msg):null;
+    return `<div class="al p${a.prio} ${a.id===focoId?'foco':''}" data-id="${esc(a.id)}">
+      <div class="cab">${ICONE[a.tipo]||'•'} ${esc(ROTULO[a.tipo]||a.tipo)} ${a.prio===1?'<span class="urg">· urgente</span>':''}<span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500">${esc(quandoTxt(a.criado))}</span></div>
+      <h4>${esc(a.titulo)}</h4><p>${esc(a.texto)}</p>
+      <div class="acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}" data-wa="${esc(a.id)}">WhatsApp</a>`:''}
+        <button class="ok" data-ac="feito" data-id="${esc(a.id)}">✓ Feito</button><button data-ac="ignorar" data-id="${esc(a.id)}">Dispensar</button></div></div>`; }).join('');
+  $('#gvLista').querySelectorAll('button[data-ac]').forEach(b=>b.onclick=()=>resolverAlerta(b.dataset.id,b.dataset.ac));
+  if(focoId){ const el=$('#gvLista').querySelector(`[data-id="${CSS.escape(focoId)}"]`); if(el) el.scrollIntoView({block:'center'}); }
+}
+function resolverAlerta(id, acao){
+  const a=ALERTAS.find(x=>x.id===id); stLocal[id]=acao; store('alertas_st',JSON.stringify(stLocal));
+  if(acao==='feito' && a && a.cliente && a.cliente.id!=null){ contatos[a.cliente.id]={d:hojeISO(), c:a.campanha||a.tipo}; store('contatos',JSON.stringify(contatos)); }
+  if(AO_VIVO) api('/api/alerta',{id, acao, cliente_id:a&&a.cliente?a.cliente.id:null, camp:a?(a.campanha||a.tipo):''}).catch(()=>{});
+  renderAlertas(); if(aba==='hoje') renderHoje();
+}
+function abrirGaveta(focoId){ renderAlertas(focoId); $('#gaveta').classList.add('aberta'); $('#veu').classList.add('on'); }
+function fecharGaveta(){ $('#gaveta').classList.remove('aberta'); $('#veu').classList.remove('on'); if(location.hash) history.replaceState(null,'',location.pathname); }
+$('#sino').onclick=()=>abrirGaveta(); $('#gvFechar').onclick=fecharGaveta; $('#veu').onclick=fecharGaveta;
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') fecharGaveta(); });
+function ping(a){
+  const el=document.createElement('div'); el.className='ping';
+  el.innerHTML=`<small>${ICONE[a.tipo]||''} ${esc(ROTULO[a.tipo]||'')}${a.prio===1?' · urgente':''}</small><b>${esc(a.titulo)}</b><span>${esc(a.texto.slice(0,110))}${a.texto.length>110?'…':''}</span><i>✕</i>`;
+  const fora=()=>{ el.classList.add('sai'); setTimeout(()=>el.remove(),300); };
+  el.onclick=e=>{ fora(); if(e.target.tagName!=='I') abrirGaveta(a.id); };
+  $('#pings').prepend(el); while($('#pings').children.length>3) $('#pings').lastChild.remove();
+  setTimeout(fora, 14000); $('#sino').classList.remove('pulsa'); void $('#sino').offsetWidth; $('#sino').classList.add('pulsa');
+}
+function abrirPeloLink(){ const h=decodeURIComponent(location.hash||''); if(h.startsWith('#alerta=')) abrirGaveta(h.slice(8)); else if(h==='#alertas') abrirGaveta(); }
+window.addEventListener('hashchange',abrirPeloLink);
+function acompanhar(){
+  api('/api/estado').then(e=>{
+    if(versaoDados===null) versaoDados=e.gerado_em;
+    else if(e.gerado_em!==versaoDados) $('#novoDado').style.display='inline-block';
+    const novos=(e.alertas||[]).filter(a=>!vistos.has(a.id));
+    ALERTAS=e.alertas||[]; novos.forEach(a=>{ vistos.add(a.id); if(a.prio<=2) ping(a); });
+    renderAlertas($('#gaveta').classList.contains('aberta')?null:undefined);
+  }).catch(()=>{});
+}
+$('#novoDado').onclick=()=>location.reload();
+
 // ------------------------------------------------------------ início
 function render(){
   marcarFiltros();
@@ -884,6 +1002,12 @@ function render(){
   $('#subtitulo').textContent=`${fmtN(P.length)} pedidos de ${ini} até ${REF.toLocaleDateString('pt-BR')} · atualizado em ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}`;
   if(D.sem_detalhe>0) $('#avisos').innerHTML=`<div class="note" style="margin-bottom:16px">⚠️ ${fmtN(D.sem_detalhe)} pedidos ainda estão sem detalhes (cliente, valor, itens). Rode o programa de novo para completar; os números abaixo ainda estão incompletos.</div>`;
   montarFiltros(); render();
+  renderAlertas(); abrirPeloLink();
+  if(AO_VIVO){
+    $('#vivo').classList.remove('hidden');
+    api('/api/contatos').then(c=>{ Object.keys(contatos).forEach(k=>delete contatos[k]); Object.assign(contatos,c); render(); }).catch(()=>{});
+    setInterval(acompanhar, 30000); setTimeout(acompanhar, 1500);
+  }
   let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(aba==='geral') renderGeral(); },150);});
 })();
 </script>

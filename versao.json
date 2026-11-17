@@ -1,21 +1,24 @@
 {
- "versao": "1.1.2",
- "notas": "Todas as páginas cabem na largura da tela, sem arrastar para o lado.",
+ "versao": "1.2.0",
+ "notas": "Vigia em tempo real: alertas de oportunidades com notificação no canto da tela e painel ao vivo.",
  "arquivos": {
-  "Ativar atualização diária às 6h (Windows).bat": "79b91d6a05dcecda14314a204937ba41ceb4c1b725e987d345cc0daba5c6ec31",
+  "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
-  "Desativar atualização diária (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "31fbeb446301878b638b877969ccb9a3e750ae0bbb95b73d6c48db57d7c97aa3",
+  "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
+  "LEIA-ME.txt": "6d344b56867cf2e1f5a83e77cd781a718a296cb7d23aa416dd4a60fc0542f8cb",
+  "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
   "Testar com dados de exemplo (Windows).bat": "67abc12a330e4ca15788207f26f9763a946397cd268254e130b1f4520af3ef37",
   "Ver painel sem baixar (Mac).command": "ecc6412ea3d108ef2e6d03bd3489e4f0e9e458295260e66568e7f83144b346af",
   "Ver painel sem baixar (Windows).bat": "fbcbe48518fac089b6e1f9ed821394d9076f446f267ea9c1a03ebd151e28c20d",
-  "agendar.ps1": "81c2e1cc00c138aab03264a88adce0d3c7b53e1c660696a59cbe23fde6e2f080",
+  "agendar.ps1": "d21373a5cfbd94d6475eec9e50e739be17f8f3d2eeb4c23d14fb924873437f9c",
+  "alertas.py": "af1e1ea88f0d59ccaf6083a470ca84e92a05db7d91d528b71688ebbb7943fca3",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "191f276f75d8bf78e20511cae09738f03b4eb8ed74c1746de5d62d291745ee83",
-  "pizzaria.py": "30e160570370781ca173e1ddbcd80a4574bec633af72624a28ffbb02844a893f",
-  "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998"
+  "painel_modelo.html": "0355a6b545a7ae336af1d75b1834944256a21af75e6f9e9b5a84382a65c65089",
+  "pizzaria.py": "dd6964236f689de5ad76a5b4fd8a399bace25810d1303b531839b59b9f435362",
+  "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
+  "vigia.py": "c1c88f009d42e001dadc16cfef8bd1ab18feef94cf4c8dfd21a028a8ee27650f"
  }
 }

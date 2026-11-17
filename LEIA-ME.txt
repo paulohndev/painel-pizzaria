@@ -76,12 +76,19 @@ AJUSTES (arquivo config.ini)
              do WhatsApp.
 
 
-ATUALIZAÇÃO DIÁRIA AUTOMÁTICA
+VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
-Dê dois cliques UMA VEZ em "Ativar atualização diária às 6h (Windows).bat".
-Todo dia às 6h o painel atualiza sozinho, sem abrir janela. Se o computador
-estiver desligado nessa hora, atualiza assim que ligar. O registro fica em
-dados\execucao.log. Para parar: "Desativar atualização diária (Windows).bat".
+Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".
+A partir daí o vigia liga sozinho sempre que você entra no Windows, sem janela:
+  - a cada minuto busca os pedidos novos no Cardápio Web;
+  - uma vez por dia (depois das 6h) atualiza histórico, clientes e avaliações;
+  - quando encontra uma oportunidade urgente, mostra uma notificação no canto
+    da tela. Clicando nela, o painel abre direto naquele cliente.
+O painel ao vivo fica em http://127.0.0.1:8766 (atalho "Abrir painel").
+Ele só funciona neste computador; nada fica exposto na internet.
+Horário das notificações e liga/desliga: config.ini, seção [alertas].
+Registro do que o vigia faz: dados\vigia.log
+Para parar: "Desligar vigia (Windows).bat".
 
 
 VERSÕES NOVAS DO PROGRAMA
