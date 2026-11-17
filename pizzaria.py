@@ -454,7 +454,7 @@ def sincronizar_loja(api, db):
     def todas_paginas(caminho):
         pagina, itens = 1, []
         while True:
-            r = api.get(caminho, {"page": pagina, "per_page": 100})
+            r = api.get(caminho, {"page": pagina, "per_page": 50})
             if r is None:
                 return None
             if isinstance(r, list):

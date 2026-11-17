@@ -1,6 +1,6 @@
 {
- "versao": "1.6.3",
- "notas": "Respostas da IA com negrito e tópicos",
+ "versao": "1.6.4",
+ "notas": "Cupons da loja liberados para a IA",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -19,7 +19,7 @@
   "ia_painel.py": "1c33e391d6bf4282109a0927c19e16567aa408033c686ebb1a236bee25b14a53",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
   "painel_modelo.html": "57be1d91f72f58b9505974ca13b8c11591f0d41672be643b2cd0cfc9c133accb",
-  "pizzaria.py": "81244e55739015b08ad284858230b0b4ab0b61734880fde6cebcf37f058bcc1d",
+  "pizzaria.py": "b0468b6aed92e189983114d775935d8b95251ce4d7a06118b8aadd5a2886ff4a",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
   "vigia.py": "d18abb6e0e4d0db54813bdd5b902719824537792157a50769d148a7abc5dc964"
  }
