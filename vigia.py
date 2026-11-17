@@ -117,7 +117,7 @@ def notificar(titulo, texto, url):
 
 # ------------------------------------------------------------------ estado compartilhado com o servidor
 
-ESTADO = {"html": None, "versao": 0, "alertas": [], "gerado_em": "", "trava": threading.Lock()}
+ESTADO = {"html": None, "versao": 0, "alertas": [], "gerado_em": "", "D": None, "por_chave": {}, "trava": threading.Lock()}
 
 
 class Vigia:
@@ -261,6 +261,8 @@ class Vigia:
         html = P.html_painel(D)
         with ESTADO["trava"]:
             ESTADO["html"], ESTADO["alertas"], ESTADO["gerado_em"] = html, ativos, D["gerado_em"]
+            ESTADO["D"] = D
+            ESTADO["por_chave"] = {c.get("chave"): i for i, c in enumerate(D["clientes"])}
             ESTADO["versao"] += 1
         try:
             P.gerar_painel(D, os.path.join(PASTA, "painel.html"))  # a versão em arquivo também fica atual
@@ -421,6 +423,9 @@ class Painel(BaseHTTPRequestHandler):
         elif u.path == "/api/estado":
             with ESTADO["trava"]:
                 self._json({"versao": ESTADO["versao"], "alertas": ESTADO["alertas"], "gerado_em": ESTADO["gerado_em"]})
+        elif u.path == "/api/cliente":
+            chave = (urllib.parse.parse_qs(u.query).get("chave") or [""])[0]
+            return self._json(perfil_cliente(chave))
         elif u.path == "/api/contatos":
             db = conectar()
             try:
@@ -467,6 +472,62 @@ class Painel(BaseHTTPRequestHandler):
             return self._json({"erro": "não encontrado"}, 404)
         finally:
             db.close()
+
+
+STATUS_PT = {"closed": "Concluído", "canceled": "Cancelado", "confirmed": "Em preparo", "waiting_confirmation": "Aguardando",
+             "ready": "Pronto", "released": "Saiu p/ entrega", "delivered": "Entregue", "scheduled_confirmed": "Agendado",
+             "pending_payment": "Pagamento pendente", "pending_online_payment": "Pagamento pendente", "waiting_to_catch": "Aguardando retirada"}
+PAGTO_PT = {"money": "Dinheiro", "pix": "Pix", "credit_card": "Crédito", "debit_card": "Débito", "online_credit_card": "Crédito online",
+            "voucher": "Vale-refeição", "meal_voucher": "Vale-refeição", "online_pix": "Pix online"}
+
+
+def perfil_cliente(chave):
+    with ESTADO["trava"]:
+        D, idx = ESTADO["D"], ESTADO["por_chave"]
+    if D is None or chave not in idx:
+        return {"erro": "cliente não encontrado"}
+    cli = idx[chave]
+    c = D["clientes"][cli]
+    pids = [p[11] for p in D["pedidos"] if p[5] == cli and len(p) > 11]
+    db = conectar()
+    try:
+        cad = None
+        if c.get("id") is not None:
+            r = db.execute("SELECT nome, telefone, email, nascimento, cadastro, pontos, cashback FROM clientes WHERE id=?", (c["id"],)).fetchone()
+            if r:
+                cad = {"nome": r[0], "telefone": r[1], "email": r[2], "nascimento": r[3], "cadastro": (r[4] or "")[:10], "pontos": r[5], "cashback": r[6]}
+        pedidos, enderecos = [], {}
+        for i in range(0, len(pids), 400):
+            lote = pids[i:i + 400]
+            q = "SELECT id, status, sales_channel, order_type, created_at, detalhe_json FROM pedidos WHERE id IN (%s)" % ",".join("?" * len(lote))
+            for pid, st, canal, tipo, criado, det in db.execute(q, lote):
+                d = json.loads(det) if det else {}
+                itens = []
+                for it in d.get("items") or []:
+                    ops = [o.get("name") for o in (it.get("options") or []) if o.get("name")]
+                    itens.append({"n": (it.get("name") or "").strip(), "q": it.get("quantity") or 1, "v": it.get("total_price"),
+                                  "o": ops[:8], "obs": it.get("observation")})
+                end = d.get("delivery_address") or {}
+                if end.get("street") or end.get("neighborhood"):
+                    k = "%s, %s · %s" % (end.get("street") or "", end.get("number") or "s/n", end.get("neighborhood") or "")
+                    e = enderecos.setdefault(k, {"texto": k, "complemento": end.get("complement") or "", "referencia": end.get("reference") or "",
+                                                 "cidade": end.get("city") or "", "vezes": 0, "ultimo": ""})
+                    e["vezes"] += 1
+                    e["ultimo"] = max(e["ultimo"], (criado or "")[:10])
+                pag = [PAGTO_PT.get(x.get("payment_method"), x.get("payment_method") or "") for x in (d.get("payments") or [])]
+                cup = next((x.get("coupon_code") or x.get("coupon_name") for x in (d.get("discounts") or []) if x.get("coupon_code") or x.get("coupon_name")), None)
+                pedidos.append({"id": pid, "num": d.get("display_id"), "data": (criado or "")[:16].replace("T", " "),
+                                "status": STATUS_PT.get(st, st), "cancelado": st == "canceled", "canal": P.CANAIS.get(canal, canal),
+                                "tipo": P.TIPOS.get(tipo, tipo), "total": d.get("total"), "taxa": d.get("delivery_fee"),
+                                "desconto": sum((x.get("total") or 0) for x in (d.get("discounts") or [])), "cupom": cup,
+                                "pagamento": ", ".join(x for x in pag if x), "obs": d.get("observation"), "itens": itens})
+        pedidos.sort(key=lambda x: x["data"], reverse=True)
+        av = [{"data": a[0], "nota": a[2], "comentario": a[3], "baixas": a[4]} for a in D.get("avaliacoes") or [] if a[1] == cli]
+        cont = db.execute("SELECT data, campanha FROM contatos WHERE cliente_id=?", (str(c.get("id")),)).fetchone()
+    finally:
+        db.close()
+    return {"cliente": c, "cadastro": cad, "pedidos": pedidos, "enderecos": sorted(enderecos.values(), key=lambda e: -e["vezes"]),
+            "avaliacoes": av, "contato": {"data": cont[0], "campanha": cont[1]} if cont else None}
 
 
 def porta_em_uso():

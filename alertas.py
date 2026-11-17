@@ -69,7 +69,7 @@ def gerar(D, contatos=None, agora=None, limites=None):
     def add(tipo, prio, cli, chave_evento, titulo, texto, **extra):
         c = clientes[cli] if cli is not None and cli >= 0 else {}
         a = {"id": "%s:%s" % (tipo, chave_evento), "tipo": tipo, "prio": prio, "cli": cli,
-             "cliente": {k: c.get(k) for k in ("id", "nome", "tel", "ddi", "pontos", "app")} if c else None,
+             "cliente": {k: c.get(k) for k in ("id", "chave", "nome", "tel", "ddi", "pontos", "app")} if c else None,
              "nome": c.get("nome") or "", "primeiro": _primeiro_nome(c.get("nome")), "titulo": titulo, "texto": texto,
              "valor": 0, "criado": agora.strftime("%Y-%m-%d %H:%M")}
         a.update(extra)

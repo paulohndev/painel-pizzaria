@@ -236,6 +236,60 @@ a.wa:hover{background:#D3EBDD;transform:translateY(-1px)}
 .novo-dado{display:none;margin-left:10px;border:0;background:var(--peach);color:#6b3d00;font:inherit;font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;cursor:pointer}
 .hero .urgentes{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:var(--sun);color:var(--red3);border:0;font:inherit;font-weight:600;font-size:13.5px;padding:8px 16px;border-radius:999px;cursor:pointer;position:relative}
 .hero .urgentes:hover{transform:translateY(-1px)}
+
+/* ---------- perfil do cliente ---------- */
+a.cli{color:inherit;text-decoration:none;cursor:pointer;font-weight:500;border-bottom:1px dashed transparent;transition:border-color .2s,color .2s}
+a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
+#perfil{position:fixed;top:0;right:0;bottom:0;width:min(780px,100vw);background:var(--bg);z-index:55;box-shadow:-24px 0 60px rgba(42,27,23,.22);transform:translateX(105%);transition:transform .3s var(--ease);overflow-y:auto}
+#perfil.aberto{transform:none}
+.pf-topo{position:relative;overflow:hidden;background:linear-gradient(120deg,#2A1B17 0%,#4a0c06 55%,#6e0000 100%);color:#fff;padding:26px 30px 24px}
+.pf-topo i{position:absolute;border-radius:50%}
+.pf-topo .b1{width:160px;height:160px;background:var(--tomato);right:-40px;top:-70px;opacity:.9}
+.pf-topo .b2{width:54px;height:54px;background:var(--sun);right:110px;top:26px}
+.pf-fechar{position:absolute;top:16px;right:16px;z-index:2;border:0;background:rgba(255,255,255,.14);color:#fff;width:36px;height:36px;border-radius:12px;font-size:18px;cursor:pointer}
+.pf-id{position:relative;display:flex;gap:18px;align-items:center}
+.pf-av{width:64px;height:64px;border-radius:20px;background:linear-gradient(140deg,#ffc04d,#ff9100);color:var(--red3);font-family:var(--display);font-weight:700;font-size:26px;display:flex;align-items:center;justify-content:center;flex:none}
+.pf-id h2{font-family:var(--display);font-size:28px;margin:0;line-height:1.1}
+.pf-id .meta{color:#EBDCD2;font-size:13px;margin-top:4px}
+.pf-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pf-tags span{background:rgba(255,255,255,.14);color:#fff;font-size:11.5px;font-weight:500;padding:3px 10px;border-radius:999px}
+.pf-tags span.y{background:var(--sun);color:var(--red3);font-weight:600}
+.pf-acoes{position:relative;display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.pf-acoes a.wa{background:#E7F4EC}
+.pf-acoes button{border:0;background:rgba(255,255,255,.14);color:#fff;font:inherit;font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:999px;cursor:pointer}
+.pf-corpo{padding:22px 26px 50px;display:grid;gap:18px}
+.pf-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:700px){.pf-kpis{grid-template-columns:repeat(2,1fr)}}
+.pf-kpis .kpi{padding:14px 16px;border-radius:18px}
+.pf-kpis .kpi .val{font-size:22px}
+.pf-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.pf-2{grid-template-columns:1fr}}
+.pf-sec{background:#fff;border-radius:20px;box-shadow:var(--sh);padding:18px 20px}
+.pf-sec h3{font-family:var(--display);font-size:17px;margin:0 0 10px}
+.pf-sec .linha{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line2);font-size:13.5px}
+.pf-sec .linha:last-child{border-bottom:0}
+.pf-sec .linha span:last-child{color:var(--mut);text-align:right}
+.pf-barra{height:10px;border-radius:999px;background:var(--line2);overflow:hidden;display:flex;margin:6px 0 4px}
+.pf-barra b{display:block;height:100%}
+.pf-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut)}
+.pf-leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.pf-sug{border-left:4px solid var(--sun);padding:8px 12px;margin:6px 0;background:#FFF8EE;border-radius:0 12px 12px 0;font-size:13px}
+.pf-sug b{display:block;font-size:13.5px}
+.pf-ped{border-bottom:1px solid var(--line2);padding:10px 0}
+.pf-ped:last-child{border-bottom:0}
+.pf-ped .cab{display:flex;gap:10px;align-items:center;cursor:pointer;font-size:13.5px}
+.pf-ped .cab .v{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.pf-ped .cab .dt{color:var(--mut);min-width:118px;font-variant-numeric:tabular-nums}
+.pf-ped.cancel .cab{opacity:.5;text-decoration:line-through}
+.pf-ped .det{display:none;margin:8px 0 2px 128px;font-size:12.5px;color:var(--mut);line-height:1.55}
+.pf-ped.open .det{display:block}
+.pf-ped .det .it{color:var(--ink)}
+.pf-ped .seta{color:var(--soft);font-size:11px;transition:transform .2s}
+.pf-ped.open .seta{transform:rotate(90deg)}
+@media(max-width:700px){.pf-ped .det{margin-left:0}}
+.pf-sec .linha .sub{display:block;font-size:12px;color:var(--soft);margin-top:2px}
+.pf-aviso{font-size:12.5px;color:var(--mut);background:var(--peach);border-radius:12px;padding:8px 12px}
+.pf-carregando{color:var(--mut);font-size:13px;padding:10px 0}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -430,6 +484,7 @@ a.wa:hover{background:#D3EBDD;transform:translateY(-1px)}
   <div class="gv-lista" id="gvLista"></div>
 </aside>
 <div id="pings"></div>
+<aside id="perfil" aria-label="Perfil do cliente"></aside>
 
 <script>
 const D = /*__DADOS__*/null;
@@ -657,7 +712,7 @@ function renderClientes(){
   F2.slice(pag*PAG,(pag+1)*PAG).forEach(c=>{const w=waLink(c); const feito=!!contatos[c.id];
     const turnosTxt=c.tc.map((n,t)=>n?`${D.turnos[t].slice(0,1)}${n}`:null).filter(Boolean).join(' · ');
     const sub=[c.bairro, c.pontos?fmtN(c.pontos)+' pts':''].filter(Boolean).join(' · ');
-    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome)}<span class="sub">${esc(sub)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
+    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${c.i}">${esc(c.nome)}</a><span class="sub">${esc(sub)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?'<span class="sub">ativo em outro turno</span>':''}</td>
@@ -775,7 +830,7 @@ function renderPromocoes(){
   let h='<tr><th>Cliente</th><th></th><th>Feito</th><th>Por que este cliente</th><th>Sugestão</th><th class="num">Total gasto</th></tr>';
   G.slice(pPag*PAG,(pPag+1)*PAG).forEach(r=>{ const c=D.clientes[r.cli]; const rec=r.recs[0]; const m=msgPromo(r,rec); const w=waLink(c,m); const feito=!!contatos[c.id];
     const outras=r.recs.slice(1).map(x=>`<span class="tag" title="${esc(x.motivo)}">${esc(CAMP[x.tipo]?CAMP[x.tipo].nome:x.titulo)}${x.sugestao?': '+esc(x.sugestao):''}</span>`).join(' ');
-    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}<span class="sub">mandar ${esc(r.quando)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
+    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${r.cli}">${esc(c.nome||'(sem nome)')}</a><span class="sub">mandar ${esc(r.quando)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(m)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td class="why">${esc(rec.motivo)}${outras?`<div class="tags">${outras}</div>`:''}</td>
@@ -871,7 +926,7 @@ function renderHoje(){
       const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
       const msg=b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da pizzaria. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
       const w=waLink(c,msg); const feito=!!cInfo(c.id);
-      h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}${c.app?`<span class="sub"><span class="tag">${esc(c.app)}</span></span>`:''}</td>
+      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${c.app?`<span class="sub"><span class="tag">${esc(c.app)}</span></span>`:''}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:'<span class="muted">sem telefone</span>'}</td>
         <td class="ck"><input type="checkbox" data-id="${c.id}" data-camp="${b.camp||'avaliacao'}" ${feito?'checked':''}></td>
         <td class="why">${esc(it.motivo)}</td>
@@ -948,8 +1003,9 @@ function renderAlertas(focoId){
       <div class="cab">${ICONE[a.tipo]||'•'} ${esc(ROTULO[a.tipo]||a.tipo)} ${a.prio===1?'<span class="urg">· urgente</span>':''}<span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500">${esc(quandoTxt(a.criado))}</span></div>
       <h4>${esc(a.titulo)}</h4><p>${esc(a.texto)}</p>
       <div class="acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}" data-wa="${esc(a.id)}">WhatsApp</a>`:''}
-        <button class="ok" data-ac="feito" data-id="${esc(a.id)}">✓ Feito</button><button data-ac="ignorar" data-id="${esc(a.id)}">Dispensar</button></div></div>`; }).join('');
+        ${c.chave?`<button data-perfil="${esc(c.chave)}">Perfil</button>`:''}<button class="ok" data-ac="feito" data-id="${esc(a.id)}">✓ Feito</button><button data-ac="ignorar" data-id="${esc(a.id)}">Dispensar</button></div></div>`; }).join('');
   $('#gvLista').querySelectorAll('button[data-ac]').forEach(b=>b.onclick=()=>resolverAlerta(b.dataset.id,b.dataset.ac));
+  $('#gvLista').querySelectorAll('button[data-perfil]').forEach(b=>b.onclick=()=>abrirPerfil({chave:b.dataset.perfil}));
   if(focoId){ const el=$('#gvLista').querySelector(`[data-id="${CSS.escape(focoId)}"]`); if(el) el.scrollIntoView({block:'center'}); }
 }
 function resolverAlerta(id, acao){
@@ -960,8 +1016,9 @@ function resolverAlerta(id, acao){
 }
 function abrirGaveta(focoId){ renderAlertas(focoId); $('#gaveta').classList.add('aberta'); $('#veu').classList.add('on'); }
 function fecharGaveta(){ $('#gaveta').classList.remove('aberta'); $('#veu').classList.remove('on'); if(location.hash) history.replaceState(null,'',location.pathname); }
-$('#sino').onclick=()=>abrirGaveta(); $('#gvFechar').onclick=fecharGaveta; $('#veu').onclick=fecharGaveta;
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') fecharGaveta(); });
+$('#sino').onclick=()=>abrirGaveta(); $('#gvFechar').onclick=fecharGaveta;
+$('#veu').onclick=()=>{ if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); } });
 function ping(a){
   const el=document.createElement('div'); el.className='ping';
   el.innerHTML=`<small>${ICONE[a.tipo]||''} ${esc(ROTULO[a.tipo]||'')}${a.prio===1?' · urgente':''}</small><b>${esc(a.titulo)}</b><span>${esc(a.texto.slice(0,110))}${a.texto.length>110?'…':''}</span><i>✕</i>`;
@@ -982,6 +1039,102 @@ function acompanhar(){
   }).catch(()=>{});
 }
 $('#novoDado').onclick=()=>location.reload();
+
+
+// ------------------------------------------------------------ PERFIL DO CLIENTE
+const IDX_CHAVE={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.chave) IDX_CHAVE[c.chave]=i; });
+function fmtTel(t){ t=(t||'').replace(/\D/g,''); if(t.length===11) return `(${t.slice(0,2)}) ${t.slice(2,7)}-${t.slice(7)}`; if(t.length===10) return `(${t.slice(0,2)}) ${t.slice(2,6)}-${t.slice(6)}`; return t; }
+function iniciais(n){ const p=(n||'?').trim().split(/\s+/); return ((p[0]||'?')[0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase(); }
+function abrirPerfil(ref){
+  let cli = ref.i!=null ? +ref.i : IDX_CHAVE[ref.chave];
+  const c = cli!=null ? D.clientes[cli] : null;
+  if(!c){ if(ref.chave && AO_VIVO) return carregarPerfil(ref.chave, null, null); return; }
+  const chave=c.chave;
+  const ps=P.filter(p=>p.cli===cli).sort((a,b)=>b.d-a.d);
+  renderPerfil(c, cli, ps, null);
+  $('#perfil').classList.add('aberto'); $('#veu').classList.add('on'); $('#perfil').scrollTop=0;
+  if(AO_VIVO && chave) carregarPerfil(chave, c, cli);
+}
+function fecharPerfil(){ $('#perfil').classList.remove('aberto'); if(!$('#gaveta').classList.contains('aberta')) $('#veu').classList.remove('on'); }
+function carregarPerfil(chave, c, cli){
+  api('/api/cliente?chave='+encodeURIComponent(chave)).then(r=>{
+    if(r.erro){ const el=$('#pfPedidos'); if(el) el.innerHTML='<div class="pf-aviso">Ainda não tenho os detalhes deste cliente. Eles aparecem quando o vigia terminar de baixar os pedidos.</div>'; return; }
+    if(!c){ c=r.cliente; cli=-1; $('#perfil').classList.add('aberto'); $('#veu').classList.add('on'); }
+    const ps=cli>=0?P.filter(p=>p.cli===cli).sort((a,b)=>b.d-a.d):r.pedidos.map(x=>({d:parseD(x.data),v:x.total,cancel:x.cancelado,t:0,c:0}));
+    renderPerfil(c, cli, ps, r);
+  }).catch(()=>{});
+}
+function renderPerfil(c, cli, ps, R){
+  const ok=ps.filter(p=>!p.cancel); const n=ok.length; const gasto=ok.reduce((s,p)=>s+(p.v||0),0);
+  const ult=ok[0]?ok[0].d:null, pri=ok.length?ok[ok.length-1].d:null; const dias=ult?Math.floor((new Date()-ult)/864e5):null;
+  const pf=PERF[cli]||[]; const rec=REC_DE[cli];
+  const seg=dias!=null?SEGS.find(s=>s.f(n,dias)):null;
+  const ci=cInfo(c.id);
+  const msg=($('#msg').value||CFG.mensagem||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{pontos\}/g,c.pontos||0);
+  const w=waLink(c,msg);
+  const cad=R&&R.cadastro||{};
+  const bairro=(()=>{ const m={}; ps.forEach(p=>{ if(p.b>=0) m[p.b]=(m[p.b]||0)+1; }); const k=Object.keys(m).sort((a,b)=>m[b]-m[a])[0]; return k!=null?D.bairros[k]:''; })();
+  // turnos e canais
+  const tc={}, cc={}; ok.forEach(p=>{ tc[p.t]=(tc[p.t]||0)+1; const nm=(D.canais[p.c]||{}).nome||'?'; cc[nm]=(cc[nm]||0)+1; });
+  const barra=(obj,cores)=>{ const tot=Object.values(obj).reduce((a,b)=>a+b,0)||1; const ks=Object.keys(obj).sort((a,b)=>obj[b]-obj[a]);
+    return `<div class="pf-barra">${ks.map((k,i)=>`<b style="width:${obj[k]/tot*100}%;background:${cores(k,i)}"></b>`).join('')}</div><div class="pf-leg">${ks.map((k,i)=>`<span><i style="background:${cores(k,i)}"></i>${esc(k)} ${fmtN(obj[k])}</span>`).join('')}</div>`; };
+  const tcNome={}; Object.keys(tc).forEach(t=>tcNome[D.turnos[t]]=tc[t]);
+  const corT=k=>corTurno(D.turnos.indexOf(k)); const PAL=['#6e0000','#eda100','#3D5A80','#2E7D52','#a9a39b','#C2412D'];
+  // favoritos (com itens do servidor quando ao vivo)
+  let favs='';
+  if(R&&R.pedidos){ const m={}; R.pedidos.filter(x=>!x.cancelado).forEach(x=>x.itens.forEach(it=>{ const k=it.n; m[k]=(m[k]||0)+(it.q||1); (it.o||[]).forEach(o=>{ if(!/borda|refri|coca|adicional/i.test(o)) m['   '+o]=(m['   '+o]||0)+1; }); }));
+    const top=Object.entries(m).filter(([k])=>!k.startsWith('   ')).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const sab=Object.entries(m).filter(([k])=>k.startsWith('   ')).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    favs=top.map(([k,v])=>`<div class="linha"><span>${esc(k)}</span><span>${fmtN(v)}×</span></div>`).join('')+(sab.length?`<div style="font-size:11.5px;color:var(--soft);margin:10px 0 2px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Sabores e opções</div>`+sab.map(([k,v])=>`<div class="linha"><span>${esc(k.trim())}</span><span>${fmtN(v)}×</span></div>`).join(''):'');
+  } else if(pf[0]) favs=`<div class="linha"><span>${esc(pf[0])}</span><span>favorito</span></div>`;
+  const sugs=[].concat(alertasAtivos().filter(a=>a.cliente&&a.cliente.chave===c.chave).map(a=>({t:(ICONE[a.tipo]||'')+' '+a.titulo,m:a.texto})))
+    .concat(rec?rec.recs.map(x=>({t:(CAMP[x.tipo]?CAMP[x.tipo].nome:x.titulo)+(x.sugestao?': '+x.sugestao:''),m:x.motivo})):[]);
+  const DIAS_N=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  let h=`<div class="pf-topo"><i class="b1"></i><i class="b2"></i><button class="pf-fechar" id="pfFechar" title="Fechar">✕</button>
+    <div class="pf-id"><div class="pf-av">${esc(iniciais(c.nome))}</div><div><h2>${esc(c.nome||'(sem nome)')}</h2>
+      <div class="meta">${[c.tel?fmtTel(c.tel):'sem telefone', bairro, (cad.cadastro||c.cad)?'cliente desde '+new Date((cad.cadastro||c.cad)+'T12:00').toLocaleDateString('pt-BR'):(pri?'1º pedido em '+pri.toLocaleDateString('pt-BR'):'')].filter(Boolean).map(esc).join(' · ')}</div>
+      <div class="pf-tags">${seg?`<span class="y">${esc(seg.nome)}</span>`:''}${c.app?`<span>só ${esc(c.app)}</span>`:''}${(cad.pontos||c.pontos)?`<span>${fmtN(cad.pontos||c.pontos)} pontos</span>`:''}${(cad.nascimento||c.nasc)?`<span>🎂 ${new Date((cad.nascimento||c.nasc).slice(0,10)+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>`:''}${ci?`<span>contatado em ${esc(ci.txt)}</span>`:''}</div></div></div>
+    <div class="pf-acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:''}${c.tel?`<button id="pfCopiar">Copiar telefone</button>`:''}${cad.email?`<button disabled style="cursor:default">${esc(cad.email)}</button>`:''}</div></div>
+  <div class="pf-corpo">
+    <div class="pf-kpis kpis">
+      <div class="kpi"><div class="lbl">Pedidos</div><div class="val">${fmtN(n)}</div><div class="cmp">${ps.length-n?fmtN(ps.length-n)+' cancelado(s)':'nenhum cancelado'}</div></div>
+      <div class="kpi"><div class="lbl">Total gasto</div><div class="val">${fmtR0(gasto)}</div><div class="cmp">em toda a história</div></div>
+      <div class="kpi"><div class="lbl">Ticket médio</div><div class="val">${fmtR(n?gasto/n:0)}</div><div class="cmp">por pedido</div></div>
+      <div class="kpi"><div class="lbl">Último pedido</div><div class="val">${dias==null?'—':dias===0?'hoje':dias+' d'}</div><div class="cmp">${ult?ult.toLocaleDateString('pt-BR'):''}</div></div>
+    </div>
+    <div class="pf-2">
+      <div class="pf-sec"><h3>Rotina</h3>
+        ${pf[1]!=null&&pf[3]>=0.25?`<div class="linha"><span>Dia preferido</span><span>${DIAS_N[pf[1]]} (${Math.round(pf[3]*100)}% dos pedidos)</span></div><div class="linha"><span>Horário</span><span>por volta das ${pf[2]+1}h</span></div>`:''}
+        ${pf[4]?`<div class="linha"><span>Ritmo</span><span>pede a cada ${pf[4]} dia${pf[4]===1?'':'s'}</span></div>`:''}
+        <div style="margin-top:10px;font-size:12px;color:var(--soft);font-weight:600;letter-spacing:.06em;text-transform:uppercase">Turnos</div>${barra(tcNome,corT)}
+        <div style="margin-top:10px;font-size:12px;color:var(--soft);font-weight:600;letter-spacing:.06em;text-transform:uppercase">Canais</div>${barra(cc,(k,i)=>PAL[i%PAL.length])}
+      </div>
+      <div class="pf-sec"><h3>O que mais pede</h3>${favs||'<div class="pf-carregando">Sem itens registrados ainda.</div>'}</div>
+    </div>
+    ${sugs.length?`<div class="pf-sec"><h3>Sugestões para este cliente</h3>${sugs.map(x=>`<div class="pf-sug"><b>${esc(x.t)}</b>${esc(x.m)}</div>`).join('')}</div>`:''}
+    ${R&&R.enderecos&&R.enderecos.length?`<div class="pf-sec"><h3>Endereços</h3>${R.enderecos.map(e=>`<div class="linha"><span>${esc(e.texto)}${e.complemento?`<span class="sub">${esc(e.complemento)}${e.referencia?' · '+esc(e.referencia):''}</span>`:''}</span><span>${fmtN(e.vezes)} pedido${e.vezes>1?'s':''}<span class="sub">último ${new Date(e.ultimo+'T12:00').toLocaleDateString('pt-BR')}</span></span></div>`).join('')}</div>`:''}
+    <div class="pf-sec"><h3>Pedidos</h3><div id="pfPedidos">${pedidosPerfil(ps,R)}</div></div>
+    ${(R&&R.avaliacoes&&R.avaliacoes.length)?`<div class="pf-sec"><h3>Avaliações</h3>${R.avaliacoes.map(a=>`<div class="linha"><span>${'★'.repeat(Math.round(a.nota||0))}${'☆'.repeat(5-Math.round(a.nota||0))} ${a.comentario?'"'+esc(a.comentario)+'"':''}${a.baixas?`<span class="sub">notas baixas: ${esc(a.baixas)}</span>`:''}</span><span>${parseD(a.data).toLocaleDateString('pt-BR')}</span></div>`).join('')}</div>`:''}
+  </div>`;
+  $('#perfil').innerHTML=h;
+  $('#pfFechar').onclick=fecharPerfil;
+  const cp=$('#pfCopiar'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(c.tel); cp.textContent='Copiado ✓'; }catch(e){} };
+  $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open'));
+  const mais=$('#pfMais'); if(mais) mais.onclick=()=>{ $('#pfPedidos').innerHTML=pedidosPerfil(ps,R,true); $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open')); };
+}
+function pedidosPerfil(ps,R,todos){
+  if(R&&R.pedidos){ const L=todos?R.pedidos:R.pedidos.slice(0,15);
+    return L.map(x=>`<div class="pf-ped ${x.cancelado?'cancel':''}"><div class="cab"><span class="seta">▶</span><span class="dt">${parseD(x.data).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</span><span>${esc(x.canal)} · ${esc(x.tipo)}${x.status!=='Concluído'?` · <b>${esc(x.status)}</b>`:''}</span><span class="v">${x.total!=null?fmtR(x.total):'—'}</span></div>
+      <div class="det">${x.itens.map(it=>`<div class="it">${it.q>1?fmtN(it.q)+'× ':''}${esc(it.n)}${it.v!=null?` <span class="muted">${fmtR(it.v)}</span>`:''}${it.o&&it.o.length?`<div class="muted" style="margin-left:12px">${it.o.map(esc).join(', ')}</div>`:''}${it.obs?`<div style="margin-left:12px">📝 ${esc(it.obs)}</div>`:''}</div>`).join('')}
+        <div style="margin-top:6px">${[x.pagamento&&'Pagamento: '+x.pagamento, x.taxa?'Entrega '+fmtR(x.taxa):'', x.cupom&&'Cupom '+x.cupom, x.desconto?'Desconto '+fmtR(x.desconto):'', x.num&&'Nº '+x.num].filter(Boolean).map(esc).join(' · ')}</div>${x.obs?`<div>📝 ${esc(x.obs)}</div>`:''}</div></div>`).join('')
+      +(!todos&&R.pedidos.length>15?`<button class="btn" id="pfMais" style="margin-top:10px">Ver todos os ${fmtN(R.pedidos.length)} pedidos</button>`:'');
+  }
+  const L=todos?ps:ps.slice(0,15);
+  return (AO_VIVO?'<div class="pf-carregando">Carregando itens e endereços…</div>':'<div class="pf-aviso" style="margin-bottom:8px">Para ver itens, endereços e pagamentos, abra o painel pelo atalho <b>Painel Mariá</b>.</div>')+
+    L.map(p=>`<div class="pf-ped ${p.cancel?'cancel':''}"><div class="cab"><span class="dt">${p.d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</span><span>${esc((D.canais[p.c]||{}).nome||'')} · ${esc(D.turnos[p.t]||'')}</span><span class="v">${p.v!=null?fmtR(p.v):'—'}</span></div></div>`).join('')
+    +(!todos&&ps.length>15?`<button class="btn" id="pfMais" style="margin-top:10px">Ver todos os ${fmtN(ps.length)} pedidos</button>`:'');
+}
+document.addEventListener('click',e=>{ const a=e.target.closest('a.cli'); if(a){ e.preventDefault(); abrirPerfil({i:a.dataset.i}); } });
 
 // ------------------------------------------------------------ início
 function render(){
