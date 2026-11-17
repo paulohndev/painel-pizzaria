@@ -129,11 +129,12 @@ class Vigia:
         self.ia = IA(cfg)
         ESTADO["ia"] = self.ia
         self.api = P.API(base, chave)
+        ESTADO["api_ia"] = P.API(base, chave)
         self.db = conectar()
         self.nome_loja = P.meta_get(self.db, "nome_loja") or ""
         self.mudou = True
         self.prox = {"polling": 0, "recalculo": 0, "avaliacoes": time.time() + 120, "backlog": time.time() + 30,
-                     "diario": time.time() + 60, "versao": time.time() + 3600}
+                     "diario": time.time() + 60, "versao": time.time() + 3600, "loja": time.time() + 90}
         self.ultimo_toast = 0
         self.toasts_prio2_hoje = (datetime.now().date(), 0)
 
@@ -229,6 +230,14 @@ class Vigia:
         self.com_trava(rodar)
         P.meta_set(self.db, "diario_em", hoje)
         self.mudou = True
+
+    def loja(self):
+        """Cadastro da loja, formas de pagamento, cupons e cardápio (1x por dia)."""
+        em = P.meta_get(self.db, "loja_em") or ""
+        if em[:10] == datetime.now().strftime("%Y-%m-%d") or self.trava_alheia():
+            return
+        P.sincronizar_loja(self.api, self.db)
+        log("dados da loja, cupons e cardápio atualizados")
 
     def avaliacoes(self):
         antes = self.db.execute("SELECT COUNT(*) FROM avaliacoes").fetchone()[0]
@@ -354,6 +363,9 @@ class Vigia:
                 if agora >= self.prox["avaliacoes"]:
                     self.prox["avaliacoes"] = agora + 15 * 60
                     self.avaliacoes()
+                if agora >= self.prox["loja"]:
+                    self.prox["loja"] = agora + 3 * 3600
+                    self.loja()
                 if agora >= self.prox["diario"]:
                     self.prox["diario"] = agora + 15 * 60
                     self.diario()
@@ -573,10 +585,11 @@ def ia_post(caminho, dado):
             try:
                 with ESTADO["trava"]:
                     versao = ESTADO["gerado_em"]
-                ia_painel.montar_analise(db, D, versao)
+                liberar = str((ESTADO["vigia"].cfg.get("ia") or {}).get("dados_pessoais", "")).strip().lower() in ("sim", "s", "yes", "1")
+                ia_painel.montar_analise(db, D, versao, liberar)
             finally:
                 db.close()
-            r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [])
+            r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [], api=ESTADO.get("api_ia"), liberar=liberar)
             log("IA: pergunta respondida (%d consulta(s))" % r["consultas"])
             return r, 200
         return {"erro": "não encontrado"}, 404

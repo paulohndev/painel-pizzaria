@@ -123,6 +123,9 @@ chave =
 ; Opcional: troque o modelo (deixe vazio para o padrão).
 modelo =
 modelo_forte =
+; A IA vê nomes, pedidos, bairros e ruas. Telefone, e-mail, número da casa e
+; complemento só vão para a IA se você trocar para "sim".
+dados_pessoais = nao
 
 [atualizacao]
 ; O programa se atualiza sozinho a partir deste repositório do GitHub.
@@ -154,7 +157,7 @@ def carregar_config():
         "dias_ativo": cp.getint("clientes", "dias_ativo", fallback=45),
         "pedidos_fiel": cp.getint("clientes", "pedidos_fiel", fallback=4),
         "mensagem": cp.get("clientes", "mensagem", fallback="").strip().replace("Aqui é da pizzaria. ", ""),
-        "ia": {k: cp.get("ia", k, fallback="").strip() for k in ("provedor", "chave", "modelo", "modelo_forte")},
+        "ia": {k: cp.get("ia", k, fallback="").strip() for k in ("provedor", "chave", "modelo", "modelo_forte", "dados_pessoais")},
     }
 
 
@@ -444,6 +447,35 @@ def sincronizar_clientes(api, db):
             break
         pagina += 1
     log("     OK: %d clientes." % total)
+
+
+def sincronizar_loja(api, db):
+    """Dados cadastrais da loja: informações, formas de pagamento, cupons e cardápio (quando a chave permite)."""
+    def todas_paginas(caminho):
+        pagina, itens = 1, []
+        while True:
+            r = api.get(caminho, {"page": pagina, "per_page": 100})
+            if r is None:
+                return None
+            if isinstance(r, list):
+                return r
+            lst = next((v for v in r.values() if isinstance(v, list)), [])
+            itens.extend(lst)
+            tp = (r.get("pagination") or {}).get("total_pages") or 1
+            if pagina >= tp or not lst:
+                return itens
+            pagina += 1
+    for chave, caminho, pag in (("loja_json", "/merchant", False), ("pagamentos_json", "/merchant/payment_methods", False),
+                                ("cupons_json", "/merchant/coupons", True), ("catalogo_json", "/catalog", False)):
+        try:
+            r = todas_paginas(caminho) if pag else api.get(caminho)
+            if r is not None:
+                meta_set(db, chave, json.dumps(r, ensure_ascii=False))
+                db.commit()
+        except ErroAPI as e:
+            log("     (%s não disponível com esta chave: %s)" % (caminho, str(e)[:120]))
+    meta_set(db, "loja_em", datetime.now().strftime("%Y-%m-%d %H:%M"))
+    db.commit()
 
 
 # ---------------------------------------------------------------- dados do painel

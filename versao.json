@@ -1,6 +1,6 @@
 {
- "versao": "1.6.0",
- "notas": "IA: mensagens personalizadas, respostas a avaliações, resumo do dia e Pergunte ao painel (ChatGPT ou Claude)",
+ "versao": "1.6.1",
+ "notas": "IA com acesso a todos os dados da API: pagamentos, descontos, entregas, cancelamentos, cardápio, cupons, loja e consulta ao vivo",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -16,11 +16,11 @@
   "alertas.py": "c947a0718d60486735bf8cba32f33383f2b3fe6aab2b24b2bfad941c848e6c02",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "ia.py": "c709e6016afe714cece74952d541614b241565408eb8e823c047ced2d3822d37",
-  "ia_painel.py": "49a0a977c497de21a7f8aad7bcd28e57356d2bd9f5c18761bfb91e40f29e2734",
+  "ia_painel.py": "1c33e391d6bf4282109a0927c19e16567aa408033c686ebb1a236bee25b14a53",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
   "painel_modelo.html": "45f22e148891359bc67e533777efe08ddc20f063e0305a3805cf0f48d30a3b81",
-  "pizzaria.py": "1ba6dc06dbdf340ef09563e108d5a774059d7fc0c1f9f66616e807ae788357be",
+  "pizzaria.py": "81244e55739015b08ad284858230b0b4ab0b61734880fde6cebcf37f058bcc1d",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "347ef12f88981afd903c891f74b043d4ed2dc534ca347913d47f999f93ee42dc"
+  "vigia.py": "d9a0d758eee1d7e08166f3a932e4c4fe6f4251787185e693d11983ce730885da"
  }
 }
