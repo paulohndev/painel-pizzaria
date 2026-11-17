@@ -314,6 +314,44 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .pc-dias button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:12.5px;cursor:pointer}
 .pc-dias button.on{background:var(--sun);border-color:var(--sun);font-weight:600}
 @media(max-width:700px){.pc-form{grid-template-columns:1fr}}
+/* ---------- IA ---------- */
+#perguntar{border:0;background:linear-gradient(135deg,#4a0c06,#6e0000);color:#fff;height:42px;padding:0 16px;border-radius:14px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 8px 20px -10px rgba(110,0,0,.7)}
+#perguntar:hover{transform:translateY(-1px)}
+.ia-modal{position:fixed;inset:0;z-index:70;background:rgba(42,27,23,.35);display:flex;align-items:center;justify-content:center;padding:16px}
+.ia-modal.hidden{display:none}
+.ia-box{background:var(--bg);border-radius:24px;width:min(560px,100%);max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(42,27,23,.35);padding:22px 24px;animation:pop .3s var(--ease) both}
+.ia-cab{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ia-cab h3{font-family:var(--display);font-size:20px;margin:0;flex:1}
+.ia-cab button{border:0;background:#fff;width:34px;height:34px;border-radius:11px;cursor:pointer;font-size:16px;color:var(--mut);box-shadow:0 0 0 1px var(--line)}
+.ia-status{font-size:13px;color:var(--mut);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.ia-status.erro{color:var(--tomato)}
+.ia-box textarea{width:100%;min-height:120px;font:inherit;font-size:14.5px;line-height:1.5;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;resize:vertical}
+.ia-box label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:14px 0 6px}
+.ia-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.ia-acoes .btn{font-weight:600}
+.ia-acoes .principal{background:#25D366;color:#fff;border:0}
+.gira{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--red2);animation:gira .8s linear infinite;display:inline-block}
+@keyframes gira{to{transform:rotate(360deg)}}
+.ia-resumo{margin-top:16px;background:#fff;border-radius:22px;box-shadow:var(--sh);padding:18px 22px;position:relative}
+.ia-resumo h3{font-family:var(--display);font-size:17px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.ia-resumo h3 small{font-family:var(--body,inherit);font-size:12px;color:var(--soft);font-weight:500;margin-left:auto}
+.ia-resumo .tx{font-size:14px;line-height:1.6;white-space:pre-line}
+.ia-resumo button{border:0;background:var(--line2);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer;color:var(--mut)}
+#chat{position:fixed;top:0;right:0;bottom:0;width:min(520px,96vw);background:var(--bg);z-index:56;box-shadow:-20px 0 50px rgba(42,27,23,.18);transform:translateX(105%);transition:transform .28s var(--ease);display:flex;flex-direction:column}
+#chat.aberta{transform:none}
+.ch-lista{flex:1;overflow-y:auto;padding:6px 20px 16px;display:flex;flex-direction:column;gap:10px}
+.ch-msg{max-width:88%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.55;white-space:pre-line;animation:pop .25s var(--ease) both}
+.ch-msg.eu{align-self:flex-end;background:var(--red2,#6e0000);color:#fff;border-bottom-right-radius:6px}
+.ch-msg.ia{align-self:flex-start;background:#fff;box-shadow:var(--sh);border-bottom-left-radius:6px}
+.ch-msg.ia .meta{display:block;font-size:11px;color:var(--soft);margin-top:6px}
+.ch-msg.erro{background:#FDECEA;color:var(--tomato)}
+.ch-sug{display:flex;flex-wrap:wrap;gap:6px;padding:0 20px 10px}
+.ch-sug button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer;text-align:left}
+.ch-sug button:hover{border-color:var(--sun)}
+.ch-entrada{display:flex;gap:8px;padding:12px 16px 18px;border-top:1px solid var(--line2)}
+.ch-entrada textarea{flex:1;min-height:44px;max-height:140px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;resize:none;background:#fff}
+.ch-entrada button{border:0;background:var(--sun);border-radius:14px;padding:0 16px;font:inherit;font-weight:700;cursor:pointer}
+.ch-vazio{color:var(--mut);font-size:13.5px;line-height:1.6;padding:6px 2px}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -349,6 +387,7 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
     <div class="filters">
       <span class="flabel">Turno</span><div class="seg" id="fTurno"></div>
       <span class="flabel">Canal</span><div class="seg" id="fCanal"></div>
+      <button id="perguntar" title="Pergunte qualquer coisa sobre suas vendas" class="hidden">✨ Perguntar</button>
       <button id="sino" title="Alertas"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="n" id="sinoN"></span></button>
     </div>
   </div>
@@ -361,7 +400,8 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
     <div class="hero"><i class="b1"></i><i class="b2"></i><i class="b3"></i>
       <div class="tx"><small id="hojeData"></small><h2 id="hojeTitulo">Lista do dia</h2><p id="hojeDesc"></p><button class="urgentes hidden" id="hojeUrg"></button></div>
     </div>
-    <div class="kpis" id="hojeResumo"></div>
+    <div class="ia-resumo hidden" id="iaResumo"><h3>✨ Resumo do dia <small id="iaResumoEm"></small> <button id="iaResumoNovo" title="Gerar de novo">↻ Atualizar</button></h3><div class="tx" id="iaResumoTx"></div></div>
+    <div class="kpis" id="hojeResumo" style="margin-top:16px"></div>
     <div class="toolbar" id="hojeFiltros">
       <input type="search" id="hBusca" placeholder="Buscar nome, bairro ou motivo" style="min-width:230px">
       <select id="hMotivo"></select>
@@ -533,6 +573,19 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 </aside>
 <div id="pings"></div>
 <aside id="perfil" aria-label="Perfil do cliente"></aside>
+<div class="ia-modal hidden" id="iaModal"><div class="ia-box">
+  <div class="ia-cab"><h3 id="iaTitulo">Mensagem</h3><button id="iaFechar" title="Fechar">✕</button></div>
+  <div class="ia-status" id="iaStatus"></div>
+  <textarea id="iaTxt"></textarea>
+  <div id="iaPub" class="hidden"><label>Resposta pública para a avaliação (copie e cole no Cardápio Web / iFood)</label><textarea id="iaPubTxt" style="min-height:90px"></textarea></div>
+  <div class="ia-acoes"><button class="btn principal" id="iaEnviar">Abrir no WhatsApp</button><button class="btn" id="iaOutra">✨ Escrever outra</button><button class="btn" id="iaPadrao">Usar a mensagem padrão</button><button class="btn hidden" id="iaCopiarPub">Copiar resposta pública</button></div>
+</div></div>
+<aside id="chat" aria-label="Pergunte ao painel">
+  <div class="gv-topo"><h3>✨ Pergunte ao painel</h3><button id="chFechar" title="Fechar">✕</button></div>
+  <div class="ch-lista" id="chLista"></div>
+  <div class="ch-sug" id="chSug"></div>
+  <div class="ch-entrada"><textarea id="chTxt" placeholder="Ex.: quanto vendi de calabresa no iFood em outubro?"></textarea><button id="chEnviar">Enviar</button></div>
+</aside>
 
 <script>
 const D = /*__DADOS__*/null;
@@ -1263,8 +1316,8 @@ function resolverAlerta(id, acao){
 function abrirGaveta(focoId){ renderAlertas(focoId); $('#gaveta').classList.add('aberta'); $('#veu').classList.add('on'); }
 function fecharGaveta(){ $('#gaveta').classList.remove('aberta'); $('#veu').classList.remove('on'); if(location.hash) history.replaceState(null,'',location.pathname); }
 $('#sino').onclick=()=>abrirGaveta(); $('#gvFechar').onclick=fecharGaveta;
-$('#veu').onclick=()=>{ if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); };
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); } });
+$('#veu').onclick=()=>{ if($('#chat').classList.contains('aberta')) fecharChat(); else if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(!$('#iaModal').classList.contains('hidden')) iaFechar(); else if($('#chat').classList.contains('aberta')) fecharChat(); else if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); } });
 function ping(a){
   const el=document.createElement('div'); el.className='ping';
   el.innerHTML=`<small>${ICONE[a.tipo]||''} ${esc(ROTULO[a.tipo]||'')}${a.prio===1?' · urgente':''}</small><b>${esc(a.titulo)}</b><span>${esc(a.texto.slice(0,110))}${a.texto.length>110?'…':''}</span><i>✕</i>`;
@@ -1328,6 +1381,87 @@ function decidirVinculo(app, principal, decisao, btn){
       const t=setInterval(()=>{ n++; api('/api/estado').then(e=>{ if(e.versao!==e0.versao||n>40){ clearInterval(t); location.reload(); } }).catch(()=>{}); },1500); });
   }).catch(()=>{ if(btn){ btn.disabled=false; btn.textContent='Tente de novo'; } });
 }
+
+
+// ------------------------------------------------------------ IA
+const IA_ON = !!(AO_VIVO && D && D.ia && D.ia.ativa);
+const TEL_IDX={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.tel&&c.uniu_em==null) TEL_IDX[c.tel.slice(-11)]=i; });
+let IA_CTX=null; const IA_CACHE={};
+function iaAbrir(a){
+  const u=new URL(a.href); const num=(u.pathname.match(/\d+/)||[''])[0]; const ref=u.searchParams.get('text')||'';
+  const cli=TEL_IDX[num.slice(-11)]; if(cli==null) return false;
+  const c=D.clientes[cli]; const row=a.closest('tr,.al,.pf-topo,.pf-sec');
+  let motivo=''; if(row){ const w=row.querySelector('.why'); const p=row.querySelector('p'); motivo=w?w.innerText:p?p.innerText:''; }
+  const al=a.closest('.al'); const tipo=(row&&row.querySelector('input[data-camp="avaliacao"]'))||(al&&String(al.dataset.id||'').startsWith('avaliacao'))?'avaliacao':'';
+  IA_CTX={num, ref, cli, chave:c.chave, motivo, tipo, base:a.href.split('?')[0]};
+  $('#iaTitulo').textContent='Mensagem para '+primeiroNome(c);
+  $('#iaTxt').value=ref; $('#iaPub').classList.add('hidden'); $('#iaCopiarPub').classList.add('hidden');
+  $('#iaModal').classList.remove('hidden'); iaGerar(false); return true;
+}
+function iaGerar(nova){
+  const k=IA_CTX.chave+'|'+IA_CTX.ref+'|'+IA_CTX.tipo; const st=$('#iaStatus');
+  if(!nova && IA_CACHE[k]) return iaMostrar(IA_CACHE[k]);
+  st.className='ia-status'; st.innerHTML='<span class="gira"></span> A IA está escrevendo uma mensagem para este cliente…'; $('#iaOutra').disabled=true;
+  const ctx=IA_CTX;
+  api('/api/ia/mensagem',{chave:ctx.chave, motivo:ctx.motivo, referencia:ctx.ref, tipo:ctx.tipo}).then(r=>{
+    if(IA_CTX!==ctx) return; $('#iaOutra').disabled=false;
+    if(r.erro){ st.className='ia-status erro'; st.textContent=r.erro+' A mensagem padrão está abaixo.'; return; }
+    IA_CACHE[k]=r; iaMostrar(r);
+  }).catch(()=>{ $('#iaOutra').disabled=false; st.className='ia-status erro'; st.textContent='Não consegui falar com a IA agora. A mensagem padrão está abaixo.'; });
+}
+function iaMostrar(r){
+  $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='✨ Escrita pela IA ('+(D.ia.nome||'IA')+') para este cliente. Pode editar antes de enviar.';
+  $('#iaTxt').value=r.texto||IA_CTX.ref;
+  const pub=!!r.resposta_publica; $('#iaPub').classList.toggle('hidden',!pub); $('#iaCopiarPub').classList.toggle('hidden',!pub); if(pub) $('#iaPubTxt').value=r.resposta_publica;
+}
+function iaFechar(){ $('#iaModal').classList.add('hidden'); IA_CTX=null; }
+$('#iaFechar').onclick=iaFechar; $('#iaModal').addEventListener('click',e=>{ if(e.target.id==='iaModal') iaFechar(); });
+$('#iaOutra').onclick=()=>iaGerar(true);
+$('#iaPadrao').onclick=()=>{ $('#iaTxt').value=IA_CTX.ref; $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem padrão.'; };
+$('#iaCopiarPub').onclick=()=>{ try{ navigator.clipboard.writeText($('#iaPubTxt').value); $('#iaCopiarPub').textContent='Copiada ✓'; setTimeout(()=>$('#iaCopiarPub').textContent='Copiar resposta pública',1500);}catch(e){} };
+$('#iaEnviar').onclick=()=>{ window.open(IA_CTX.base+'?text='+encodeURIComponent($('#iaTxt').value),'_blank','noopener'); iaFechar(); };
+if(IA_ON) document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.button) return;
+  if(iaAbrir(a)) e.preventDefault(); },true);
+
+// resumo do dia
+function iaResumo(novo){
+  if(!AO_VIVO) return;
+  const box=$('#iaResumo'), tx=$('#iaResumoTx');
+  const mostrar=r=>{ if(r.texto){ box.classList.remove('hidden'); tx.textContent=r.texto; $('#iaResumoEm').textContent='gerado às '+(r.em||''); return true; } return false; };
+  const gerar=()=>{ box.classList.remove('hidden'); tx.innerHTML='<span class="gira"></span> Analisando os números de ontem e de hoje…';
+    api('/api/ia/resumo',{novo:!!novo}).then(r=>{ if(!mostrar(r)) tx.textContent=r.erro||'Não consegui gerar o resumo agora.'; }).catch(()=>{ tx.textContent='Não consegui gerar o resumo agora.'; }); };
+  if(novo) return gerar();
+  api('/api/ia/resumo').then(r=>{ if(mostrar(r)) return; if(r.vazio&&r.ativa) gerar(); }).catch(()=>{});
+}
+$('#iaResumoNovo').onclick=()=>iaResumo(true);
+
+// pergunte ao painel
+const CHAT=[];
+const SUGESTOES=['Como foram as vendas desta semana comparando com a passada?','Quais sabores de pizza mais cresceram no último mês?','Quais bairros estão pedindo menos que antes?',
+  'Que promoção você sugere para quarta-feira, que é dia fraco?','Quanto do meu faturamento vem do iFood e do 99 nos últimos 30 dias?','Quem são meus 10 melhores clientes do almoço?'];
+function chatRender(){
+  const L=$('#chLista');
+  if(!IA_ON){ L.innerHTML=`<div class="ch-vazio"><b>A IA ainda não está ligada.</b><br>1. Crie uma chave de API em <b>platform.openai.com</b> (ChatGPT) ou <b>platform.claude.com</b> (Claude) e coloque um pouco de crédito.<br>2. Abra o arquivo <b>config.ini</b> na pasta do painel e, na seção <b>[ia]</b>, preencha <b>provedor = chatgpt</b> (ou claude) e cole a chave em <b>chave =</b>.<br>3. Rode "Desligar vigia" e depois "Ligar vigia e alertas".</div>`; $('#chSug').innerHTML=''; return; }
+  L.innerHTML=CHAT.length?CHAT.map(m=>`<div class="ch-msg ${m.role==='user'?'eu':'ia'} ${m.erro?'erro':''}">${esc(m.content)}${m.meta?`<span class="meta">${esc(m.meta)}</span>`:''}</div>`).join('')
+    :'<div class="ch-vazio">Pergunte qualquer coisa sobre vendas, clientes, produtos, canais, bairros ou promoções. A IA consulta os seus dados e responde.</div>';
+  if(CHAT.pendente) L.innerHTML+='<div class="ch-msg ia"><span class="gira"></span> Consultando os dados…</div>';
+  $('#chSug').innerHTML=CHAT.length?'':SUGESTOES.map(t=>`<button>${esc(t)}</button>`).join('');
+  $('#chSug').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#chTxt').value=b.textContent; chatEnviar(); });
+  L.scrollTop=L.scrollHeight;
+}
+function chatEnviar(){
+  const t=$('#chTxt').value.trim(); if(!t||CHAT.pendente) return; $('#chTxt').value='';
+  CHAT.push({role:'user',content:t}); CHAT.pendente=true; chatRender();
+  api('/api/ia/pergunta',{mensagens:CHAT.filter(m=>!m.erro).map(m=>({role:m.role,content:m.content}))}).then(r=>{
+    CHAT.pendente=false; if(r.erro) CHAT.push({role:'assistant',content:r.erro,erro:true}); else CHAT.push({role:'assistant',content:r.resposta,meta:r.consultas?`consultou os dados ${r.consultas} ${r.consultas===1?'vez':'vezes'}`:''}); chatRender();
+  }).catch(()=>{ CHAT.pendente=false; CHAT.push({role:'assistant',content:'Não consegui falar com a IA agora.',erro:true}); chatRender(); });
+}
+function abrirChat(){ chatRender(); $('#chat').classList.add('aberta'); $('#veu').classList.add('on'); setTimeout(()=>$('#chTxt').focus(),300); }
+function fecharChat(){ $('#chat').classList.remove('aberta'); if(!$('#gaveta').classList.contains('aberta')&&!$('#perfil').classList.contains('aberto')) $('#veu').classList.remove('on'); }
+$('#chFechar').onclick=fecharChat; $('#chEnviar').onclick=chatEnviar;
+$('#chTxt').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); chatEnviar(); } });
+if(AO_VIVO){ $('#perguntar').classList.remove('hidden'); $('#perguntar').onclick=abrirChat; }
+if(AO_VIVO) setTimeout(()=>iaResumo(false),800);
 
 // ------------------------------------------------------------ PERFIL DO CLIENTE
 const IDX_CHAVE={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.chave) IDX_CHAVE[c.chave]=c.uniu_em!=null?c.uniu_em:i; });

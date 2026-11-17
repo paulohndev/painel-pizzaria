@@ -115,6 +115,15 @@ mensagem = Oi {nome}! Tudo bem? Sentimos sua falta por aqui! Preparamos um mimo 
 notificacoes = sim
 horario = 09:00-23:30
 
+[ia]
+; Inteligência artificial (opcional). provedor = chatgpt ou claude.
+; Cole a chave da API (platform.openai.com ou platform.claude.com) na linha "chave".
+provedor =
+chave =
+; Opcional: troque o modelo (deixe vazio para o padrão).
+modelo =
+modelo_forte =
+
 [atualizacao]
 ; O programa se atualiza sozinho a partir deste repositório do GitHub.
 ; Para desligar, troque "sim" por "nao".
@@ -145,6 +154,7 @@ def carregar_config():
         "dias_ativo": cp.getint("clientes", "dias_ativo", fallback=45),
         "pedidos_fiel": cp.getint("clientes", "pedidos_fiel", fallback=4),
         "mensagem": cp.get("clientes", "mensagem", fallback="").strip().replace("Aqui é da pizzaria. ", ""),
+        "ia": {k: cp.get("ia", k, fallback="").strip() for k in ("provedor", "chave", "modelo", "modelo_forte")},
     }
 
 

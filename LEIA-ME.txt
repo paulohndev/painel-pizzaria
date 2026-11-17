@@ -76,6 +76,25 @@ AJUSTES (arquivo config.ini)
              do WhatsApp.
 
 
+INTELIGÊNCIA ARTIFICIAL (OPCIONAL)
+------------------------------------------------------------
+Com a IA ligada, o painel:
+  - escreve uma mensagem diferente para cada cliente ao clicar em WhatsApp
+    (você confere, edita e envia; dá para voltar para a mensagem padrão);
+  - sugere a mensagem e a resposta pública para avaliações ruins;
+  - mostra um resumo do dia no topo da aba Hoje;
+  - responde perguntas sobre as vendas no botão "Perguntar".
+Para a IA vão só o primeiro nome e o histórico de pedidos. Telefone e
+endereço nunca saem do computador.
+
+Como ligar:
+  1. Crie uma chave de API em platform.openai.com (ChatGPT) ou
+     platform.claude.com (Claude) e coloque crédito na conta.
+  2. Abra o config.ini e, na seção [ia], preencha:
+       provedor = chatgpt      (ou claude)
+       chave = (cole a chave aqui)
+  3. Rode "Desligar vigia" e depois "Ligar vigia e alertas".
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

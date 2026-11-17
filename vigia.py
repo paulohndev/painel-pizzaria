@@ -49,6 +49,8 @@ if not JANELA or sys.stdout is None:
 
 import pizzaria as P  # noqa: E402
 import alertas  # noqa: E402
+import ia_painel  # noqa: E402
+from ia import IA, ErroIA  # noqa: E402
 
 PORTA = int(os.environ.get("PIZZARIA_PORTA", "8766"))
 ENDERECO = "http://127.0.0.1:%d/" % PORTA
@@ -124,6 +126,8 @@ ESTADO = {"html": None, "versao": 0, "alertas": [], "gerado_em": "", "D": None, 
 class Vigia:
     def __init__(self, cfg, base, chave):
         self.cfg = cfg
+        self.ia = IA(cfg)
+        ESTADO["ia"] = self.ia
         self.api = P.API(base, chave)
         self.db = conectar()
         self.nome_loja = P.meta_get(self.db, "nome_loja") or ""
@@ -259,6 +263,7 @@ class Vigia:
         self.db.commit()
         D["alertas"] = ativos
         D["ao_vivo"] = True
+        D["ia"] = {"ativa": self.ia.ativa, "nome": self.ia.nome()}
         html = P.html_painel(D)
         with ESTADO["trava"]:
             ESTADO["html"], ESTADO["alertas"], ESTADO["gerado_em"] = html, ativos, D["gerado_em"]
@@ -424,6 +429,8 @@ class Painel(BaseHTTPRequestHandler):
         elif u.path == "/api/estado":
             with ESTADO["trava"]:
                 self._json({"versao": ESTADO["versao"], "alertas": ESTADO["alertas"], "gerado_em": ESTADO["gerado_em"]})
+        elif u.path == "/api/ia/resumo":  # só lê o que já foi gerado (gerar custa crédito: só por POST)
+            return self._json(*ia_resumo(gerar=False))
         elif u.path == "/api/cliente":
             chave = (urllib.parse.parse_qs(u.query).get("chave") or [""])[0]
             return self._json(perfil_cliente(chave))
@@ -470,6 +477,8 @@ class Painel(BaseHTTPRequestHandler):
                     ESTADO["alertas"] = [a for a in ESTADO["alertas"] if a["id"] != aid]
                     ESTADO["versao"] += 1
                 return self._json({"ok": True})
+            if u.path.startswith("/api/ia/"):
+                return self._json(*ia_post(u.path, dado))
             if u.path == "/api/promocoes_casa":
                 lista = dado.get("promos")
                 if not isinstance(lista, list) or len(lista) > 30:
@@ -502,6 +511,80 @@ class Painel(BaseHTTPRequestHandler):
             return self._json({"erro": "não encontrado"}, 404)
         finally:
             db.close()
+
+
+# ------------------------------------------------------------------ IA
+
+def _ia():
+    ia = ESTADO.get("ia")
+    if ia is None or not ia.ativa:
+        raise ErroIA("A IA ainda não está ligada. Abra o config.ini, preencha a seção [ia] (provedor e chave) e reinicie o vigia.")
+    with ESTADO["trava"]:
+        D = ESTADO["D"]
+    if D is None:
+        raise ErroIA("O painel ainda está carregando os dados. Tente de novo em instantes.")
+    return ia, D
+
+
+def ia_resumo(gerar=False, novo=False):
+    hoje = datetime.now().strftime("%Y-%m-%d")
+    db = conectar()
+    try:
+        try:
+            cache = json.loads(P.meta_get(db, "ia_resumo") or "{}")
+        except ValueError:
+            cache = {}
+        if cache.get("data") == hoje and cache.get("texto") and not novo:
+            return cache, 200
+        if not gerar:
+            ia = ESTADO.get("ia")
+            return {"vazio": True, "ativa": bool(ia and ia.ativa)}, 200
+        try:
+            ia, D = _ia()
+            texto = ia_painel.resumo_dia(ia, D)
+        except ErroIA as e:
+            return {"erro": str(e)}, 200
+        cache = {"data": hoje, "texto": texto, "em": datetime.now().strftime("%H:%M")}
+        P.meta_set(db, "ia_resumo", json.dumps(cache, ensure_ascii=False))
+        db.commit()
+        log("IA: resumo do dia gerado")
+        return cache, 200
+    finally:
+        db.close()
+
+
+def ia_post(caminho, dado):
+    try:
+        ia, D = _ia()
+        if caminho == "/api/ia/resumo":
+            return ia_resumo(gerar=True, novo=bool(dado.get("novo")))
+        if caminho == "/api/ia/mensagem":
+            chave = str(dado.get("chave") or "")
+            with ESTADO["trava"]:
+                cli = ESTADO["por_chave"].get(chave)
+            if cli is None:
+                return {"erro": "Cliente não encontrado."}, 200
+            perfil = perfil_cliente(chave)
+            r = ia_painel.gerar_mensagem(ia, D, cli, perfil, str(dado.get("motivo") or "")[:600],
+                                         str(dado.get("referencia") or "")[:800], str(dado.get("tipo") or ""))
+            return r, 200
+        if caminho == "/api/ia/pergunta":
+            db = conectar()
+            try:
+                with ESTADO["trava"]:
+                    versao = ESTADO["gerado_em"]
+                ia_painel.montar_analise(db, D, versao)
+            finally:
+                db.close()
+            r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [])
+            log("IA: pergunta respondida (%d consulta(s))" % r["consultas"])
+            return r, 200
+        return {"erro": "não encontrado"}, 404
+    except ErroIA as e:
+        return {"erro": str(e)}, 200
+    except Exception as e:  # nunca derrubar o vigia por causa da IA
+        log("IA: erro inesperado: %s" % e)
+        return {"erro": "Erro inesperado na IA: %s" % e}, 200
 
 
 STATUS_PT = {"closed": "Concluído", "canceled": "Cancelado", "confirmed": "Em preparo", "waiting_confirmation": "Aguardando",
