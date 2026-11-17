@@ -108,7 +108,7 @@ dias_ativo = 45
 ; Cliente "fiel" = tem pelo menos X pedidos (no turno escolhido)
 pedidos_fiel = 4
 ; Mensagem padrão do WhatsApp. {nome} vira o primeiro nome do cliente.
-mensagem = Oi {nome}! Tudo bem? Aqui é da pizzaria. Sentimos sua falta! Preparamos um mimo pro seu próximo pedido pelo nosso app 🍕
+mensagem = Oi {nome}! Tudo bem? Sentimos sua falta por aqui! Preparamos um mimo pro seu próximo pedido pelo nosso app 🍕
 
 [alertas]
 ; Notificações no canto da tela (sim/nao) e em que horário elas podem aparecer.
@@ -144,7 +144,7 @@ def carregar_config():
         "turnos": turnos,
         "dias_ativo": cp.getint("clientes", "dias_ativo", fallback=45),
         "pedidos_fiel": cp.getint("clientes", "pedidos_fiel", fallback=4),
-        "mensagem": cp.get("clientes", "mensagem", fallback="").strip(),
+        "mensagem": cp.get("clientes", "mensagem", fallback="").strip().replace("Aqui é da pizzaria. ", ""),
     }
 
 

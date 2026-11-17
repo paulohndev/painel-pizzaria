@@ -711,7 +711,9 @@ const AO_VIVO = location.protocol.indexOf('http')===0;
 function api(caminho, dado){ return fetch(caminho, dado?{method:'POST',headers:{'Content-Type':'application/json','X-Painel':'1'},body:JSON.stringify(dado)}:{cache:'no-store'}).then(r=>r.json()); }
 function marcar(id, camp, on){ if(on) contatos[id]={d:hojeISO(), c:camp}; else delete contatos[id]; store('contatos',JSON.stringify(contatos));
   if(AO_VIVO) api('/api/contato',{id, camp, on}).catch(()=>{}); }
-$('#msg').value = store('msg') || CFG.mensagem || '';
+const MSG_ANTIGA='Oi {nome}! Tudo bem? Aqui é da pizzaria. Sentimos sua falta! Preparamos um mimo pro seu próximo pedido pelo nosso app 🍕';
+const MSG_NOVA='Oi {nome}! Tudo bem? Sentimos sua falta por aqui! Preparamos um mimo pro seu próximo pedido pelo nosso app 🍕';
+$('#msg').value = (v=>v===MSG_ANTIGA?MSG_NOVA:v)(store('msg') || CFG.mensagem || '');
 $('#msg').oninput=()=>{store('msg',$('#msg').value); renderClientes();};
 
 function calcClientes(){
@@ -1020,7 +1022,7 @@ function renderHojeBlocos(){
     itens.forEach(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
       if(!c){ h+=`<tr><td class="muted">Cliente não identificado (pedido ${esc(it.aval?it.aval[5]:'')})</td><td>—</td><td></td><td class="why">${esc(it.motivo)}</td><td></td></tr>`; return; }
       const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
-      const msg=b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da pizzaria. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
+      const msg=b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da Pizzaria Mariá. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
       const w=waLink(c,msg); const feito=!!cInfo(c.id); const bb=bairroCli(it.cli);
       h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${c.app||bb?`<span class="sub">${esc(bb)}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</span>`:''}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:'<span class="muted">sem telefone</span>'}</td>

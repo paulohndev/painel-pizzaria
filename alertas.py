@@ -168,7 +168,7 @@ def gerar(D, contatos=None, agora=None, limites=None):
         nome = _primeiro_nome(clientes[cli]["nome"]) if cli is not None and cli >= 0 else "Cliente"
         add("avaliacao", 1, cli if cli is not None else -1, oid, "Avaliação %s de %s" % (str(nota).replace(".", ","), nome),
             "%s%s" % (("Notas baixas: %s. " % baixas) if baixas else "", ('"%s"' % coment) if coment else "Sem comentário."),
-            campanha=None, mensagem="Oi %s! Aqui é do Mariá. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?" % nome,
+            campanha=None, mensagem="Oi %s! Aqui é da Pizzaria Mariá. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?" % nome,
             valor=0)
 
     # limita os "se afastando" aos mais valiosos
