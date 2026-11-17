@@ -1437,12 +1437,13 @@ $('#iaResumoNovo').onclick=()=>iaResumo(true);
 
 // pergunte ao painel
 const CHAT=[];
+function mdSimples(t){ return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^\s*[-*]\s+/gm,'• '); }
 const SUGESTOES=['Como foram as vendas desta semana comparando com a passada?','Quais sabores de pizza mais cresceram no último mês?','Quais bairros estão pedindo menos que antes?',
   'Que promoção você sugere para quarta-feira, que é dia fraco?','Quanto do meu faturamento vem do iFood e do 99 nos últimos 30 dias?','Quem são meus 10 melhores clientes do almoço?'];
 function chatRender(){
   const L=$('#chLista');
   if(!IA_ON){ L.innerHTML=`<div class="ch-vazio"><b>A IA ainda não está ligada.</b><br>1. Crie uma chave de API em <b>platform.openai.com</b> (ChatGPT) ou <b>platform.claude.com</b> (Claude) e coloque um pouco de crédito.<br>2. Abra o arquivo <b>config.ini</b> na pasta do painel e, na seção <b>[ia]</b>, preencha <b>provedor = chatgpt</b> (ou claude) e cole a chave em <b>chave =</b>.<br>3. Rode "Desligar vigia" e depois "Ligar vigia e alertas".</div>`; $('#chSug').innerHTML=''; return; }
-  L.innerHTML=CHAT.length?CHAT.map(m=>`<div class="ch-msg ${m.role==='user'?'eu':'ia'} ${m.erro?'erro':''}">${esc(m.content)}${m.meta?`<span class="meta">${esc(m.meta)}</span>`:''}</div>`).join('')
+  L.innerHTML=CHAT.length?CHAT.map(m=>`<div class="ch-msg ${m.role==='user'?'eu':'ia'} ${m.erro?'erro':''}">${m.role==='user'?esc(m.content):mdSimples(m.content)}${m.meta?`<span class="meta">${esc(m.meta)}</span>`:''}</div>`).join('')
     :'<div class="ch-vazio">Pergunte qualquer coisa sobre vendas, clientes, produtos, canais, bairros ou promoções. A IA consulta os seus dados e responde.</div>';
   if(CHAT.pendente) L.innerHTML+='<div class="ch-msg ia"><span class="gira"></span> Consultando os dados…</div>';
   $('#chSug').innerHTML=CHAT.length?'':SUGESTOES.map(t=>`<button>${esc(t)}</button>`).join('');
