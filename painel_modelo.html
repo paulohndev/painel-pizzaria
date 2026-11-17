@@ -471,7 +471,7 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
         <p class="desc" id="cpDica"></p>
         <div style="font-size:12px;color:var(--text-2);margin:8px 0 4px">Oferta desta campanha</div>
         <input id="cpOferta" style="width:100%;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px">
-        <div style="font-size:12px;color:var(--text-2);margin:10px 0 4px">Mensagem do WhatsApp. Variáveis: <b>{nome}</b> <b>{favorito}</b> <b>{sugestao}</b> <b>{base}</b> <b>{oferta}</b> <b>{pontos}</b></div>
+        <div style="font-size:12px;color:var(--text-2);margin:10px 0 4px">Mensagem do WhatsApp. Variáveis: <b>{nome}</b>, <b>{favorito}</b> (vira "aquela pizza de calabresa", "aquela quentinha"…), <b>{sugestao}</b>, <b>{base}</b>, <b>{oferta}</b>, <b>{pontos}</b></div>
         <textarea id="cpMsg" style="min-height:70px"></textarea>
         <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><button class="btn" id="cpReset">Voltar ao texto padrão</button><span class="muted" style="font-size:12px">As edições ficam salvas neste computador.</span></div>
       </div>
@@ -827,29 +827,49 @@ const CAMP = {
   segundo:{nome:'Puxar o 2º pedido', dica:'Fizeram só 1 pedido, recente. É o momento mais barato para criar o hábito: quem faz o 2º pedido tem muito mais chance de virar fiel.', oferta:'R$ 5 de desconto',
     msg:'Oi {nome}! Que bom ter você com a gente 😊 Esperamos que tenha gostado! No seu próximo pedido pelo nosso app tem {oferta}, válido até domingo.'},
   reativar:{nome:'Reativar sumidos', dica:'Já foram clientes frequentes e pararam. A oferta vai no item favorito de cada um, que é o que tem mais chance de trazer de volta.', oferta:'R$ 8 de desconto',
-    msg:'Oi {nome}! Faz tempo que você não pede {favorito} com a gente, sentimos sua falta! Pra matar a saudade: {oferta} no próximo pedido pelo app, até domingo.'},
+    msg:'Oi {nome}! Bateu saudade de {favorito}? 😋 Faz tempo que você não pede com a gente! Pra matar a saudade: {oferta} no próximo pedido pelo app, até domingo.'},
   canal_proprio:{nome:'Voltar para o canal próprio', dica:'Pediam direto com você e passaram para o iFood/99. Um benefício pequeno no app próprio costuma sair mais barato que a comissão.', oferta:'a entrega grátis',
     msg:'Oi {nome}! Vi que você tem pedido a gente pelo app de entrega 😊 Pedindo direto pelo nosso app sai mais em conta: no seu próximo pedido por lá vai {oferta}!'},
   lembrete:{nome:'Lembrete (sem desconto)', dica:'Clientes ativos que já passaram do próprio ritmo de pedidos. Eles iam pedir de qualquer jeito: um lembrete basta, não precisa dar desconto.', oferta:'',
-    msg:'Oi {nome}! Bateu a vontade de {favorito} hoje? 😋 Tô por aqui, é só pedir pelo nosso app!'},
+    msg:'Oi {nome}! Bateu a vontade de {favorito} hoje? 😋 É só pedir pelo nosso app!'},
   conhecer_noite:{nome:'Almoço → pizzaria', dica:'Pedem só no almoço e nunca pediram pizza. Já confiam na casa: é o cliente mais fácil de ganhar para a noite.', oferta:'R$ 10 de desconto',
-    msg:'Oi {nome}! Sabia que à noite a gente vira pizzaria? 🍕 O sabor mais pedido é {sugestao}. Na sua primeira pizza pelo app: {oferta}!'},
-  conhecer_almoco:{nome:'Pizzaria → almoço', dica:'Pedem só pizza e nunca pediram almoço. Vale apresentar o almoço em dia de semana.', oferta:'um suco grátis no primeiro almoço',
-    msg:'Oi {nome}! Além da pizza, a gente também faz almoço 🍽️ O mais pedido é {sugestao}. No seu primeiro almoço pelo app vai {oferta}!'},
+    msg:'Oi {nome}! Sabia que à noite a gente vira pizzaria? 🍕 A mais pedida é a pizza de {sugestao}. Na sua primeira pizza pelo app: {oferta}!'},
+  conhecer_almoco:{nome:'Pizzaria → almoço', dica:'Pedem só pizza e nunca pediram almoço. Vale apresentar o almoço em dia de semana.', oferta:'um suco grátis',
+    msg:'Oi {nome}! Além da pizza, a gente também faz almoço 🍽️ O que mais sai é {sugestao}. No seu primeiro almoço pelo app vai {oferta}!'},
   complemento:{nome:'Complemento', dica:'Pedem sempre o mesmo item e nunca levam o acompanhamento que a maioria leva junto. Aumenta o ticket sem dar desconto no principal.', oferta:'sai pela metade do preço',
     msg:'Oi {nome}! Da próxima vez que pedir {base}, que tal levar {sugestao} junto? Pra você experimentar: {oferta} 😉'},
   sabor_novo:{nome:'Sabor novo', dica:'Pedem sempre o mesmo sabor. A sugestão é o sabor que mais agrada quem tem o mesmo gosto, e que esse cliente nunca provou.', oferta:'sem custo extra',
-    msg:'Oi {nome}! Você é fã de {favorito}, né? 😄 Quem ama {favorito} costuma adorar {sugestao}. Na sua próxima pizza, pede meia {sugestao}, que sai {oferta}!'},
+    msg:'Oi {nome}! Você que é fã de {favorito}, já provou a de {sugestao}? 😄 Quem gosta de uma costuma adorar a outra. Na sua próxima pizza, pede meia {sugestao}, que sai {oferta}!'},
 };
 const PR = (D.promo && D.promo.clientes) || [];
 let campSel = null, pPag = 0;
 function cpTexto(tipo, campo){ const v=store('camp_'+tipo+'_'+campo); return v!=null?v:CAMP[tipo][campo]; }
+// ---- textos naturais: "Camarão" -> "aquela pizza de camarão"; "Quentinha" -> "aquela quentinha"
+function limparNome(n){ n=String(n||'').replace(/\(.*?\)/g,'').replace(/^\s*\d+\s*\/\s*\d+\s+/,'').replace(/^[^:]*(maluca|promo|combo|oferta)[^:]*:\s*/i,'');
+  if(n.includes('|')){ const pz=n.split('|').map(x=>x.trim()); n=(/^(marmita|quentinha|prato)/i.test(pz[0])&&pz[1]&&!pz[1].includes(',')&&pz[1].split(/\s+/).length<=4)?pz[0].split(/\s+/)[0]+' de '+pz[1]:pz[0]; }
+  n=n.split(/\s+\+\s+/)[0].replace(/\s*-\s*(serve\s+)?\d+\s*pessoas?.*$/i,'').replace(/\b(individual|executivo|executiva|grandes?|m[ée]dias?|pequenas?|broto)\b/gi,'');
+  return n.replace(/\s+/g,' ').replace(/^[\s\-:|.]+|[\s\-:|.]+$/g,''); }
+const MAIUSC=['Nutella','Ovomaltine','Coca-Cola','Coca','Catupiry','Kit Kat','Kitkat','Sprite','Fanta','Guaraná Antarctica'];
+function minusc(n){ let t=n.toLowerCase(); MAIUSC.forEach(w=>{ t=t.split(w.toLowerCase()).join(w); }); return t; }
+const SABOR_SET=new Set((D&&D.sabores||[]).filter(x=>/sabor/i.test(x[2]||'')).map(x=>limparNome(x[3]).toLowerCase()));
+function ehSaborPizza(orig){ const n=limparNome(orig).toLowerCase(); return SABOR_SET.has(n)||/pizza|segunda maluca/i.test(orig||''); }
+function ehFem(m){ const w=m.split(' ')[0]; return /^(quentinha|marmita|feijoada|costela|maminha|lasanha|salada|porção|porcao|galinha|picanha|sobremesa|torta|coxinha|esfiha|esfirra|sopa|macarronada|pizza|batata|calabresa|bebida|água|agua|cerveja|coca)/.test(m) || /a$/.test(w); }
+function falaFav(orig){ const n=limparNome(orig); if(!n) return 'a nossa comida'; const m=minusc(n);
+  if(ehSaborPizza(orig)) return 'aquela '+(/^pizza/.test(m)?m:'pizza de '+m);
+  return (ehFem(m)?'aquela ':'aquele ')+m; }
+function falaSabor(orig){ return minusc(limparNome(orig).replace(/^pizza\s+(de\s+)?/i,'')); }
+function falaItem(orig){ const n=limparNome(orig); if(!n) return ''; const m=minusc(n); return (ehFem(m)?'a ':'o ')+m; }
+function juntarPreps(t){ return t.replace(/\bde aquel/g,'daquel').replace(/\bem aquel/g,'naquel').replace(/\bde a /g,'da ').replace(/\bde o /g,'do ').replace(/\bem a /g,'na ').replace(/\bem o /g,'no '); }
+const SUG_SABOR=new Set(['sabor_novo','conhecer_noite']);
+function preencher(tipo, o){
+  const sug=o.sug?(SUG_SABOR.has(tipo)?falaSabor(o.sug):falaItem(o.sug)):'';
+  const oferta=cpTexto(tipo,'oferta').replace(/\{sugestao\}/g,sug);
+  return juntarPreps(cpTexto(tipo,'msg').replace(/\{nome\}/g,o.nome).replace(/\{favorito\}/g,falaFav(o.fav)).replace(/\{sugestao\}/g,sug)
+    .replace(/\{base\}/g,falaItem(o.base||o.fav)).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,o.pontos||0)).replace(/\s+([!.,?])/g,'$1');
+}
 function msgPromo(r, rec){
   const c=D.clientes[r.cli];
-  const fav = rec.fav || r.favorito || '';
-  const oferta = cpTexto(rec.tipo,'oferta').replace(/\{sugestao\}/g, rec.sugestao||'');
-  return cpTexto(rec.tipo,'msg').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,fav).replace(/\{sugestao\}/g,rec.sugestao||'')
-    .replace(/\{base\}/g,rec.base||fav).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
+  return preencher(rec.tipo,{nome:primeiroNome(c), fav:rec.fav||r.favorito||'', sug:rec.sugestao||'', base:rec.base, pontos:c.pontos});
 }
 function promoFiltrada(){
   return PR.filter(r=>{ if(F.turno!=='all' && r.turno!==F.turno) return false; return cliCanal(r.cli); });
@@ -930,10 +950,8 @@ function porCliente(){
   const m=new Map(); P.forEach(p=>{ if(p.cancel||p.cli<0) return; let x=m.get(p.cli); if(!x){x={n:0,v:0,pri:p.d,ult:p.d}; m.set(p.cli,x);} x.n++; x.v+=p.v||0; if(p.d<x.pri)x.pri=p.d; if(p.d>x.ult)x.ult=p.d; }); return m; }
 function contatadoRecente(c, dias){ const i=cInfo(c.id); return i && diasEntre(i.d,new Date())<=dias; }
 function msgTipo(tipo, cli, extra){
-  const c=D.clientes[cli]; const pf=PERF[cli]||[]; const fav=(extra&&extra.fav)||pf[0]||'';
-  const oferta=cpTexto(tipo,'oferta').replace(/\{sugestao\}/g,(extra&&extra.sugestao)||'');
-  return cpTexto(tipo,'msg').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,fav).replace(/\{sugestao\}/g,(extra&&extra.sugestao)||'')
-    .replace(/\{base\}/g,fav).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
+  const c=D.clientes[cli]; const pf=PERF[cli]||[];
+  return preencher(tipo,{nome:primeiroNome(c), fav:(extra&&extra.fav)||pf[0]||'', sug:(extra&&extra.sugestao)||'', pontos:c.pontos});
 }
 function listaDoDia(){
   const hoje=new Date(); hoje.setHours(12,0,0,0); const dow=hoje.getDay();
@@ -1100,9 +1118,7 @@ function msgAlerta(a){
   const c=a.cliente||{}; const nome=primeiroNome(c);
   if(a.mensagem) return a.mensagem;
   if(!a.campanha||!CAMP[a.campanha]) return '';
-  const oferta=cpTexto(a.campanha,'oferta').replace(/\{sugestao\}/g,a.sugestao||'');
-  return cpTexto(a.campanha,'msg').replace(/\{nome\}/g,nome).replace(/\{favorito\}/g,a.favorito||'').replace(/\{sugestao\}/g,a.sugestao||'')
-    .replace(/\{base\}/g,a.favorito||'').replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
+  return preencher(a.campanha,{nome, fav:a.favorito||'', sug:a.sugestao||'', pontos:c.pontos});
 }
 function quandoTxt(s){ const d=parseD(s); const m=Math.round((new Date()-d)/6e4); return m<1?'agora':m<60?`há ${m} min`:m<1440?`há ${Math.round(m/60)} h`:d.toLocaleDateString('pt-BR'); }
 let AF='all';
