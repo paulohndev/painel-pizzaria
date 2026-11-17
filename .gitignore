@@ -1,0 +1,6 @@
+config.ini
+dados/
+painel.html
+painel_TESTE.html
+__pycache__/
+*.novo

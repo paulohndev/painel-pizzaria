@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel de clientes e vendas</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f3ef; --surface:#fcfcfb; --surface-2:#f0efea; --line:#e2e0d9;
+  --text:#0b0b0b; --text-2:#52514e; --muted:#8a887f;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#9a978d;
+  --accent:#2a78d6; --good:#0f7b3a; --bad:#c2372f; --warn:#b7791f;
+  --seq0:#eef4fc; --seq1:#cde2fb; --seq2:#9ec5f4; --seq3:#6da7ec; --seq4:#3987e5; --seq5:#256abf; --seq6:#184f95;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --line:#33332f;
+    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8d84;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#77756d;
+    --accent:#5598e7; --good:#3fb96b; --bad:#e66767; --warn:#d9a43a;
+    --seq0:#1d2531; --seq1:#173052; --seq2:#184f95; --seq3:#256abf; --seq4:#3987e5; --seq5:#6da7ec; --seq6:#9ec5f4;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px}
+.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 0 10px}
+.top h1{font-size:18px;margin:0;font-weight:650}
+.top .sub{color:var(--muted);font-size:12px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-left:auto}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:8px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;color:var(--text-2);padding:5px 10px;border-radius:6px;cursor:pointer;font:inherit;font-size:13px}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:600}
+.flabel{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-right:2px}
+nav.tabs{display:flex;gap:4px}
+nav.tabs button{border:0;background:none;padding:10px 14px;font:inherit;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent}
+nav.tabs button.on{color:var(--text);border-color:var(--accent);font-weight:600}
+main{padding:20px 0 60px}
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card h2{font-size:15px;margin:0 0 2px;font-weight:620}
+.card .desc{color:var(--muted);font-size:12px;margin:0 0 12px}
+.kpi .lbl{color:var(--text-2);font-size:12px}
+.kpi .val{font-size:26px;font-weight:650;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .cmp{font-size:12px;color:var(--muted)}
+.up{color:var(--good)} .down{color:var(--bad)}
+.two{grid-template-columns:1fr 1fr}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;color:var(--text-2);font-weight:600;background:var(--surface);position:sticky;top:0;cursor:default}
+th.sort{cursor:pointer;user-select:none}
+th.sort:hover{color:var(--text)}
+td.num,th.num{text-align:right}
+tr:hover td{background:var(--surface-2)}
+.tablebox{overflow:auto;max-height:640px;border:1px solid var(--line);border-radius:10px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text-2);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chart{position:relative}
+.chart svg{display:block;width:100%;overflow:visible}
+.axis text{fill:var(--muted);font-size:11px}
+.chart .gl line{stroke:var(--line)}
+.tip{position:absolute;pointer-events:none;background:var(--text);color:var(--surface);font-size:12px;padding:7px 9px;border-radius:7px;white-space:nowrap;opacity:0;transition:opacity .08s;z-index:3}
+.tip b{font-weight:650}
+.tip .row{display:flex;gap:8px;align-items:center}
+.tip i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.heat{width:auto}
+.heat td{padding:0;border:0;text-align:center;font-size:11px}
+.heat td.c{width:30px;height:26px;border:2px solid var(--surface);border-radius:5px;cursor:default}
+.heat th{background:none;border:0;font-weight:500;color:var(--muted);text-align:center;padding:2px;font-size:11px;position:static}
+.heat th.r{text-align:right;padding-right:8px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;cursor:pointer;text-align:left;font:inherit;color:var(--text);min-width:150px}
+.chip .n{font-size:20px;font-weight:650}
+.chip .l{font-size:12px;color:var(--text-2)}
+.chip .p{font-size:11px;color:var(--muted)}
+.chip.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0 10px}
+input[type=search],select,textarea{font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px}
+textarea{width:100%;min-height:44px;resize:vertical}
+.btn{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+a.wa{color:var(--good);font-weight:600;text-decoration:none}
+a.wa:hover{text-decoration:underline}
+.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:999px;background:var(--surface-2);color:var(--text-2)}
+.bar{height:8px;border-radius:0 4px 4px 0;background:var(--s1);min-width:2px}
+.muted{color:var(--muted)}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:8px;font-size:12px;color:var(--text-2)}
+.note{background:var(--surface-2);border-radius:10px;padding:10px 14px;color:var(--text-2);font-size:13px}
+.hidden{display:none!important}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+td.done{opacity:.55}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 id="titulo">Painel de clientes e vendas</h1>
+        <div class="sub" id="subtitulo"></div>
+      </div>
+      <div class="filters">
+        <span class="flabel">Turno</span><div class="seg" id="fTurno"></div>
+        <span class="flabel">Canal</span><div class="seg" id="fCanal"></div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-t="hoje" class="on">Hoje</button>
+      <button data-t="geral">Visão geral</button>
+      <button data-t="clientes">Clientes</button>
+      <button data-t="produtos">Produtos</button>
+      <button data-t="bairros">Bairros</button>
+      <button data-t="promocoes">Promoções</button>
+      <button data-t="resultados">Resultados</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="avisos"></div>
+
+  <!-- VISÃO GERAL -->
+  <section id="t-hoje">
+    <div class="card">
+      <h2 id="hojeTitulo">Lista do dia</h2>
+      <p class="desc" id="hojeDesc"></p>
+      <div class="grid kpis" id="hojeResumo"></div>
+    </div>
+    <div id="hojeBlocos"></div>
+  </section>
+
+  <!-- RESULTADOS -->
+  <section id="t-resultados" class="hidden grid">
+    <div class="card">
+      <h2>Clientes contatados voltaram a pedir?</h2>
+      <p class="desc">Cada vez que você marca "Contatado", o painel guarda a data e a campanha. Aqui ele confere se o cliente pediu nos 7 dias seguintes (em qualquer canal). Compare com a coluna "Pediria de qualquer jeito?": é quanto esse tipo de cliente costuma pedir numa semana normal, sem mensagem.</p>
+      <div class="toolbar" style="margin-top:0"><select id="rPeriodo"><option value="30">Contatos dos últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="9999">Todos</option></select></div>
+      <div class="tablebox"><table id="tbRes"></table></div>
+    </div>
+    <div class="card">
+      <h2>Cupons usados</h2>
+      <p class="desc">Crie no Cardápio Web um cupom diferente para cada campanha (ex.: VOLTA8 para reativar, PIZZATERCA para a terça da pizza). O painel conta sozinho quantas vezes cada um foi usado e quanto vendeu.</p>
+      <div class="tablebox"><table id="tbCup"></table></div>
+    </div>
+  </section>
+
+  <section id="t-geral" class="hidden grid">
+    <div class="grid kpis" id="kpis"></div>
+    <div class="card">
+      <h2>Faturamento por mês</h2>
+      <p class="desc">Pedidos concluídos, por turno. Passe o mouse para ver os valores. O trecho tracejado é o mês atual, ainda em andamento.</p>
+      <div class="legend" id="lgMes"></div>
+      <div class="chart" id="chMes"></div>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <h2>Resumo por turno</h2>
+        <p class="desc">Todo o período baixado, com o filtro de canal aplicado.</p>
+        <div id="tbTurno"></div>
+      </div>
+      <div class="card">
+        <h2>Pedidos por mês: canal próprio x apps de entrega</h2>
+        <p class="desc">Quantidade de pedidos concluídos, com o filtro de turno aplicado.</p>
+        <div class="legend" id="lgCanal"></div>
+        <div class="chart" id="chCanal"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Quando os pedidos chegam</h2>
+      <p class="desc">Pedidos concluídos nos últimos 90 dias, por dia da semana e hora. Quanto mais escuro, mais pedidos.</p>
+      <div id="heat" style="overflow:auto"></div>
+    </div>
+    <div class="card">
+      <h2>Clientes novos voltam?</h2>
+      <p class="desc">Para cada mês, quantos clientes fizeram o 1º pedido e quantos voltaram a pedir em até 30 e 60 dias.</p>
+      <div id="tbRet"></div>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="t-clientes" class="hidden">
+    <div class="card">
+      <h2>Grupos de clientes</h2>
+      <p class="desc" id="segDesc"></p>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="toolbar">
+      <input type="search" id="busca" placeholder="Buscar nome, telefone ou bairro" style="min-width:240px">
+      <select id="fPerfil"></select>
+      <select id="fContato">
+        <option value="">Contatados e não contatados</option>
+        <option value="nao">Só não contatados</option>
+        <option value="sim">Só contatados</option>
+      </select>
+      <label class="muted" style="font-size:13px"><input type="checkbox" id="soWhats" checked> só quem tem WhatsApp</label>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="btnCsv">Baixar lista (CSV)</button>
+    </div>
+    <div class="card" style="margin-bottom:12px;padding:12px 14px">
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">Mensagem do WhatsApp (<b>{nome}</b> vira o primeiro nome do cliente, <b>{pontos}</b> o saldo de pontos):</div>
+      <textarea id="msg"></textarea>
+    </div>
+    <div class="tablebox"><table id="tbCli"></table></div>
+    <div class="pager" id="pager"></div>
+  </section>
+
+  <!-- PRODUTOS -->
+  <section id="t-produtos" class="hidden grid">
+    <div class="grid two">
+      <div class="card">
+        <h2>Itens mais vendidos</h2>
+        <p class="desc">Pedidos concluídos, com os filtros de turno e canal aplicados.</p>
+        <div class="toolbar" style="margin-top:0"><select id="ordItens"><option value="v">Ordenar por faturamento</option><option value="q">Ordenar por quantidade</option></select></div>
+        <div class="tablebox"><table id="tbItens"></table></div>
+      </div>
+      <div class="card">
+        <h2>Sabores e complementos</h2>
+        <p class="desc">Opções escolhidas dentro dos itens (sabores de pizza, bordas, adicionais).</p>
+        <div class="toolbar" style="margin-top:0"><select id="grpSab"></select></div>
+        <div class="tablebox"><table id="tbSab"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMOÇÕES -->
+  <section id="t-promocoes" class="hidden">
+    <div class="card">
+      <h2>Promoções sugeridas para cada cliente</h2>
+      <p class="desc">O app olha o que cada cliente costuma pedir, quando pede e há quanto tempo não pede, e sugere uma ação por cliente (a mais importante). Escolha uma campanha para ver a lista.</p>
+      <div class="chips" id="campanhas"></div>
+    </div>
+    <div class="grid two" style="margin-top:16px">
+      <div class="card">
+        <h2 id="cpTitulo"></h2>
+        <p class="desc" id="cpDica"></p>
+        <div style="font-size:12px;color:var(--text-2);margin:8px 0 4px">Oferta desta campanha</div>
+        <input id="cpOferta" style="width:100%;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px">
+        <div style="font-size:12px;color:var(--text-2);margin:10px 0 4px">Mensagem do WhatsApp. Variáveis: <b>{nome}</b> <b>{favorito}</b> <b>{sugestao}</b> <b>{base}</b> <b>{oferta}</b> <b>{pontos}</b></div>
+        <textarea id="cpMsg" style="min-height:70px"></textarea>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><button class="btn" id="cpReset">Voltar ao texto padrão</button><span class="muted" style="font-size:12px">As edições ficam salvas neste computador.</span></div>
+      </div>
+      <div class="card">
+        <h2>Combinações que já acontecem</h2>
+        <p class="desc">Quem pede o item da esquerda leva o da direita com essa frequência. Bons candidatos a combo no cardápio.</p>
+        <div class="tablebox" style="max-height:300px"><table id="tbPares"></table></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input type="search" id="pBusca" placeholder="Buscar nome ou item" style="min-width:220px">
+      <select id="pContato"><option value="nao">Só não contatados</option><option value="">Contatados e não contatados</option><option value="sim">Só contatados</option></select>
+      <label class="muted" style="font-size:13px"><input type="checkbox" id="pSoWhats" checked> só quem tem WhatsApp</label>
+      <span style="margin-left:auto"></span>
+      <button class="btn" id="pCsv">Baixar lista (CSV)</button>
+    </div>
+    <div class="tablebox"><table id="tbPromo"></table></div>
+    <div class="pager" id="pPager"></div>
+  </section>
+
+  <!-- BAIRROS -->
+  <section id="t-bairros" class="hidden">
+    <div class="card">
+      <h2>Bairros</h2>
+      <p class="desc">Pedidos de entrega concluídos, com os filtros de turno e canal aplicados.</p>
+      <div class="tablebox"><table id="tbBai"></table></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const D = /*__DADOS__*/null;
+
+// ------------------------------------------------------------ helpers
+const $ = s => document.querySelector(s);
+const fmtR = v => (v==null?'—':'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}));
+const fmtR0 = v => 'R$ '+Math.round(v).toLocaleString('pt-BR');
+const fmtN = v => Math.round(v).toLocaleString('pt-BR');
+const fmtP = v => (v==null||!isFinite(v))?'—':(v*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const DIAS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const SER = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)'];
+function parseD(s){return new Date(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10),+s.slice(11,13),+s.slice(14,16));}
+function mesLbl(k){return MESES[+k.slice(5,7)-1]+'/'+k.slice(2,4);}
+function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){return null}}
+
+// ------------------------------------------------------------ preparo
+const REF = parseD(D.gerado_em);
+const P = D.pedidos.map(p=>({d:parseD(p[0]), k:p[0], t:p[1], c:p[2], tipo:p[3], v:p[4], cli:p[5], b:p[6], cancel:p[7]===1, taxa:p[8], desc:p[9], cup:p[10]}));
+const IFOOD = new Set(D.canais.map((c,i)=>c.ifood?i:-1).filter(i=>i>=0));
+const NT = D.turnos.length;
+const turnoUsado = new Array(NT).fill(0); P.forEach(p=>turnoUsado[p.t]++);
+const TURNOS_VIS = D.turnos.map((n,i)=>i).filter(i=>i<NT-1 || turnoUsado[i]>0);
+
+let F = {turno:'all', canal:'all'};
+function okCanal(p){ if(F.canal==='all') return true; const f=IFOOD.has(p.c); return F.canal==='ifood'?f:!f; }
+function okTurno(p){ return F.turno==='all' || p.t===F.turno; }
+const ok = p => okCanal(p) && okTurno(p);
+
+// ------------------------------------------------------------ filtros
+function montarFiltros(){
+  const ft=$('#fTurno'); ft.innerHTML='';
+  [['all','Todos']].concat(TURNOS_VIS.map(i=>[i,D.turnos[i]])).forEach(([v,l])=>{
+    const b=document.createElement('button'); b.textContent=l; b.title=(v==='all'?'':D.turnos_horario[v]||'');
+    b.onclick=()=>{F.turno=v;render();}; b.dataset.v=v; ft.appendChild(b);});
+  const fc=$('#fCanal'); fc.innerHTML='';
+  const temIfood = IFOOD.size>0;
+  [['all','Todos'],['proprio','Próprio']].concat(temIfood?[['ifood','Apps (iFood/99)']]:[]).forEach(([v,l])=>{
+    const b=document.createElement('button'); b.textContent=l; b.onclick=()=>{F.canal=v;render();}; b.dataset.v=v; fc.appendChild(b);});
+}
+function marcarFiltros(){
+  document.querySelectorAll('#fTurno button').forEach(b=>b.classList.toggle('on', String(F.turno)===b.dataset.v));
+  document.querySelectorAll('#fCanal button').forEach(b=>b.classList.toggle('on', F.canal===b.dataset.v));
+}
+let aba='hoje';
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{aba=b.dataset.t;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  ['hoje','geral','clientes','produtos','bairros','promocoes','resultados'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
+
+// ------------------------------------------------------------ gráfico de linhas (SVG)
+function lineChart(el, cats, series, opt){
+  opt=opt||{}; const W=el.clientWidth||800, H=opt.h||240, m={l:58,r:16,t:10,b:26};
+  const iw=W-m.l-m.r, ih=H-m.t-m.b;
+  let max=0; series.forEach(s=>s.vals.forEach(v=>{if(v>max)max=v;})); if(max<=0)max=1;
+  const step=niceStep(max/4); const top=Math.ceil(max/step)*step;
+  const x=i=>m.l+(cats.length<=1?iw/2:i*iw/(cats.length-1)), y=v=>m.t+ih-(v/top)*ih;
+  let s=`<svg viewBox="0 0 ${W} ${H}" height="${H}">`;
+  for(let v=0; v<=top+1e-9; v+=step){ s+=`<g class="gl"><line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}"/></g><g class="axis"><text x="${m.l-8}" y="${y(v)+4}" text-anchor="end">${opt.fmt?opt.fmt(v):fmtN(v)}</text></g>`; }
+  const every=Math.max(1,Math.ceil(cats.length/12));
+  cats.forEach((c,i)=>{ if(i%every===0||i===cats.length-1) s+=`<g class="axis"><text x="${x(i)}" y="${H-6}" text-anchor="middle">${esc(opt.lbl?opt.lbl(c):c)}</text></g>`; });
+  series.forEach(se=>{ const n=se.vals.length, corte=(opt.parcial&&n>1)?n-1:n;
+    const pts=se.vals.slice(0,corte).map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+    s+=`<polyline points="${pts}" fill="none" stroke="${se.cor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    if(corte<n) s+=`<line x1="${x(n-2)}" y1="${y(se.vals[n-2])}" x2="${x(n-1)}" y2="${y(se.vals[n-1])}" stroke="${se.cor}" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>`;
+    if(cats.length<=40) se.vals.forEach((v,i)=>{ s+=`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${se.cor}" stroke="var(--surface)" stroke-width="2"/>`; });
+  });
+  s+=`<line class="xh" x1="0" x2="0" y1="${m.t}" y2="${m.t+ih}" stroke="var(--muted)" stroke-dasharray="3 3" opacity="0"/>`;
+  s+=`<rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent" class="hit"/></svg><div class="tip"></div>`;
+  el.innerHTML=s;
+  const svg=el.querySelector('svg'), tip=el.querySelector('.tip'), xh=el.querySelector('.xh');
+  el.querySelector('.hit').onmousemove=ev=>{
+    const r=svg.getBoundingClientRect(); const px=(ev.clientX-r.left)*W/r.width;
+    let i=Math.round((px-m.l)/(cats.length<=1?1:iw/(cats.length-1))); i=Math.max(0,Math.min(cats.length-1,i));
+    xh.setAttribute('x1',x(i)); xh.setAttribute('x2',x(i)); xh.setAttribute('opacity',1);
+    tip.innerHTML=`<b>${esc(opt.lbl?opt.lbl(cats[i]):cats[i])}</b>${opt.parcial&&i===cats.length-1?' <span style="opacity:.7">(mês em andamento)</span>':''}`+series.map(se=>`<div class="row"><i style="background:${se.cor}"></i>${esc(se.nome)}: <b>${opt.tipFmt?opt.tipFmt(se.vals[i]):fmtN(se.vals[i])}</b></div>`).join('');
+    tip.style.opacity=1; const tx=x(i)*r.width/W; tip.style.left=Math.min(tx+12, r.width-tip.offsetWidth-4)+'px'; tip.style.top='8px';
+  };
+  el.querySelector('.hit').onmouseleave=()=>{tip.style.opacity=0; xh.setAttribute('opacity',0);};
+}
+function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw||1))); const n=raw/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+function legenda(el, itens){ el.innerHTML=itens.length<2?'':itens.map(([n,c])=>`<span><i style="background:${c}"></i>${esc(n)}</span>`).join(''); }
+
+// ------------------------------------------------------------ VISÃO GERAL
+function renderGeral(){
+  const dia=864e5, r30=new Date(REF-30*dia), r60=new Date(REF-60*dia);
+  const A=P.filter(p=>ok(p)&&p.d>=r30), B=P.filter(p=>ok(p)&&p.d>=r60&&p.d<r30);
+  const stat=L=>{const f=L.filter(p=>!p.cancel); const v=f.reduce((s,p)=>s+(p.v||0),0); const cl=new Set(f.filter(p=>p.cli>=0).map(p=>p.cli));
+    return {fat:v, n:f.length, tk:f.length?v/f.filter(p=>p.v!=null).length:0, cli:cl.size, canc:L.length?(L.length-f.length)/L.length:0};};
+  const a=stat(A), b=stat(B);
+  const var_=(x,y,inv)=>{ if(!y) return '<span class="muted">sem base de comparação</span>'; const d=(x-y)/y; const bom=inv?d<0:d>0;
+    return `<span class="${Math.abs(d)<0.005?'':bom?'up':'down'}">${d>0?'▲':d<0?'▼':''} ${fmtP(Math.abs(d))}</span> vs 30 dias anteriores`; };
+  const kp=[['Faturamento (30 dias)',fmtR0(a.fat),var_(a.fat,b.fat)],['Pedidos (30 dias)',fmtN(a.n),var_(a.n,b.n)],
+    ['Ticket médio',fmtR(a.tk),var_(a.tk,b.tk)],['Clientes que pediram',fmtN(a.cli),var_(a.cli,b.cli)],
+    ['Cancelamentos',fmtP(a.canc),b.n?`${fmtP(b.canc)} nos 30 dias anteriores`:'']];
+  $('#kpis').innerHTML=kp.map(k=>`<div class="card kpi"><div class="lbl">${k[0]}</div><div class="val">${k[1]}</div><div class="cmp">${k[2]}</div></div>`).join('');
+
+  // por mês e turno
+  const fech=P.filter(p=>!p.cancel && okCanal(p));
+  const meses=[...new Set(P.map(p=>p.k.slice(0,7)))].sort();
+  const ts = F.turno==='all'?TURNOS_VIS:[F.turno];
+  const series=ts.map(t=>({nome:D.turnos[t], cor:SER[Math.min(t,3)], vals:meses.map(mm=>fech.filter(p=>p.t===t&&p.k.startsWith(mm)).reduce((s,p)=>s+(p.v||0),0))}));
+  legenda($('#lgMes'), series.map(s=>[s.nome,s.cor]));
+  lineChart($('#chMes'), meses, series, {lbl:mesLbl, fmt:v=>v>=1000?'R$ '+(v/1000).toLocaleString('pt-BR')+' mil':'R$ '+v, tipFmt:fmtR0, parcial:true});
+
+  // canal
+  const fe2=P.filter(p=>!p.cancel && okTurno(p));
+  const sc=[{nome:'Canal próprio',cor:SER[0],f:p=>!IFOOD.has(p.c)}].concat(IFOOD.size?[{nome:'Apps de entrega',cor:SER[1],f:p=>IFOOD.has(p.c)}]:[])
+    .map(s=>({nome:s.nome,cor:s.cor,vals:meses.map(mm=>fe2.filter(p=>s.f(p)&&p.k.startsWith(mm)).length)}));
+  legenda($('#lgCanal'), sc.map(s=>[s.nome,s.cor]));
+  lineChart($('#chCanal'), meses, sc, {lbl:mesLbl, h:200, parcial:true});
+
+  // resumo por turno
+  const tot=fech.reduce((s,p)=>s+(p.v||0),0);
+  let h='<table><tr><th>Turno</th><th class="num">Pedidos</th><th class="num">Faturamento</th><th class="num">% do total</th><th class="num">Ticket</th><th class="num">Clientes</th></tr>';
+  TURNOS_VIS.forEach(t=>{const L=fech.filter(p=>p.t===t); const v=L.reduce((s,p)=>s+(p.v||0),0); const nv=L.filter(p=>p.v!=null).length;
+    h+=`<tr><td><span class="dot" style="background:${SER[Math.min(t,3)]}"></span>${esc(D.turnos[t])} <span class="muted">${esc(D.turnos_horario[t]||'')}</span></td><td class="num">${fmtN(L.length)}</td><td class="num">${fmtR0(v)}</td><td class="num">${fmtP(tot?v/tot:0)}</td><td class="num">${fmtR(nv?v/nv:0)}</td><td class="num">${fmtN(new Set(L.filter(p=>p.cli>=0).map(p=>p.cli)).size)}</td></tr>`;});
+  $('#tbTurno').innerHTML=h+'</table>';
+
+  // heatmap
+  const r90=new Date(REF-90*dia); const M=Array.from({length:7},()=>new Array(24).fill(0));
+  P.forEach(p=>{ if(!p.cancel && ok(p) && p.d>=r90) M[p.d.getDay()][p.d.getHours()]++; });
+  const horas=[]; for(let hh=0;hh<24;hh++){ if(M.some(r=>r[hh]>0)) horas.push(hh); }
+  const mx=Math.max(1,...M.flat()); const seq=['--seq1','--seq2','--seq3','--seq4','--seq5','--seq6'];
+  if(!horas.length){ $('#heat').innerHTML='<p class="muted">Sem pedidos nos últimos 90 dias para esse filtro.</p>'; }
+  else{
+    const ordem=[1,2,3,4,5,6,0];
+    let hm='<table class="heat"><tr><th></th>'+horas.map(hh=>`<th>${hh}h</th>`).join('')+'</tr>';
+    ordem.forEach(d=>{ hm+=`<tr><th class="r">${DIAS[d]}</th>`+horas.map(hh=>{const v=M[d][hh];
+      const c=v? `var(${seq[Math.min(5,Math.floor(v/mx*5.999))]})`:'var(--surface-2)';
+      return `<td class="c" style="background:${c}" title="${DIAS[d]} ${hh}h: ${v} pedidos"></td>`;}).join('')+'</tr>'; });
+    $('#heat').innerHTML=hm+'</table>';
+  }
+
+  // retenção
+  const porCli={}; P.filter(p=>!p.cancel&&ok(p)&&p.cli>=0).forEach(p=>{(porCli[p.cli]=porCli[p.cli]||[]).push(p.d);});
+  const coh={};
+  Object.values(porCli).forEach(ds=>{ ds.sort((a,b)=>a-b); const f=ds[0]; const k=f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0');
+    const c=coh[k]=coh[k]||{n:0,r30:0,r60:0,el30:0,el60:0}; c.n++;
+    const seg=ds.find(d=>d-f>=36e5*4); // 2º pedido (ignora pedidos no mesmo momento)
+    if((REF-f)/dia>=30){c.el30++; if(seg && (seg-f)/dia<=30) c.r30++;}
+    if((REF-f)/dia>=60){c.el60++; if(seg && (seg-f)/dia<=60) c.r60++;}
+  });
+  const ks=Object.keys(coh).sort().slice(-12);
+  let rt='<table><tr><th>Mês do 1º pedido</th><th class="num">Clientes novos</th><th class="num">Voltaram em 30 dias</th><th style="width:30%"></th><th class="num">Voltaram em 60 dias</th></tr>';
+  ks.forEach(k=>{const c=coh[k]; const p30=c.el30?c.r30/c.el30:null, p60=c.el60?c.r60/c.el60:null;
+    rt+=`<tr><td>${mesLbl(k)}</td><td class="num">${fmtN(c.n)}</td><td class="num">${p30==null?'<span class="muted">ainda cedo</span>':fmtP(p30)}</td><td>${p30==null?'':`<div class="bar" style="width:${Math.max(1,p30*100)}%"></div>`}</td><td class="num">${p60==null?'<span class="muted">ainda cedo</span>':fmtP(p60)}</td></tr>`;});
+  $('#tbRet').innerHTML=ks.length?rt+'</table>':'<p class="muted">Sem dados de clientes para esse filtro.</p>';
+}
+
+// ------------------------------------------------------------ CLIENTES
+const CFG=D.config; const DA=CFG.dias_ativo, PF=CFG.pedidos_fiel;
+const SEGS=[
+  {id:'fa', nome:'Fiéis ativos', dica:`${PF}+ pedidos e pediu nos últimos ${DA} dias`, f:(n,d)=>n>=PF&&d<=DA},
+  {id:'fs', nome:'Fiéis sumindo', dica:`${PF}+ pedidos, mas não pede há mais de ${DA} dias`, f:(n,d)=>n>=PF&&d>DA},
+  {id:'rr', nome:'Recorrentes recentes', dica:`2 a ${PF-1} pedidos, pediu nos últimos ${DA} dias`, f:(n,d)=>n>=2&&n<PF&&d<=DA},
+  {id:'no', nome:'Novos', dica:`1 pedido, nos últimos ${DA} dias`, f:(n,d)=>n===1&&d<=DA},
+  {id:'es', nome:'Esfriando', dica:`menos de ${PF} pedidos, entre ${DA+1} e 120 dias sem pedir`, f:(n,d)=>n<PF&&d>DA&&d<=120},
+  {id:'pe', nome:'Perdidos', dica:`menos de ${PF} pedidos, mais de 120 dias sem pedir`, f:(n,d)=>n<PF&&d>120},
+];
+let segSel=null, pag=0, ordCli={k:'gasto',dir:-1};
+const PAG=100;
+const contatos = JSON.parse(store('contatos')||'{}');
+function hojeISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function cInfo(id){ const v=contatos[id]; if(!v) return null;
+  if(typeof v==='string'){ const p=v.split('/'); const d=new Date(+p[2],+p[1]-1,+p[0],12); return {d, c:'clientes', txt:v}; }
+  const d=new Date(v.d+'T12:00:00'); return {d, c:v.c, txt:d.toLocaleDateString('pt-BR')}; }
+function marcar(id, camp, on){ if(on) contatos[id]={d:hojeISO(), c:camp}; else delete contatos[id]; store('contatos',JSON.stringify(contatos)); }
+$('#msg').value = store('msg') || CFG.mensagem || '';
+$('#msg').oninput=()=>{store('msg',$('#msg').value); renderClientes();};
+
+function calcClientes(){
+  const porCli=new Map(); const turnosCli=new Map();
+  P.forEach(p=>{ if(p.cancel||p.cli<0||!okCanal(p)) return;
+    let tc=turnosCli.get(p.cli); if(!tc){tc=new Array(NT).fill(0); tc.ult=p.d; turnosCli.set(p.cli,tc);} tc[p.t]++; if(p.d>tc.ult) tc.ult=p.d;
+    if(!okTurno(p)) return;
+    let c=porCli.get(p.cli); if(!c){c={n:0,v:0,nv:0,ult:p.d,pri:p.d,bai:{}}; porCli.set(p.cli,c);}
+    c.n++; if(p.v!=null){c.v+=p.v; c.nv++;} if(p.d>c.ult)c.ult=p.d; if(p.d<c.pri)c.pri=p.d; if(p.b>=0)c.bai[p.b]=(c.bai[p.b]||0)+1;
+  });
+  const L=[];
+  porCli.forEach((c,i)=>{ const cad=D.clientes[i]; const dias=Math.floor((REF-c.ult)/864e5);
+    const seg=SEGS.find(s=>s.f(c.n,dias));
+    const tc=turnosCli.get(i); const perfil=tc.map((n,t)=>n?D.turnos[t]:null).filter(Boolean).join(' + ');
+    const bb=Object.entries(c.bai).sort((a,b)=>b[1]-a[1])[0];
+    L.push({i, nome:cad.nome||'(sem nome)', tel:cad.tel, ddi:cad.ddi, ifood:cad.ifood, app:cad.app, pontos:cad.pontos||0, n:c.n, gasto:c.v, tk:c.nv?c.v/c.nv:0,
+      ult:c.ult, pri:c.pri, dias, seg:seg?seg.id:'pe', tc, perfil, outro: F.turno!=='all' && dias>DA && (REF-tc.ult)/864e5<=DA, bairro:bb?D.bairros[bb[0]]:'', id:cad.id});
+  });
+  return L;
+}
+function primeiroNome(c){ const nome=(c.nome||'').trim().split(/\s+/)[0]||''; return nome?nome.charAt(0).toUpperCase()+nome.slice(1).toLowerCase():''; }
+function waLink(c, texto){
+  if(!c.tel || c.tel.length<10) return null;
+  let num=c.tel; if(!(num.length>=12 && num.startsWith(c.ddi||'55'))) num=(c.ddi||'55')+num;
+  const txt=(texto!=null?texto:($('#msg').value||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{pontos\}/g,c.pontos));
+  return 'https://wa.me/'+num+(txt?'?text='+encodeURIComponent(txt):'');
+}
+let ultimaLista=[];
+function renderClientes(){
+  const L=calcClientes(); const totV=L.reduce((s,c)=>s+c.gasto,0)||1;
+  $('#segDesc').innerHTML=`Clique num grupo para filtrar a lista. Contagem considerando ${F.turno==='all'?'todos os turnos':'só o turno <b>'+esc(D.turnos[F.turno])+'</b>'} e ${F.canal==='all'?'todos os canais':F.canal==='ifood'?'só apps de entrega':'só canal próprio'}.`;
+  $('#chips').innerHTML=SEGS.map(s=>{const g=L.filter(c=>c.seg===s.id); const v=g.reduce((a,c)=>a+c.gasto,0);
+    return `<button class="chip ${segSel===s.id?'on':''}" data-s="${s.id}" title="${esc(s.dica)}"><div class="n">${fmtN(g.length)}</div><div class="l">${s.nome}</div><div class="p">${fmtP(v/totV)} do faturamento</div></button>`;}).join('');
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{segSel=segSel===b.dataset.s?null:b.dataset.s; pag=0; renderClientes();});
+  // perfis
+  const perfis=[...new Set(L.map(c=>c.perfil))].sort((a,b)=>L.filter(c=>c.perfil===b).length-L.filter(c=>c.perfil===a).length);
+  const fp=$('#fPerfil'), cur=fp.value;
+  fp.innerHTML='<option value="">Todos os perfis de turno</option>'+perfis.map(p=>`<option ${p===cur?'selected':''} value="${esc(p)}">Pede no: ${esc(p)} (${L.filter(c=>c.perfil===p).length})</option>`).join('');
+  const q=($('#busca').value||'').toLowerCase().trim(), qd=q.replace(/\D/g,'');
+  let F2=L.filter(c=>(!segSel||c.seg===segSel) && (!fp.value||c.perfil===fp.value) &&
+    (!$('#soWhats').checked || waLink(c)) &&
+    (!$('#fContato').value || ($('#fContato').value==='sim')===!!contatos[c.id]) &&
+    (!q || c.nome.toLowerCase().includes(q) || (qd && (c.tel||'').includes(qd)) || (c.bairro||'').toLowerCase().includes(q)));
+  const k=ordCli.k, dir=ordCli.dir;
+  F2.sort((a,b)=>{const x=a[k],y=b[k]; return (x>y?1:x<y?-1:0)*dir;});
+  ultimaLista=F2;
+  const nPag=Math.max(1,Math.ceil(F2.length/PAG)); if(pag>=nPag)pag=nPag-1;
+  const cols=[['nome','Nome'],['wa','WhatsApp',0],['ok','Contatado',0],['seg','Grupo'],['dias','Dias sem pedir',1],['n','Pedidos',1],['gasto','Total gasto',1],['tk','Ticket médio',1],['ult','Último pedido',1],['perfil','Pedidos por turno'],['bairro','Bairro'],['pontos','Pontos',1]];
+  let h='<tr>'+cols.map(c=>`<th class="${c[2]?'num ':''}${c[2]===0?'':'sort'}" data-k="${c[0]}">${c[1]}${ordCli.k===c[0]?(ordCli.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
+  F2.slice(pag*PAG,(pag+1)*PAG).forEach(c=>{const w=waLink(c); const feito=!!contatos[c.id];
+    const turnosTxt=c.tc.map((n,t)=>n?`${D.turnos[t].slice(0,1)}${n}`:null).filter(Boolean).join(' · ');
+    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</td>
+      <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">Abrir conversa</a>`:'<span class="muted">—</span>'}</td>
+      <td><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}> ${feito?`<span class="muted" style="font-size:11px">${esc(cInfo(c.id).txt)}</span>`:''}</td>
+      <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?' <span class="tag" title="Sumiu deste turno, mas pediu recentemente em outro turno" style="background:transparent;border:1px solid var(--line)">ativo em outro turno</span>':''}</td>
+      <td class="num">${fmtN(c.dias)}</td><td class="num">${fmtN(c.n)}</td><td class="num">${fmtR(c.gasto)}</td><td class="num">${fmtR(c.tk)}</td>
+      <td class="num">${c.ult.toLocaleDateString('pt-BR')}</td><td title="${esc(c.perfil)}">${esc(turnosTxt)}</td><td>${esc(c.bairro)}</td><td class="num">${fmtN(c.pontos)}</td></tr>`;});
+  if(!F2.length) h+=`<tr><td colspan="${cols.length}" class="muted" style="padding:20px">Nenhum cliente com esses filtros.</td></tr>`;
+  $('#tbCli').innerHTML=h;
+  $('#tbCli').querySelectorAll('th.sort').forEach(th=>th.onclick=()=>{const k=th.dataset.k; ordCli = ordCli.k===k?{k,dir:-ordCli.dir}:{k,dir:(k==='nome'||k==='perfil'||k==='bairro'||k==='seg')?1:-1}; renderClientes();});
+  $('#tbCli').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, segSel?'seg_'+segSel:'clientes', cb.checked); renderClientes();});
+  $('#pager').innerHTML=`${fmtN(F2.length)} clientes · página ${pag+1} de ${nPag} <button class="btn" ${pag?'':'disabled'} id="pgA">‹ Anterior</button><button class="btn" ${pag<nPag-1?'':'disabled'} id="pgP">Próxima ›</button>`;
+  $('#pgA').onclick=()=>{pag--;renderClientes();}; $('#pgP').onclick=()=>{pag++;renderClientes();};
+}
+['#busca','#fPerfil','#fContato','#soWhats'].forEach(s=>$(s).addEventListener(s==='#busca'?'input':'change',()=>{pag=0;renderClientes();}));
+$('#btnCsv').onclick=()=>{
+  const linhas=[['Nome','Telefone','WhatsApp','Grupo','Dias sem pedir','Pedidos','Total gasto','Ticket medio','Ultimo pedido','Turnos','Bairro','Pontos','Contatado em']];
+  ultimaLista.forEach(c=>linhas.push([c.nome,c.tel||'',waLink(c)||'',(SEGS.find(s=>s.id===c.seg)||{}).nome,c.dias,c.n,c.gasto.toFixed(2).replace('.',','),c.tk.toFixed(2).replace('.',','),c.ult.toLocaleDateString('pt-BR'),c.perfil,c.bairro,c.pontos,(cInfo(c.id)||{}).txt||'']));
+  const csv='﻿'+linhas.map(l=>l.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='clientes_'+(segSel||'todos')+'.csv'; a.click();
+};
+
+// ------------------------------------------------------------ PRODUTOS
+function okIT(t,c){ if(F.turno!=='all'&&t!==F.turno) return false; if(F.canal==='all') return true; const f=IFOOD.has(c); return F.canal==='ifood'?f:!f; }
+function tabelaRank(el, linhas, cab){
+  const tv=linhas.reduce((s,l)=>s+l.v,0)||1, mx=Math.max(1,...linhas.map(l=>l.ord));
+  let h=`<tr><th>#</th><th>${cab}</th><th class="num">Qtd.</th><th class="num">Faturamento</th><th class="num">% do fat.</th><th style="width:22%"></th></tr>`;
+  linhas.slice(0,60).forEach((l,i)=>{h+=`<tr><td class="muted">${i+1}</td><td>${esc(l.nome)}</td><td class="num">${fmtN(l.q)}</td><td class="num">${fmtR0(l.v)}</td><td class="num">${fmtP(l.v/tv)}</td><td><div class="bar" style="width:${l.ord/mx*100}%"></div></td></tr>`;});
+  if(!linhas.length) h+='<tr><td colspan="6" class="muted" style="padding:20px">Sem dados (os detalhes dos pedidos já foram baixados?).</td></tr>';
+  el.innerHTML=h;
+}
+function renderProdutos(){
+  const o=$('#ordItens').value; const acc={};
+  D.itens.forEach(([t,c,n,q,v])=>{ if(!okIT(t,c))return; const a=acc[n]=acc[n]||{nome:n,q:0,v:0}; a.q+=q; a.v+=v; });
+  const L=Object.values(acc).map(a=>({...a,ord:o==='q'?a.q:a.v})).sort((a,b)=>b.ord-a.ord);
+  tabelaRank($('#tbItens'),L,'Item');
+  const grupos={}; D.sabores.forEach(([t,c,g,n,q,v])=>{ if(okIT(t,c)) grupos[g]=(grupos[g]||0)+q; });
+  const gs=Object.keys(grupos).sort((a,b)=>grupos[b]-grupos[a]); const sel=$('#grpSab'); const cur=sel.value;
+  sel.innerHTML='<option value="">Todos os grupos</option>'+gs.map(g=>`<option ${g===cur?'selected':''}>${esc(g)}</option>`).join('');
+  const acc2={}; D.sabores.forEach(([t,c,g,n,q,v])=>{ if(!okIT(t,c)||(sel.value&&g!==sel.value))return; const k=sel.value?n:n+(g?'  ·  '+g:''); const a=acc2[k]=acc2[k]||{nome:k,q:0,v:0}; a.q+=q; a.v+=v; });
+  tabelaRank($('#tbSab'),Object.values(acc2).map(a=>({...a,ord:a.q})).sort((a,b)=>b.ord-a.ord),'Opção');
+}
+$('#ordItens').onchange=renderProdutos; $('#grpSab').onchange=renderProdutos;
+
+// ------------------------------------------------------------ BAIRROS
+function renderBairros(){
+  const acc={}; P.forEach(p=>{ if(p.cancel||!ok(p)||p.b<0) return; const a=acc[p.b]=acc[p.b]||{n:0,v:0,cl:new Set(),tx:0}; a.n++; a.v+=p.v||0; a.tx+=p.taxa||0; if(p.cli>=0)a.cl.add(p.cli); });
+  const L=Object.entries(acc).map(([b,a])=>({nome:D.bairros[b],...a})).sort((a,b)=>b.v-a.v); const tv=L.reduce((s,l)=>s+l.v,0)||1, mx=Math.max(1,...L.map(l=>l.v));
+  let h='<tr><th>Bairro</th><th class="num">Pedidos</th><th class="num">Clientes</th><th class="num">Faturamento</th><th class="num">%</th><th class="num">Ticket</th><th class="num">Taxa média</th><th style="width:20%"></th></tr>';
+  L.forEach(l=>{h+=`<tr><td>${esc(l.nome)}</td><td class="num">${fmtN(l.n)}</td><td class="num">${fmtN(l.cl.size)}</td><td class="num">${fmtR0(l.v)}</td><td class="num">${fmtP(l.v/tv)}</td><td class="num">${fmtR(l.v/l.n)}</td><td class="num">${fmtR(l.tx/l.n)}</td><td><div class="bar" style="width:${l.v/mx*100}%"></div></td></tr>`;});
+  if(!L.length) h+='<tr><td colspan="8" class="muted" style="padding:20px">Sem pedidos de entrega para esses filtros.</td></tr>';
+  $('#tbBai').innerHTML=h;
+}
+
+
+// ------------------------------------------------------------ PROMOÇÕES
+const CAMP = {
+  aniversario:{nome:'Aniversário', dica:'Aniversário nos próximos 15 dias. Um mimo nessa data é lembrado e quase sempre vira pedido.', oferta:'uma sobremesa de presente',
+    msg:'Oi {nome}! Vi aqui que seu aniversário está chegando 🎉 Pra comemorar, no seu pedido pelo nosso app desta semana vai {oferta}. Parabéns!'},
+  segundo:{nome:'Puxar o 2º pedido', dica:'Fizeram só 1 pedido, recente. É o momento mais barato para criar o hábito: quem faz o 2º pedido tem muito mais chance de virar fiel.', oferta:'R$ 5 de desconto',
+    msg:'Oi {nome}! Que bom ter você com a gente 😊 Esperamos que tenha gostado! No seu próximo pedido pelo nosso app tem {oferta}, válido até domingo.'},
+  reativar:{nome:'Reativar sumidos', dica:'Já foram clientes frequentes e pararam. A oferta vai no item favorito de cada um, que é o que tem mais chance de trazer de volta.', oferta:'R$ 8 de desconto',
+    msg:'Oi {nome}! Faz tempo que você não pede {favorito} com a gente, sentimos sua falta! Pra matar a saudade: {oferta} no próximo pedido pelo app, até domingo.'},
+  lembrete:{nome:'Lembrete (sem desconto)', dica:'Clientes ativos que já passaram do próprio ritmo de pedidos. Eles iam pedir de qualquer jeito: um lembrete basta, não precisa dar desconto.', oferta:'',
+    msg:'Oi {nome}! Bateu a vontade de {favorito} hoje? 😋 Tô por aqui, é só pedir pelo nosso app!'},
+  conhecer_noite:{nome:'Almoço → pizzaria', dica:'Pedem só no almoço e nunca pediram pizza. Já confiam na casa: é o cliente mais fácil de ganhar para a noite.', oferta:'R$ 10 de desconto',
+    msg:'Oi {nome}! Sabia que à noite a gente vira pizzaria? 🍕 O sabor mais pedido é {sugestao}. Na sua primeira pizza pelo app: {oferta}!'},
+  conhecer_almoco:{nome:'Pizzaria → almoço', dica:'Pedem só pizza e nunca pediram almoço. Vale apresentar o almoço em dia de semana.', oferta:'um suco grátis no primeiro almoço',
+    msg:'Oi {nome}! Além da pizza, a gente também faz almoço 🍽️ O mais pedido é {sugestao}. No seu primeiro almoço pelo app vai {oferta}!'},
+  complemento:{nome:'Complemento', dica:'Pedem sempre o mesmo item e nunca levam o acompanhamento que a maioria leva junto. Aumenta o ticket sem dar desconto no principal.', oferta:'sai pela metade do preço',
+    msg:'Oi {nome}! Da próxima vez que pedir {base}, que tal levar {sugestao} junto? Pra você experimentar: {oferta} 😉'},
+  sabor_novo:{nome:'Sabor novo', dica:'Pedem sempre o mesmo sabor. A sugestão é o sabor que mais agrada quem tem o mesmo gosto, e que esse cliente nunca provou.', oferta:'sem custo extra',
+    msg:'Oi {nome}! Você é fã de {favorito}, né? 😄 Quem ama {favorito} costuma adorar {sugestao}. Na sua próxima pizza, pede meia {sugestao}, que sai {oferta}!'},
+};
+const PR = (D.promo && D.promo.clientes) || [];
+let campSel = null, pPag = 0;
+function cpTexto(tipo, campo){ const v=store('camp_'+tipo+'_'+campo); return v!=null?v:CAMP[tipo][campo]; }
+function msgPromo(r, rec){
+  const c=D.clientes[r.cli];
+  const fav = rec.fav || r.favorito || '';
+  const oferta = cpTexto(rec.tipo,'oferta').replace(/\{sugestao\}/g, rec.sugestao||'');
+  return cpTexto(rec.tipo,'msg').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,fav).replace(/\{sugestao\}/g,rec.sugestao||'')
+    .replace(/\{base\}/g,rec.base||fav).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
+}
+function promoFiltrada(){
+  return PR.filter(r=>{ if(F.turno!=='all' && r.turno!==F.turno) return false; return true; });
+}
+function renderPromocoes(){
+  const L=promoFiltrada();
+  const tipos=Object.keys(CAMP).filter(t=>L.some(r=>r.recs[0].tipo===t));
+  if(!campSel || !tipos.includes(campSel)) campSel=tipos[0]||null;
+  $('#campanhas').innerHTML = tipos.length? tipos.map(t=>{ const g=L.filter(r=>r.recs[0].tipo===t); const pot=g.reduce((s,r)=>s+r.ticket,0);
+    const pend=g.filter(r=>!contatos[D.clientes[r.cli].id]).length;
+    return `<button class="chip ${campSel===t?'on':''}" data-c="${t}" title="${esc(CAMP[t].dica)}"><div class="n">${fmtN(g.length)}</div><div class="l">${CAMP[t].nome}</div><div class="p">${fmtN(pend)} a contatar · ${fmtR0(pot)} se cada um pedir 1 vez</div></button>`;}).join('')
+    : '<p class="muted">Ainda não há dados suficientes para sugerir promoções (os detalhes dos pedidos já foram baixados?).</p>';
+  document.querySelectorAll('#campanhas .chip').forEach(b=>b.onclick=()=>{campSel=b.dataset.c; pPag=0; renderPromocoes();});
+  // pares
+  const pares=(D.promo&&D.promo.pares)||[];
+  $('#tbPares').innerHTML='<tr><th>Quem pede</th><th>leva junto</th><th class="num">Frequência</th><th class="num">Vezes</th></tr>'+
+    (pares.length?pares.map(p=>`<tr><td>${esc(p.a)}</td><td>${esc(p.b)}</td><td class="num">${fmtP(p.conf)}</td><td class="num">${fmtN(p.juntos)}</td></tr>`).join(''):'<tr><td colspan="4" class="muted">Sem combinações frequentes ainda.</td></tr>');
+  if(!campSel){ $('#tbPromo').innerHTML=''; $('#pPager').innerHTML=''; $('#cpTitulo').textContent=''; return; }
+  const C=CAMP[campSel];
+  $('#cpTitulo').textContent='Campanha: '+C.nome; $('#cpDica').textContent=C.dica;
+  if(document.activeElement!==$('#cpOferta')) $('#cpOferta').value=cpTexto(campSel,'oferta');
+  if(document.activeElement!==$('#cpMsg')) $('#cpMsg').value=cpTexto(campSel,'msg');
+  $('#cpOferta').disabled = campSel==='lembrete';
+  // lista
+  const q=($('#pBusca').value||'').toLowerCase().trim(); const fc=$('#pContato').value;
+  let G=L.filter(r=>r.recs[0].tipo===campSel).filter(r=>{ const c=D.clientes[r.cli];
+    if($('#pSoWhats').checked && !waLink(c,'')) return false;
+    if(fc && (fc==='sim')!==!!contatos[c.id]) return false;
+    if(q && !((c.nome||'').toLowerCase().includes(q) || (r.favorito||'').toLowerCase().includes(q) || (r.recs[0].sugestao||'').toLowerCase().includes(q))) return false;
+    return true; });
+  G.sort((a,b)=>b.gasto-a.gasto);
+  ultimaPromo=G;
+  const nPag=Math.max(1,Math.ceil(G.length/PAG)); if(pPag>=nPag) pPag=nPag-1;
+  let h='<tr><th>Nome</th><th>WhatsApp</th><th>Contatado</th><th>Por que este cliente</th><th>Sugestão</th><th>Melhor momento p/ mandar</th><th class="num">Pedidos</th><th class="num">Total gasto</th><th>Outras ideias</th></tr>';
+  G.slice(pPag*PAG,(pPag+1)*PAG).forEach(r=>{ const c=D.clientes[r.cli]; const rec=r.recs[0]; const m=msgPromo(r,rec); const w=waLink(c,m); const feito=!!contatos[c.id];
+    const outras=r.recs.slice(1).map(x=>`<span class="tag" title="${esc(x.motivo)}">${esc(CAMP[x.tipo]?CAMP[x.tipo].nome:x.titulo)}${x.sugestao?': '+esc(x.sugestao):''}</span>`).join(' ');
+    h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</td>
+      <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(m)}">Abrir conversa</a>`:'<span class="muted">—</span>'}</td>
+      <td><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}> ${feito?`<span class="muted" style="font-size:11px">${esc(cInfo(c.id).txt)}</span>`:''}</td>
+      <td style="white-space:normal;min-width:280px;max-width:420px;font-size:13px">${esc(rec.motivo)}</td>
+      <td>${esc(rec.sugestao||rec.fav||r.favorito||'')}</td><td>${esc(r.quando)}</td>
+      <td class="num">${fmtN(r.n)}</td><td class="num">${fmtR(r.gasto)}</td><td style="white-space:normal;min-width:160px">${outras}</td></tr>`; });
+  if(!G.length) h+='<tr><td colspan="9" class="muted" style="padding:20px">Nenhum cliente com esses filtros.</td></tr>';
+  $('#tbPromo').innerHTML=h;
+  $('#tbPromo').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, campSel, cb.checked); renderPromocoes();});
+  $('#pPager').innerHTML=`${fmtN(G.length)} clientes · página ${pPag+1} de ${nPag} <button class="btn" ${pPag?'':'disabled'} id="ppA">‹ Anterior</button><button class="btn" ${pPag<nPag-1?'':'disabled'} id="ppP">Próxima ›</button>`;
+  $('#ppA').onclick=()=>{pPag--;renderPromocoes();}; $('#ppP').onclick=()=>{pPag++;renderPromocoes();};
+}
+let ultimaPromo=[];
+$('#cpOferta').oninput=()=>{ store('camp_'+campSel+'_oferta',$('#cpOferta').value); renderPromocoes(); };
+$('#cpMsg').oninput=()=>{ store('camp_'+campSel+'_msg',$('#cpMsg').value); renderPromocoes(); };
+$('#cpReset').onclick=()=>{ try{localStorage.removeItem('camp_'+campSel+'_oferta'); localStorage.removeItem('camp_'+campSel+'_msg');}catch(e){} $('#cpOferta').value=CAMP[campSel].oferta; $('#cpMsg').value=CAMP[campSel].msg; renderPromocoes(); };
+['#pBusca','#pContato','#pSoWhats'].forEach(s=>$(s).addEventListener(s==='#pBusca'?'input':'change',()=>{pPag=0;renderPromocoes();}));
+$('#pCsv').onclick=()=>{
+  const linhas=[['Nome','Telefone','Campanha','Motivo','Sugestao','Mensagem','WhatsApp','Melhor momento','Pedidos','Total gasto','Contatado em']];
+  ultimaPromo.forEach(r=>{const c=D.clientes[r.cli]; const rec=r.recs[0]; const m=msgPromo(r,rec);
+    linhas.push([c.nome,c.tel||'',CAMP[rec.tipo].nome,rec.motivo,rec.sugestao||'',m,waLink(c,m)||'',r.quando,r.n,r.gasto.toFixed(2).replace('.',','),(cInfo(c.id)||{}).txt||'']);});
+  const csv='﻿'+linhas.map(l=>l.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download='promocao_'+campSel+'.csv'; a.click();
+};
+
+
+// ------------------------------------------------------------ HOJE (lista do dia)
+const PERF = (D.promo && D.promo.perfis) || {};
+const REC_DE = {}; ((D.promo&&D.promo.clientes)||[]).forEach(r=>REC_DE[r.cli]=r);
+const AVAL = D.avaliacoes || [];
+const BLOCOS = [
+  {id:'avaliacao', nome:'Avaliação ruim para responder', camp:null, dica:'Deram nota 3 ou menos nos últimos 7 dias. Responda logo: cliente que reclama e é bem atendido muitas vezes vira fiel.'},
+  {id:'aniversario', nome:'Aniversariantes da semana', camp:'aniversario', dica:'Aniversário hoje ou nos próximos 7 dias.'},
+  {id:'segundo', nome:'Boas-vindas (fizeram o 1º pedido há 2 a 5 dias)', camp:'segundo', dica:'O melhor momento para puxar o 2º pedido é logo depois do 1º.'},
+  {id:'lembrete', nome:'Costumam pedir neste dia da semana', camp:'lembrete', dica:'Clientes ativos que pedem principalmente neste dia da semana e ainda não pediram esta semana. Só lembrar, sem desconto.'},
+  {id:'reativar', nome:'Sumidos que mais gastavam', camp:'reativar', dica:'Os 10 clientes sumidos que mais gastaram, que você ainda não chamou no último mês.'},
+];
+const MAX_BLOCO = {aniversario:30, segundo:20, lembrete:20, reativar:10, avaliacao:20};
+function diasEntre(a,b){ return Math.floor((b-a)/864e5); }
+function porCliente(){
+  const m=new Map(); P.forEach(p=>{ if(p.cancel||p.cli<0) return; let x=m.get(p.cli); if(!x){x={n:0,v:0,pri:p.d,ult:p.d}; m.set(p.cli,x);} x.n++; x.v+=p.v||0; if(p.d<x.pri)x.pri=p.d; if(p.d>x.ult)x.ult=p.d; }); return m; }
+function contatadoRecente(c, dias){ const i=cInfo(c.id); return i && diasEntre(i.d,new Date())<=dias; }
+function msgTipo(tipo, cli, extra){
+  const c=D.clientes[cli]; const pf=PERF[cli]||[]; const fav=(extra&&extra.fav)||pf[0]||'';
+  const oferta=cpTexto(tipo,'oferta').replace(/\{sugestao\}/g,(extra&&extra.sugestao)||'');
+  return cpTexto(tipo,'msg').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,fav).replace(/\{sugestao\}/g,(extra&&extra.sugestao)||'')
+    .replace(/\{base\}/g,fav).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,c.pontos||0).replace(/\s+([!.,])/g,'$1');
+}
+function listaDoDia(){
+  const hoje=new Date(); hoje.setHours(12,0,0,0); const dow=hoje.getDay();
+  const pc=porCliente(); const out={}; BLOCOS.forEach(b=>out[b.id]=[]);
+  pc.forEach((x,cli)=>{ const c=D.clientes[cli]; if(!c||!waLink(c,'')) return;
+    const dias=diasEntre(x.ult,hoje); const pf=PERF[cli]||[];
+    if(F.turno!=='all' && pf[5]!==undefined && pf[5]!==F.turno) return;
+    // aniversário
+    if(c.nasc && c.nasc.length>=10){ const a=new Date(hoje.getFullYear(),+c.nasc.slice(5,7)-1,+c.nasc.slice(8,10),12);
+      if(a<hoje && diasEntre(a,hoje)>0) a.setFullYear(a.getFullYear()+1);
+      const falta=diasEntre(hoje,a); if(falta>=0&&falta<=7&&!contatadoRecente(c,20)) out.aniversario.push({cli,x,ord:falta,motivo:falta?`Faz aniversário em ${a.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} (daqui a ${falta} dia${falta>1?'s':''}).`:'Faz aniversário HOJE 🎉'}); }
+    // 2º pedido
+    if(x.n===1 && dias>=2 && dias<=5 && !contatadoRecente(c,10)) out.segundo.push({cli,x,ord:dias,motivo:`1º pedido há ${dias} dias${pf[0]?' ('+pf[0]+')':''}. Gastou ${fmtR(x.v)}.`});
+    // dia de costume
+    if(x.n>=3 && pf[1]===dow && pf[3]>=0.35 && dias>=5 && dias<=DA && !contatadoRecente(c,6))
+      out.lembrete.push({cli,x,ord:-x.n,motivo:`${Math.round(pf[3]*100)}% dos pedidos são ${['no domingo','na segunda','na terça','na quarta','na quinta','na sexta','no sábado'][dow]}. Último pedido há ${dias} dias. Melhor horário: por volta das ${pf[2]}h.`});
+  });
+  // sumidos (da recomendação "reativar")
+  Object.values(REC_DE).filter(r=>r.recs[0].tipo==='reativar').sort((a,b)=>b.gasto-a.gasto).forEach(r=>{
+    const c=D.clientes[r.cli]; if(!waLink(c,'')||contatadoRecente(c,30)) return;
+    if(F.turno!=='all' && r.turno!==F.turno) return;
+    out.reativar.push({cli:r.cli, x:{n:r.n,v:r.gasto}, ord:-r.gasto, motivo:r.recs[0].motivo}); });
+  // avaliações ruins (7 dias)
+  AVAL.forEach(a=>{ const d=parseD(a[0]); if(diasEntre(d,hoje)>7 || a[2]>3) return; const cli=a[1];
+    if(cli>=0){ const ci=cInfo(D.clientes[cli].id); if(ci && ci.d>=new Date(d.getFullYear(),d.getMonth(),d.getDate())) return; }
+    out.avaliacao.push({cli, x:cli>=0?pc.get(cli)||null:null, ord:a[2], aval:a, motivo:`Nota ${String(a[2]).replace('.',',')} em ${d.toLocaleDateString('pt-BR')}${a[4]?' · notas baixas: '+a[4]:''}${a[3]?' · "'+a[3]+'"':''}`}); });
+  Object.keys(out).forEach(k=>{ out[k].sort((a,b)=>a.ord-b.ord); out[k]=out[k].slice(0,MAX_BLOCO[k]); });
+  return out;
+}
+function renderHoje(){
+  const L=listaDoDia(); const hoje=new Date();
+  $('#hojeTitulo').textContent='Lista do dia · '+hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  const idade=Math.round((hoje-REF)/36e5);
+  $('#hojeDesc').innerHTML=`Quem chamar no WhatsApp hoje. A mensagem já vai pronta: clique em "Abrir conversa", envie e marque como contatado. Quem já foi contatado recentemente não aparece de novo.${idade>30?` <b style="color:var(--bad)">Atenção: os dados são de ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}. Rode "Atualizar painel".</b>`:''}`;
+  const tot=BLOCOS.reduce((s,b)=>s+L[b.id].length,0);
+  $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi" style="padding:4px 0"><div class="lbl">${b.nome}</div><div class="val" style="font-size:22px">${L[b.id].length}</div></div>`).join('');
+  let h='';
+  BLOCOS.forEach(b=>{ const itens=L[b.id]; if(!itens.length) return;
+    h+=`<div class="card" style="margin-top:16px"><h2>${b.nome} <span class="muted" style="font-weight:400">(${itens.length})</span></h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Nome</th><th>WhatsApp</th><th>Contatado</th><th>Por quê</th><th class="num">Pedidos</th><th class="num">Total gasto</th></tr>`;
+    itens.forEach(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
+      if(!c){ h+=`<tr><td class="muted">Cliente não identificado (pedido ${esc(it.aval?it.aval[5]:'')})</td><td>—</td><td></td><td style="white-space:normal;min-width:320px">${esc(it.motivo)}</td><td></td><td></td></tr>`; return; }
+      const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
+      const msg=b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da pizzaria. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
+      const w=waLink(c,msg); const feito=!!cInfo(c.id);
+      h+=`<tr><td class="${feito?'done':''}">${esc(c.nome||'(sem nome)')}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</td>
+        <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">Abrir conversa</a>`:'<span class="muted">sem telefone</span>'}</td>
+        <td><input type="checkbox" data-id="${c.id}" data-camp="${b.camp||'avaliacao'}" ${feito?'checked':''}></td>
+        <td style="white-space:normal;min-width:320px;font-size:13px">${esc(it.motivo)}</td>
+        <td class="num">${it.x?fmtN(it.x.n):''}</td><td class="num">${it.x?fmtR(it.x.v):''}</td></tr>`; });
+    h+='</table></div></div>'; });
+  if(!tot) h='<div class="card" style="margin-top:16px"><p class="muted">Ninguém para chamar hoje com esses filtros. 🎉</p></div>';
+  $('#hojeBlocos').innerHTML=h;
+  $('#hojeBlocos').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, cb.dataset.camp, cb.checked); });
+}
+
+// ------------------------------------------------------------ RESULTADOS
+const NOME_CAMP = Object.assign({clientes:'Aba Clientes', avaliacao:'Avaliação ruim', seg_fa:'Clientes: fiéis ativos', seg_fs:'Clientes: fiéis sumindo', seg_rr:'Clientes: recorrentes', seg_no:'Clientes: novos', seg_es:'Clientes: esfriando', seg_pe:'Clientes: perdidos'},
+  Object.fromEntries(Object.entries(CAMP).map(([k,v])=>[k,v.nome])));
+function renderResultados(){
+  const dias=+$('#rPeriodo').value; const hoje=new Date();
+  const idCli={}; D.clientes.forEach((c,i)=>{ if(c.id!=null) idCli[c.id]=i; });
+  const ped=new Map(); P.forEach(p=>{ if(p.cancel||p.cli<0) return; (ped.get(p.cli)||ped.set(p.cli,[]).get(p.cli)).push(p); });
+  const res={};
+  Object.keys(contatos).forEach(id=>{ const inf=cInfo(id); const cli=idCli[id]; if(!inf||cli==null) return;
+    if(diasEntre(inf.d,hoje)>dias) return;
+    const r=res[inf.c]=res[inf.c]||{n:0,cedo:0,volt:0,fat:0,base:0,nb:0};
+    r.n++;
+    const ps=ped.get(cli)||[];
+    // linha de base: em quantas semanas dos 90 dias antes do contato o cliente pediu
+    const ini=new Date(inf.d-90*864e5); const sem=new Set(ps.filter(p=>p.d>=ini&&p.d<inf.d).map(p=>Math.floor((p.d-ini)/(7*864e5))));
+    r.base+=sem.size/13; r.nb++;
+    if(diasEntre(inf.d,REF)<7){ r.cedo++; }
+    const depois=ps.filter(p=>p.d>=new Date(inf.d.getTime()-12*36e5) && diasEntre(inf.d,p.d)<=7);
+    if(depois.length){ r.volt++; r.fat+=depois.reduce((s,p)=>s+(p.v||0),0); }
+  });
+  const ks=Object.keys(res).sort((a,b)=>res[b].n-res[a].n);
+  let h='<tr><th>Campanha</th><th class="num">Contatados</th><th class="num">Pediram em até 7 dias</th><th class="num">Taxa</th><th class="num">Pediria de qualquer jeito?</th><th class="num">Faturamento desses pedidos</th></tr>';
+  ks.forEach(k=>{ const r=res[k]; const tx=r.volt/r.n, base=r.nb?r.base/r.nb:0;
+    h+=`<tr><td>${esc(NOME_CAMP[k]||k)}</td><td class="num">${fmtN(r.n)}${r.cedo?` <span class="muted" title="contatados há menos de 7 dias: ainda podem pedir">(${r.cedo} recentes)</span>`:''}</td><td class="num">${fmtN(r.volt)}</td><td class="num"><b>${fmtP(tx)}</b></td><td class="num">${fmtP(base)}</td><td class="num">${fmtR0(r.fat)}</td></tr>`; });
+  if(!ks.length) h+='<tr><td colspan="6" class="muted" style="padding:20px">Nenhum contato marcado nesse período. Marque "Contatado" nas listas e os resultados aparecem aqui.</td></tr>';
+  $('#tbRes').innerHTML=h;
+  // cupons
+  const cup=(D.cupons||[]).map((nome,i)=>({nome,u:0,u30:0,fat:0,desc:0,cl:new Set(),novos:0,ult:null}));
+  const primeiro=new Map(); P.forEach(p=>{ if(!p.cancel&&p.cli>=0&&(!primeiro.has(p.cli)||p.d<primeiro.get(p.cli))) primeiro.set(p.cli,p.d); });
+  P.forEach(p=>{ if(p.cancel||p.cup==null||p.cup<0) return; const c=cup[p.cup]; c.u++; if(diasEntre(p.d,REF)<=30)c.u30++; c.fat+=p.v||0; c.desc+=p.desc||0;
+    if(p.cli>=0){ c.cl.add(p.cli); if(+primeiro.get(p.cli)===+p.d) c.novos++; } if(!c.ult||p.d>c.ult)c.ult=p.d; });
+  const cs=cup.filter(c=>c.u).sort((a,b)=>b.u30-a.u30||b.u-a.u);
+  let hc='<tr><th>Cupom</th><th class="num">Usos (30 dias)</th><th class="num">Usos (total)</th><th class="num">Clientes</th><th class="num">Era o 1º pedido</th><th class="num">Faturamento</th><th class="num">Desconto dado</th><th class="num" title="Faturamento dos pedidos com o cupom dividido pelo desconto dado">Vendas por R$ 1 de desconto</th><th>Último uso</th></tr>';
+  cs.forEach(c=>{ hc+=`<tr><td><b>${esc(c.nome)}</b></td><td class="num">${fmtN(c.u30)}</td><td class="num">${fmtN(c.u)}</td><td class="num">${fmtN(c.cl.size)}</td><td class="num">${fmtN(c.novos)}</td><td class="num">${fmtR0(c.fat)}</td><td class="num">${fmtR0(c.desc)}</td><td class="num">${c.desc?fmtR(c.fat/c.desc):'—'}</td><td>${c.ult?c.ult.toLocaleDateString('pt-BR'):''}</td></tr>`; });
+  if(!cs.length) hc+='<tr><td colspan="9" class="muted" style="padding:20px">Nenhum cupom usado nos pedidos baixados ainda.</td></tr>';
+  $('#tbCup').innerHTML=hc;
+}
+$('#rPeriodo').onchange=renderResultados;
+
+// ------------------------------------------------------------ início
+function render(){
+  marcarFiltros();
+  if(aba==='geral') renderGeral(); else if(aba==='clientes') renderClientes(); else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else renderResultados();
+}
+(function init(){
+  if(!D){ document.body.innerHTML='<p style="padding:40px">Este é o modelo do painel. Rode o programa <b>pizzaria.py</b> para gerar o painel com os seus dados.</p>'; return; }
+  $('#titulo').textContent=(D.loja?D.loja+' · ':'')+'Painel de clientes e vendas';
+  const ini=P.length?P[0].d.toLocaleDateString('pt-BR'):'—';
+  $('#subtitulo').textContent=`${fmtN(P.length)} pedidos de ${ini} até ${REF.toLocaleDateString('pt-BR')} · atualizado em ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}`;
+  if(D.sem_detalhe>0) $('#avisos').innerHTML=`<div class="note" style="margin-bottom:16px">⚠️ ${fmtN(D.sem_detalhe)} pedidos ainda estão sem detalhes (cliente, valor, itens). Rode o programa de novo para completar; os números abaixo ainda estão incompletos.</div>`;
+  montarFiltros(); render();
+  let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{ if(aba==='geral') renderGeral(); },150);});
+})();
+</script>
+</body>
+</html>

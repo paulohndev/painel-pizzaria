@@ -1,0 +1,104 @@
+PAINEL DE CLIENTES E VENDAS - CARDÁPIO WEB
+============================================
+
+O programa baixa seus pedidos e clientes do Cardápio Web, guarda tudo no seu
+computador (pasta "dados") e abre um painel no navegador com:
+  - Hoje: a lista de quem chamar no WhatsApp hoje (aniversariantes, boas-vindas,
+    clientes que costumam pedir neste dia, sumidos que mais gastavam e
+    avaliações ruins para responder), com a mensagem pronta
+  - Visão geral: faturamento por mês e por turno, canal próprio x iFood,
+    horários de pico e quantos clientes novos voltam a pedir
+  - Clientes: grupos (fiéis ativos, fiéis sumindo, novos...), separados por
+    turno, com botão de WhatsApp, marcação de "contatado" e lista em planilha
+  - Produtos: itens e sabores mais vendidos em cada turno
+  - Bairros: de onde vêm os pedidos e quanto cada bairro rende
+  - Resultados: quantos clientes contatados voltaram a pedir em 7 dias e
+    quanto cada cupom vendeu
+  - Promoções: uma sugestão de ação para cada cliente, a partir do que ele
+    costuma pedir (reativar com o favorito, apresentar a pizza a quem só
+    almoça, complemento, sabor novo, aniversário...), com a mensagem de
+    WhatsApp pronta e a oferta que você pode editar
+
+Nada sai do seu computador: os dados vão direto do Cardápio Web para cá.
+
+
+PASSO 1 - INSTALAR O PYTHON (só uma vez)
+----------------------------------------
+Windows: entre em https://www.python.org/downloads/ e baixe a versão mais recente.
+         Na instalação, MARQUE a caixinha "Add python.exe to PATH" antes de clicar em Install.
+Mac:     entre no mesmo site e instale a versão para macOS.
+
+
+PASSO 2 - TESTAR COM DADOS DE EXEMPLO (opcional, uns 3 minutos)
+--------------------------------------------------------------
+Dê dois cliques em "Testar com dados de exemplo (Windows).bat"
+(no Mac: "Testar com dados de exemplo (Mac).command").
+Ele usa a loja de demonstração do próprio Cardápio Web e abre um painel de teste.
+Se isso funcionar, está tudo instalado certo.
+
+No Mac, se aparecer aviso de segurança: clique com o botão direito no arquivo > Abrir.
+
+
+PASSO 3 - COLOCAR A CHAVE DA SUA LOJA
+-------------------------------------
+1. No painel do Cardápio Web: Configurações > Integrações > API > "Gerar novo token"
+2. Copie o código gerado
+3. Abra o arquivo "config.ini" desta pasta com o Bloco de Notas
+   (se ele ainda não existe, rode o passo 2 ou o passo 4 uma vez que ele é criado)
+4. Cole o código depois de "chave = " e salve
+
+IMPORTANTE: essa chave dá acesso aos dados da sua loja. Não mande por WhatsApp,
+e-mail ou chat. Se achar que ela vazou, gere uma nova no Cardápio Web.
+
+
+PASSO 4 - RODAR
+---------------
+Dê dois cliques em "Atualizar painel (Windows).bat" (ou a versão Mac).
+
+DA PRIMEIRA VEZ demora, porque baixa o histórico todo e a API do Cardápio Web
+limita a velocidade. Conta aproximada: 1 minuto para cada 100 pedidos.
+Exemplo: 10 mil pedidos = umas 2 horas. Deixe o computador ligado e sem dormir.
+Se fechar no meio, não tem problema: da próxima vez continua de onde parou.
+
+DEPOIS DISSO, cada atualização leva menos de um minuto. Rode quando quiser ver
+os números do dia (o ideal é uma vez por dia ou antes de fazer campanhas).
+
+O painel fica salvo no arquivo "painel.html" desta pasta. Dá para abrir direto
+nele, sem atualizar, a qualquer momento.
+
+
+AJUSTES (arquivo config.ini)
+----------------------------
+[turnos]     horários de almoço, tarde e noite. Mude se os seus forem outros.
+             Depois de mudar, rode de novo (é rápido).
+[historico]  quantos meses baixar na primeira vez (padrão 15, máximo 36).
+[clientes]   o que conta como cliente "ativo" e "fiel", e a mensagem padrão
+             do WhatsApp.
+
+
+ATUALIZAÇÃO DIÁRIA AUTOMÁTICA
+-----------------------------
+Dê dois cliques UMA VEZ em "Ativar atualização diária às 6h (Windows).bat".
+Todo dia às 6h o painel atualiza sozinho, sem abrir janela. Se o computador
+estiver desligado nessa hora, atualiza assim que ligar. O registro fica em
+dados\execucao.log. Para parar: "Desativar atualização diária (Windows).bat".
+
+
+VERSÕES NOVAS DO PROGRAMA
+-------------------------
+O programa se atualiza sozinho: toda vez que roda, confere se tem versão nova
+no repositório do GitHub (config.ini, seção [atualizacao]) e baixa só os
+arquivos do programa. O config.ini e a pasta "dados" nunca são mexidos.
+Para desligar: no config.ini, troque "ativo = sim" por "ativo = nao".
+
+
+DÚVIDAS COMUNS
+--------------
+"python não é reconhecido": o Python não foi instalado com a caixinha
+  "Add to PATH". Reinstale marcando essa opção.
+"A chave da API foi recusada": confira se colou a chave inteira no config.ini,
+  sem espaços extras. Se precisar, gere outra no Cardápio Web.
+Pedidos do iFood: aparecem só se o iFood estiver integrado ao Cardápio Web.
+  O telefone desses clientes vem mascarado pelo iFood, então eles não têm
+  botão de WhatsApp.
+A marcação "Contatado" fica salva no navegador deste computador.
