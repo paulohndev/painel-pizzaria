@@ -480,6 +480,7 @@ def montar_dados(db, cfg, nome_loja):
     abertos = []   # pedidos em andamento (para o alerta de combo ao vivo)
     idx_cupom, lista_cupom = {}, []
     cid_cli = {}   # id do cliente no Cardápio Web -> índice no painel
+    promos = carregar_promos()
     info_cli = {}  # índice -> {"ends": set(endereços), "canais": set()}
 
     for (pid, status, otype, canal, created, det) in db.execute(
@@ -589,6 +590,7 @@ def montar_dados(db, cfg, nome_loja):
             cli_i, bai_i, 1 if status == "canceled" else 0,
             round(taxa, 2), round(desc, 2), cup_i, pid,
             0 if status in ("closed", "canceled") else 1,
+            promos_do_pedido(promos, d) if d else 0,
         ])
 
     # ---- mesma pessoa em canais diferentes (iFood não passa telefone)
@@ -647,7 +649,58 @@ def montar_dados(db, cfg, nome_loja):
         "avaliacoes": avaliacoes,
         "abertos": abertos,
         "vinc_sug": sugestoes,
+        "promos_casa": promos,
     }
+
+
+# ---------------------------------------------------------------- promoções da casa
+
+# dias: 0=domingo ... 6=sábado (vazio = todo dia). "itens": trechos do nome do item no Cardápio Web.
+PROMOS_PADRAO = [
+    {"id": "segunda_maluca", "nome": "Segunda Maluca", "dias": [1], "itens": ["segunda maluca"], "cupom": "", "so_proprio": False,
+     "sabores": ["calabresa", "mussarela", "napolitana", "marguerita", "cartola"],
+     "oferta": "pizza grande de calabresa, mussarela, napolitana, marguerita ou cartola por R$ 39,99",
+     "msg": "Oi {nome}! Hoje é Segunda Maluca 🍕 {sabor_promo} sai por R$ 39,99. É só pedir pelo nosso app!"},
+    {"id": "terca_off", "nome": "Terça Off", "dias": [2], "itens": [], "cupom": "TERCA15", "so_proprio": True, "sabores": [],
+     "oferta": "15% de desconto em todo pedido pelo nosso app com o cupom TERCA15",
+     "msg": "Oi {nome}! Hoje é Terça Off: pedindo pelo nosso app com o cupom TERCA15, você ganha 15% de desconto em tudo. Que tal {favorito} hoje? 😋"},
+    {"id": "quinta_clone", "nome": "Quinta do Clone", "dias": [4], "itens": ["clone"], "cupom": "", "so_proprio": False, "sabores": [],
+     "oferta": "clone de pizza (até 2 sabores) por R$ 69,99",
+     "msg": "Oi {nome}! Hoje é Quinta do Clone 🍕🍕 Clone de pizza por R$ 69,99. Que tal dobrar {favorito}? Peça pelo nosso app!"},
+    {"id": "combos", "nome": "Combos", "dias": [], "itens": ["combo"], "cupom": "", "so_proprio": False, "sabores": [],
+     "oferta": "combos de pizza com refrigerante todos os dias", "msg": ""},
+]
+
+
+def carregar_promos():
+    try:
+        with open(os.path.join(PASTA_DADOS, "promocoes_casa.json"), encoding="utf-8") as f:
+            v = json.load(f)
+        if isinstance(v, list):
+            return v
+    except (OSError, ValueError):
+        pass
+    return PROMOS_PADRAO
+
+
+def salvar_promos(promos):
+    os.makedirs(PASTA_DADOS, exist_ok=True)
+    tmp = os.path.join(PASTA_DADOS, "promocoes_casa.json.tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(promos, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, os.path.join(PASTA_DADOS, "promocoes_casa.json"))
+
+
+def promos_do_pedido(promos, d):
+    """Bits das promoções da casa usadas no pedido (pelo nome do item ou pelo cupom)."""
+    nomes = " ".join(_sem_acento(i.get("name")) for i in (d.get("items") or []))
+    cupons = {str(x.get(k) or "").strip().upper() for x in (d.get("discounts") or []) for k in ("coupon_code", "coupon_name")}
+    m = 0
+    for k, p in enumerate(promos[:30]):
+        if any(t and _sem_acento(t) in nomes for t in p.get("itens") or []) or \
+                (p.get("cupom") and p["cupom"].strip().upper() in cupons):
+            m |= 1 << k
+    return m
 
 
 # ---------------------------------------------------------------- mesma pessoa em vários canais

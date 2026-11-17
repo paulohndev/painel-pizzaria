@@ -301,6 +301,19 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .gv-filtro button{border:0;background:var(--line2);color:var(--mut);font:inherit;font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;cursor:pointer}
 .gv-filtro button.on{background:var(--sun);color:var(--ink);font-weight:600}
 .limpar{border:0;background:none;color:var(--red2);font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline}
+.pc-item{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line2)}
+.pc-item:last-child{border-bottom:0}
+.pc-item .tx{flex:1;min-width:0;font-size:13.5px}
+.pc-item .tx b{font-size:14.5px}
+.pc-item .tx .muted{font-size:12.5px}
+.pc-form{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;background:var(--bg);border-radius:16px;padding:16px;margin:8px 0}
+.pc-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut);font-weight:600}
+.pc-form input,.pc-form textarea{font:inherit;font-size:13.5px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-weight:400}
+.pc-form .full{grid-column:1/-1}
+.pc-dias{display:flex;gap:6px;flex-wrap:wrap}
+.pc-dias button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:12.5px;cursor:pointer}
+.pc-dias button.on{background:var(--sun);border-color:var(--sun);font-weight:600}
+@media(max-width:700px){.pc-form{grid-template-columns:1fr}}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -366,6 +379,11 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
       <p class="desc">Cada vez que você marca "Contatado", o painel guarda a data e a campanha. Aqui ele confere se o cliente pediu nos 7 dias seguintes (em qualquer canal). Compare com a coluna "Pediria de qualquer jeito?": é quanto esse tipo de cliente costuma pedir numa semana normal, sem mensagem.</p>
       <div class="toolbar" style="margin-top:0"><select id="rPeriodo"><option value="30">Contatos dos últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="9999">Todos</option></select></div>
       <div class="tablebox"><table id="tbRes"></table></div>
+    </div>
+    <div class="card">
+      <h2>Promoções da casa</h2>
+      <p class="desc">Pedidos que usaram cada promoção (pelo nome do item ou pelo cupom), com os filtros de turno e canal aplicados. Para mudar as promoções, vá em Promoções → Promoções da casa.</p>
+      <div class="tablebox"><table id="tbPromoCasa"></table></div>
     </div>
     <div class="card">
       <h2>Cupons usados</h2>
@@ -460,6 +478,11 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 
   <!-- PROMOÇÕES -->
   <section id="t-promocoes" class="hidden">
+    <div class="card" style="margin-bottom:16px">
+      <h2>Promoções da casa</h2>
+      <p class="desc">As promoções fixas da Mariá. O painel reconhece nos pedidos quem usou cada uma e, no dia da promoção, monta em <b>Hoje</b> a lista de quem tem mais chance de aproveitar. Na mensagem, <b>{sabor_promo}</b> vira o sabor favorito do cliente quando ele está na promoção.</p>
+      <div id="pcLista"></div>
+    </div>
     <div class="card">
       <h2>Promoções sugeridas para cada cliente</h2>
       <p class="desc">O app olha o que cada cliente costuma pedir, quando pede e há quanto tempo não pede, e sugere uma ação por cliente (a mais importante). Escolha uma campanha para ver a lista.</p>
@@ -531,7 +554,7 @@ function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); local
 
 // ------------------------------------------------------------ preparo
 const REF = parseD(D.gerado_em);
-const P = D.pedidos.map(p=>({d:parseD(p[0]), k:p[0], t:p[1], c:p[2], tipo:p[3], v:p[4], cli:p[5], b:p[6], cancel:p[7]===1, taxa:p[8], desc:p[9], cup:p[10], pid:p[11]}));
+const P = D.pedidos.map(p=>({d:parseD(p[0]), k:p[0], t:p[1], c:p[2], tipo:p[3], v:p[4], cli:p[5], b:p[6], cancel:p[7]===1, taxa:p[8], desc:p[9], cup:p[10], pid:p[11], pm:p[13]||0}));
 const GRUPO_CANAL = D.canais.map(c=>c.id==='ifood'?'ifood':c.id==='food99'?'food99':'proprio');
 const TURNO_PID = {}; P.forEach(p=>{ if(p.pid!=null) TURNO_PID[p.pid]=p.t; });
 const CLI_GRP = {}; P.forEach(p=>{ if(p.cancel||p.cli<0) return; (CLI_GRP[p.cli]=CLI_GRP[p.cli]||new Set()).add(GRUPO_CANAL[p.c]); });
@@ -875,6 +898,7 @@ function promoFiltrada(){
   return PR.filter(r=>{ if(F.turno!=='all' && r.turno!==F.turno) return false; return cliCanal(r.cli); });
 }
 function renderPromocoes(){
+  renderPromosCasa();
   const L=promoFiltrada();
   const tipos=Object.keys(CAMP).filter(t=>L.some(r=>r.recs[0].tipo===t));
   if(!campSel || !tipos.includes(campSel)) campSel=tipos[0]||null;
@@ -945,6 +969,35 @@ const BLOCOS = [
   {id:'migrou', nome:'Migraram para o iFood / 99', camp:'canal_proprio', dica:'Pediam pelo canal próprio e passaram a pedir pelos apps de entrega, onde você paga comissão. Não sumiram: vale convidar para voltar a pedir direto.'},
 ];
 const MAX_BLOCO = {aniversario:30, segundo:20, lembrete:20, reativar:10, avaliacao:20, migrou:15};
+// ---- promoções da casa
+const PROMOS=(D&&D.promos_casa)||[];
+const DIAS_NOME=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+function promosHoje(){ const d=new Date().getDay(); return PROMOS.map((p,k)=>({p,k})).filter(x=>x.p.msg && (x.p.dias||[]).includes(d)); }
+function blocosDia(){ return BLOCOS.concat(promosHoje().map(({p,k})=>({id:'promo_'+k, promo:k, camp:'promo_'+p.id, nome:'Hoje é '+p.nome, curto:p.nome,
+  dica:`Promoção de hoje: ${p.oferta}. Primeiro quem já pediu nessa promoção${(p.sabores||[]).length?', depois quem tem um desses sabores como favorito':''}${p.so_proprio?', e quem passou a pedir pelos apps (a promoção só vale no app próprio)':''}.`}))); }
+const CLI_PROMO={}; P.forEach(p=>{ if(p.cancel||p.cli<0||!p.pm) return; PROMOS.forEach((pr,k)=>{ if(p.pm>>k&1){ const m=CLI_PROMO[p.cli]=CLI_PROMO[p.cli]||{}; const x=m[k]=m[k]||{n:0,ult:null}; x.n++; if(!x.ult||p.d>x.ult)x.ult=p.d; } }); });
+function saborNaPromo(p,fav){ if(!fav||!(p.sabores||[]).length) return false; const f=semAc(limparNome(fav)); return p.sabores.some(s=>f===semAc(s)); }
+function msgPromoCasa(p,cli){
+  const c=D.clientes[cli]; const pf=PERF[cli]||[]; const sab=p.sabores||[];
+  const sp=saborNaPromo(p,pf[0])?'Aquela pizza de '+falaSabor(pf[0]):(sab.length?'Pizza grande de '+(sab.length>1?sab.slice(0,-1).join(', ')+' ou '+sab[sab.length-1]:sab[0]):'');
+  return juntarPreps(String(p.msg||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,falaFav(pf[0])).replace(/\{sabor_promo\}/g,sp)
+    .replace(/\{oferta\}/g,p.oferta||'').replace(/\{pontos\}/g,c.pontos||0)).replace(/\s+([!.,?])/g,'$1');
+}
+function itensPromoHoje(pc,hoje,out){
+  promosHoje().forEach(({p,k})=>{ const L=out['promo_'+k];
+    pc.forEach((x,cli)=>{ const c=D.clientes[cli]; if(!c||!waLink(c,'')||!cliCanal(cli)) return; const pf=PERF[cli]||[];
+      if(F.turno!=='all' && pf[5]!==undefined && pf[5]!==F.turno) return;
+      const dias=diasEntre(x.ult,hoje); if(dias<1||dias>120||contatadoRecente(c,6)) return;
+      const u=(CLI_PROMO[cli]||{})[k]; let sc=0; const mot=[];
+      if(u){ sc+=100+u.n*10; mot.push(`Já pediu na ${p.nome} ${u.n} ${u.n===1?'vez':'vezes'}`); }
+      if(saborNaPromo(p,pf[0])){ sc+=60; mot.push(`O favorito (${limparNome(pf[0])}) está na promoção`); }
+      if(p.so_proprio){ const st=situacaoCanal(cli); if(st&&st.tipo==='migrou'){ sc+=80; mot.push('Passou a pedir pelos apps, e a promoção só vale no app próprio'); }
+        else if(!sc && (CLI_CAN[cli]||{}).proprio && dias<=60){ sc=20; mot.push('Pede pelo app próprio'); } }
+      else if(!sc && ehSaborPizza(pf[0]||'') && dias<=60){ sc=10; mot.push('Cliente de pizza'); }
+      if(!sc) return;
+      L.push({cli,x,ord:-(sc*1e5+(x.v||0)),motivo:mot.join('. ')+`. Último pedido há ${dias} dia${dias===1?'':'s'}.`}); });
+    MAX_BLOCO['promo_'+k]=25; });
+}
 function diasEntre(a,b){ return Math.floor((b-a)/864e5); }
 function porCliente(){
   const m=new Map(); P.forEach(p=>{ if(p.cancel||p.cli<0) return; let x=m.get(p.cli); if(!x){x={n:0,v:0,pri:p.d,ult:p.d}; m.set(p.cli,x);} x.n++; x.v+=p.v||0; if(p.d<x.pri)x.pri=p.d; if(p.d>x.ult)x.ult=p.d; }); return m; }
@@ -955,7 +1008,7 @@ function msgTipo(tipo, cli, extra){
 }
 function listaDoDia(){
   const hoje=new Date(); hoje.setHours(12,0,0,0); const dow=hoje.getDay();
-  const pc=porCliente(); const out={}; BLOCOS.forEach(b=>out[b.id]=[]);
+  const pc=porCliente(); const out={}; blocosDia().forEach(b=>out[b.id]=[]);
   pc.forEach((x,cli)=>{ const c=D.clientes[cli]; if(!c||!waLink(c,'')) return;
     const dias=diasEntre(x.ult,hoje); const pf=PERF[cli]||[];
     if(F.turno!=='all' && pf[5]!==undefined && pf[5]!==F.turno) return;
@@ -984,6 +1037,7 @@ function listaDoDia(){
     if(F.turno!=='all' && pf[5]!==undefined && pf[5]!==F.turno) return;
     const st=situacaoCanal(cli); if(!st||st.tipo!=='migrou'||contatadoRecente(c,30)) return;
     out.migrou.push({cli, x, ord:st.ord, motivo:st.txt}); });
+  itensPromoHoje(pc,hoje,out);
   Object.keys(out).forEach(k=>{ out[k].sort((a,b)=>a.ord-b.ord); out[k]=out[k].slice(0,MAX_BLOCO[k]); });
   return out;
 }
@@ -992,13 +1046,13 @@ function renderHoje(){
   const hr=hoje.getHours(); const sauda=hr<12?'Bom dia':hr<18?'Boa tarde':'Boa noite';
   $('#hojeData').textContent=hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
   const idade=Math.round((hoje-REF)/36e5);
-  const tot=BLOCOS.reduce((s,b)=>s+L[b.id].length,0);
+  const BL=blocosDia(); const tot=BL.reduce((s,b)=>s+L[b.id].length,0);
   $('#hojeTitulo').textContent=tot?`${sauda}! ${tot} ${tot===1?'pessoa':'pessoas'} para chamar hoje`:`${sauda}! Ninguém pendente hoje`;
   $('#hojeDesc').innerHTML=(tot?'Clique em <b>WhatsApp</b>, envie a mensagem que já vai pronta e marque como contatado. Quem você já chamou não volta para a lista.':'Todo mundo que precisava de contato já foi chamado. Volte amanhã!')+
     (idade>30?`<br><b>Atenção:</b> os dados são de ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}. Rode "Atualizar painel".`:'');
   $('#qtHoje').dataset.base=tot; $('#qtHoje').textContent=tot||'';
   const CURTO={avaliacao:'Avaliações ruins',aniversario:'Aniversários',segundo:'Boas-vindas',lembrete:'Dia de costume',reativar:'Sumidos',migrou:'Foram pros apps'};
-  $('#hojeResumo').innerHTML=BLOCOS.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi filtro ${HF.bloco===b.id?'sel':''}" data-b="${b.id}" title="Clique para ver só esta lista"><div class="lbl">${CURTO[b.id]}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos',migrou:'iFood / 99'}[b.id]}</div></div>`).join('');
+  $('#hojeResumo').innerHTML=BL.filter(b=>b.id!=='avaliacao'||L.avaliacao.length).map(b=>`<div class="kpi filtro ${HF.bloco===b.id?'sel':''}" data-b="${b.id}" title="Clique para ver só esta lista"><div class="lbl">${esc(CURTO[b.id]||b.curto)}</div><div class="val">${L[b.id].length}</div><div class="cmp">${{avaliacao:'nota 3 ou menos',aniversario:'próximos 7 dias',segundo:'1º pedido há 2–5 dias',lembrete:'pedem neste dia',reativar:'mais valiosos',migrou:'iFood / 99'}[b.id]||'promoção de hoje'}</div></div>`).join('');
   $('#hojeResumo').classList.toggle('filtrando',!!HF.bloco);
   $('#hojeResumo').querySelectorAll('.kpi.filtro').forEach(k=>k.onclick=()=>{ HF.bloco=HF.bloco===k.dataset.b?null:k.dataset.b; renderHoje(); });
   HOJE_L=L; setTimeout(()=>{ const bu=$('#hojeUrg'); if(bu) bu.onclick=()=>abrirGaveta(); renderAlertas(); },0);
@@ -1015,6 +1069,7 @@ function motivosItem(bid,it){
   if(pf[0]&&bid!=='avaliacao') t.push('Favorito: '+pf[0]);
   if(pf[5]!=null&&D.turnos[pf[5]]){ const n=D.turnos[pf[5]].toLowerCase(); t.push('Cliente '+(/^(noite|tarde)/.test(n)?'da ':'do ')+n); }
   if(it.x&&it.x.n>=10) t.push('10 pedidos ou mais');
+  Object.keys(CLI_PROMO[it.cli]||{}).forEach(k=>{ if(PROMOS[k]) t.push('Já usou '+PROMOS[k].nome); });
   return t;
 }
 function renderHojeBlocos(){
@@ -1022,13 +1077,13 @@ function renderHojeBlocos(){
   const q=semAc($('#hBusca').value.trim()), mot=$('#hMotivo').value, bai=$('#hBairro').value, ocultar=$('#hOcultar').checked;
   // opções dos filtros a partir do que está na tela
   const cntM={}, cntB={};
-  BLOCOS.forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return; L[b.id].forEach(it=>{ it._m=it._m||motivosItem(b.id,it); it._m.forEach(m=>cntM[m]=(cntM[m]||0)+1); const bb=it.cli>=0?bairroCli(it.cli):''; if(bb) cntB[bb]=(cntB[bb]||0)+1; }); });
+  blocosDia().forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return; L[b.id].forEach(it=>{ it._m=it._m||motivosItem(b.id,it); it._m.forEach(m=>cntM[m]=(cntM[m]||0)+1); const bb=it.cli>=0?bairroCli(it.cli):''; if(bb) cntB[bb]=(cntB[bb]||0)+1; }); });
   const opts=(sel,cnt,todos)=>{ const ks=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b)); if(sel.value&&!cnt[sel.value]) ks.unshift(sel.value);
     const v=sel.value; sel.innerHTML=`<option value="">${todos}</option>`+ks.map(k=>`<option value="${esc(k)}">${esc(k)} (${cnt[k]||0})</option>`).join(''); sel.value=v; };
   opts($('#hMotivo'),cntM,'Todos os motivos'); opts($('#hBairro'),cntB,'Todos os bairros');
   const ativo=!!(q||mot||bai||ocultar||HF.bloco); $('#hLimpar').classList.toggle('hidden',!ativo);
   let h='', vis=0;
-  BLOCOS.forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return;
+  blocosDia().forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return;
     const itens=L[b.id].filter(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
       if(mot && !(it._m||[]).includes(mot)) return false;
       if(bai && (it.cli<0||bairroCli(it.cli)!==bai)) return false;
@@ -1040,7 +1095,7 @@ function renderHojeBlocos(){
     itens.forEach(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
       if(!c){ h+=`<tr><td class="muted">Cliente não identificado (pedido ${esc(it.aval?it.aval[5]:'')})</td><td>—</td><td></td><td class="why">${esc(it.motivo)}</td><td></td></tr>`; return; }
       const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
-      const msg=b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da Pizzaria Mariá. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
+      const msg=b.promo!=null?msgPromoCasa(PROMOS[b.promo],it.cli):b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da Pizzaria Mariá. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
       const w=waLink(c,msg); const feito=!!cInfo(c.id); const bb=bairroCli(it.cli);
       h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${c.app||bb?`<span class="sub">${esc(bb)}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</span>`:''}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:'<span class="muted">sem telefone</span>'}</td>
@@ -1070,8 +1125,65 @@ function prepararBuscas(){
 
 // ------------------------------------------------------------ RESULTADOS
 const NOME_CAMP = Object.assign({clientes:'Aba Clientes', avaliacao:'Avaliação ruim', seg_fa:'Clientes: fiéis ativos', seg_fs:'Clientes: fiéis sumindo', seg_rr:'Clientes: recorrentes', seg_no:'Clientes: novos', seg_es:'Clientes: esfriando', seg_pe:'Clientes: perdidos'},
-  Object.fromEntries(Object.entries(CAMP).map(([k,v])=>[k,v.nome])));
+  Object.fromEntries(Object.entries(CAMP).map(([k,v])=>[k,v.nome])), Object.fromEntries(PROMOS.map(p=>['promo_'+p.id,p.nome])));
+function renderPromoCasa(){
+  const dias30=new Date(REF-30*864e5); const semanas=[0,1,2,3].map(i=>new Date(REF-(i+1)*7*864e5));
+  let h='<tr><th>Promoção</th><th class="num">Pedidos em 30 dias</th><th class="num">Faturamento</th><th class="num">Ticket</th><th class="num">Clientes</th><th class="num" title="Dos pedidos feitos nos dias da promoção, quantos usaram a promoção">Nos dias da promo</th><th>Últimas 4 semanas</th></tr>';
+  PROMOS.forEach((pr,k)=>{ const bit=1<<k; const L=P.filter(p=>!p.cancel&&ok(p)&&(p.pm&bit)); const L30=L.filter(p=>p.d>=dias30);
+    const fat=L30.reduce((s,p)=>s+(p.v||0),0); const cl=new Set(L30.map(p=>p.cli).filter(c=>c>=0)).size;
+    const ds=pr.dias||[]; const noDia=ds.length?P.filter(p=>!p.cancel&&ok(p)&&p.d>=dias30&&ds.includes(p.d.getDay())):[];
+    const sem=semanas.map((ini,i)=>L.filter(p=>p.d>=ini&&p.d<(i?semanas[i-1]:new Date(REF.getTime()+864e5))).length).reverse();
+    h+=`<tr><td><b>${esc(pr.nome)}</b><span class="sub">${ds.length?ds.map(d=>DIAS_NOME[d]).join(', '):'todo dia'}</span></td><td class="num">${fmtN(L30.length)}</td><td class="num">${fmtR0(fat)}</td><td class="num">${L30.length?fmtR(fat/L30.length):'—'}</td><td class="num">${fmtN(cl)}</td>
+      <td class="num">${ds.length&&noDia.length?fmtP(L30.length/noDia.length):'—'}${ds.length&&noDia.length?`<span class="sub">de ${fmtN(noDia.length)} pedidos</span>`:''}</td><td style="white-space:nowrap">${sem.map(fmtN).join(' · ')}</td></tr>`; });
+  if(!PROMOS.length) h+='<tr><td colspan="7" class="muted" style="padding:20px">Nenhuma promoção cadastrada.</td></tr>';
+  $('#tbPromoCasa').innerHTML=h;
+}
+let PC_EDIT=null, PC_LISTA=null;
+function renderPromosCasa(){
+  if(!PC_LISTA) PC_LISTA=JSON.parse(JSON.stringify(PROMOS));
+  const como=p=>[(p.itens||[]).length?'item com "'+p.itens.join('" ou "')+'" no nome':'', p.cupom?'cupom '+p.cupom:''].filter(Boolean).join(' ou ')||'—';
+  let h=PC_LISTA.map((p,i)=>PC_EDIT===i?formPromo(p,i):`<div class="pc-item"><div class="tx"><b>${esc(p.nome)}</b> · ${(p.dias||[]).length?p.dias.map(d=>DIAS_NOME[d]).join(', '):'todo dia'}
+      <div>${esc(p.oferta||'')}</div><div class="muted">Reconhece por: ${esc(como(p))}${p.so_proprio?' · só no app próprio':''}${p.msg?'':' · sem mensagem (não entra na lista de Hoje)'}</div></div>
+      ${AO_VIVO?`<button class="btn" data-pced="${i}">Editar</button>`:''}</div>`).join('');
+  h+= AO_VIVO?(PC_EDIT==='nova'?formPromo({nome:'',dias:[],itens:[],cupom:'',sabores:[],oferta:'',msg:'Oi {nome}! Hoje tem {oferta}. Peça pelo nosso app! 😋',so_proprio:false},'nova'):`<button class="btn" id="pcNova" style="margin-top:10px">+ Nova promoção</button>`)
+     :'<div class="pf-aviso" style="margin-top:10px">Para editar as promoções, abra o painel pelo atalho <b>Painel Mariá</b>.</div>';
+  $('#pcLista').innerHTML=h;
+  $('#pcLista').querySelectorAll('[data-pced]').forEach(b=>b.onclick=()=>{ PC_EDIT=+b.dataset.pced; renderPromosCasa(); });
+  const nv=$('#pcNova'); if(nv) nv.onclick=()=>{ PC_EDIT='nova'; renderPromosCasa(); };
+  const f=$('#pcForm'); if(!f) return;
+  f.querySelectorAll('.pc-dias button').forEach(b=>b.onclick=e=>{ e.preventDefault(); b.classList.toggle('on'); });
+  $('#pcCancelar').onclick=e=>{ e.preventDefault(); PC_EDIT=null; renderPromosCasa(); };
+  const ex=$('#pcExcluir'); if(ex) ex.onclick=e=>{ e.preventDefault(); if(!confirmar(ex)) return; PC_LISTA.splice(PC_EDIT,1); salvarPromos(); };
+  $('#pcSalvar').onclick=e=>{ e.preventDefault();
+    const lista=v=>v.split(',').map(x=>x.trim()).filter(Boolean);
+    const p={ id:(PC_EDIT==='nova'?'':PC_LISTA[PC_EDIT].id)||'', nome:$('#pfNome').value.trim(), dias:[...f.querySelectorAll('.pc-dias button.on')].map(b=>+b.dataset.d),
+      itens:lista($('#pfItens').value), cupom:$('#pfCupom').value.trim().toUpperCase(), sabores:lista($('#pfSabores').value).map(x=>x.toLowerCase()),
+      oferta:$('#pfOferta').value.trim(), msg:$('#pfMsg').value.trim(), so_proprio:$('#pfProprio').checked };
+    if(!p.nome){ $('#pfNome').focus(); return; }
+    if(PC_EDIT==='nova') PC_LISTA.push(p); else PC_LISTA[PC_EDIT]=p; salvarPromos(); };
+}
+function confirmar(b){ if(b.dataset.conf) return true; b.dataset.conf='1'; b.textContent='Clique de novo para excluir'; return false; }
+function formPromo(p,i){
+  return `<form class="pc-form" id="pcForm">
+    <label>Nome<input id="pfNome" value="${esc(p.nome)}" placeholder="Ex.: Segunda Maluca"></label>
+    <label>Dias<div class="pc-dias">${DIAS_NOME.map((d,k)=>`<button data-d="${k}" class="${(p.dias||[]).includes(k)?'on':''}">${d.slice(0,3)}</button>`).join('')}</div><span style="font-weight:400">Nenhum marcado = todo dia</span></label>
+    <label>Reconhecer pelo nome do item (separe por vírgula)<input id="pfItens" value="${esc((p.itens||[]).join(', '))}" placeholder="Ex.: segunda maluca"></label>
+    <label>…ou pelo cupom<input id="pfCupom" value="${esc(p.cupom||'')}" placeholder="Ex.: TERCA15"></label>
+    <label class="full">Sabores da promoção (vírgula; deixe vazio se vale para todos)<input id="pfSabores" value="${esc((p.sabores||[]).join(', '))}"></label>
+    <label class="full">Oferta<input id="pfOferta" value="${esc(p.oferta||'')}" placeholder="Ex.: pizza grande por R$ 39,99"></label>
+    <label class="full">Mensagem do WhatsApp (vazio = não monta lista em Hoje). Variáveis: {nome}, {favorito}, {sabor_promo}, {oferta}<textarea id="pfMsg" style="min-height:64px">${esc(p.msg||'')}</textarea></label>
+    <label class="full" style="flex-direction:row;align-items:center;gap:8px;font-weight:500"><input type="checkbox" id="pfProprio" ${p.so_proprio?'checked':''}> Só vale no app próprio</label>
+    <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="pcSalvar" style="background:var(--sun);font-weight:600">Salvar</button><button class="btn" id="pcCancelar">Cancelar</button>${i!=='nova'?'<button class="btn" id="pcExcluir" style="margin-left:auto">Excluir</button>':''}</div>
+  </form>`;
+}
+function salvarPromos(){
+  const b=$('#pcSalvar')||$('#pcExcluir'); if(b){ b.disabled=true; b.textContent='Salvando…'; }
+  api('/api/promocoes_casa',{promos:PC_LISTA}).then(()=>api('/api/estado')).then(e0=>{ let n=0;
+    const t=setInterval(()=>{ n++; api('/api/estado').then(e=>{ if(e.versao!==e0.versao||n>40){ clearInterval(t); location.reload(); } }).catch(()=>{}); },1500); })
+    .catch(()=>{ if(b){ b.disabled=false; b.textContent='Tente de novo'; } });
+}
 function renderResultados(){
+  renderPromoCasa();
   const dias=+$('#rPeriodo').value; const hoje=new Date();
   const idCli={}; D.clientes.forEach((c,i)=>{ if(c.id!=null) idCli[c.id]=i; });
   const ped=new Map(); P.forEach(p=>{ if(p.cancel||p.cli<0) return; (ped.get(p.cli)||ped.set(p.cli,[]).get(p.cli)).push(p); });
@@ -1307,6 +1419,7 @@ function renderPerfil(c, cli, psAll, RAll){
       <div class="pf-sec"><h3>O que mais pede</h3>${favs||'<div class="pf-carregando">Sem itens registrados ainda.</div>'}</div>
     </div>
     ${secCanais(c,cli)}
+    ${secPromos(cli)}
     ${sugs.length?`<div class="pf-sec"><h3>Sugestões para este cliente</h3>${sugs.map(x=>`<div class="pf-sug"><b>${esc(x.t)}</b>${esc(x.m)}</div>`).join('')}</div>`:''}
     ${R&&R.enderecos&&R.enderecos.length?`<div class="pf-sec"><h3>Endereços</h3>${R.enderecos.map(e=>`<div class="linha"><span>${esc(e.texto)}${e.complemento?`<span class="sub">${esc(e.complemento)}${e.referencia?' · '+esc(e.referencia):''}</span>`:''}</span><span>${fmtN(e.vezes)} pedido${e.vezes>1?'s':''}<span class="sub">último ${new Date(e.ultimo+'T12:00').toLocaleDateString('pt-BR')}</span></span></div>`).join('')}</div>`:''}
     <div class="pf-sec"><h3>Pedidos</h3><div id="pfPedidos">${pedidosPerfil(ps,R)}</div></div>
@@ -1319,6 +1432,10 @@ function renderPerfil(c, cli, psAll, RAll){
   $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open'));
   $('#perfil').querySelectorAll('button[data-vinc]').forEach(b=>b.onclick=()=>decidirVinculo(b.dataset.a,b.dataset.p,b.dataset.vinc,b));
   const mais=$('#pfMais'); if(mais) mais.onclick=()=>{ $('#pfPedidos').innerHTML=pedidosPerfil(ps,R,true); $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open')); };
+}
+function secPromos(cli){
+  const m=CLI_PROMO[cli]; if(!m||cli<0) return '';
+  return `<div class="pf-sec"><h3>Promoções da casa que usa</h3>${Object.keys(m).filter(k=>PROMOS[k]).map(k=>`<div class="linha"><span>${esc(PROMOS[k].nome)}</span><span>${fmtN(m[k].n)} pedido${m[k].n>1?'s':''}<span class="sub">último ${m[k].ult.toLocaleDateString('pt-BR')}</span></span></div>`).join('')}</div>`;
 }
 function secCanais(c,cli){
   if(cli<0) return '';

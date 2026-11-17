@@ -15,6 +15,7 @@ Vigia do painel: fica rodando em segundo plano (sem janela) desde que o Windows 
 """
 import base64
 import json
+import re
 import os
 import socket
 import subprocess
@@ -468,6 +469,25 @@ class Painel(BaseHTTPRequestHandler):
                 with ESTADO["trava"]:
                     ESTADO["alertas"] = [a for a in ESTADO["alertas"] if a["id"] != aid]
                     ESTADO["versao"] += 1
+                return self._json({"ok": True})
+            if u.path == "/api/promocoes_casa":
+                lista = dado.get("promos")
+                if not isinstance(lista, list) or len(lista) > 30:
+                    return self._json({"erro": "dados"}, 400)
+                limpa = []
+                for p in lista:
+                    if not isinstance(p, dict) or not str(p.get("nome") or "").strip():
+                        continue
+                    txt = lambda k, n=300: str(p.get(k) or "").strip()[:n]
+                    lst = lambda k: [str(x).strip()[:60] for x in (p.get(k) or []) if str(x).strip()][:20]
+                    limpa.append({"id": txt("id", 40) or re.sub(r"\W+", "_", txt("nome").lower())[:40], "nome": txt("nome", 60),
+                                  "dias": sorted({int(x) for x in (p.get("dias") or []) if str(x).isdigit() and 0 <= int(x) <= 6}),
+                                  "itens": lst("itens"), "cupom": txt("cupom", 40).upper(), "so_proprio": bool(p.get("so_proprio")),
+                                  "sabores": lst("sabores"), "oferta": txt("oferta"), "msg": txt("msg", 600)})
+                P.salvar_promos(limpa)
+                v = ESTADO.get("vigia")
+                if v is not None:
+                    v.mudou = True
                 return self._json({"ok": True})
             if u.path == "/api/vinculo":
                 app, princ, dec = str(dado.get("app") or ""), str(dado.get("principal") or ""), dado.get("decisao")
