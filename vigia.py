@@ -555,6 +555,7 @@ def ia_resumo(gerar=False, novo=False):
             ia, D = _ia()
             texto = ia_painel.resumo_dia(ia, D)
         except ErroIA as e:
+            log("IA: resumo falhou: %s" % e)
             return {"erro": str(e)}, 200
         cache = {"data": hoje, "texto": texto, "em": datetime.now().strftime("%H:%M")}
         P.meta_set(db, "ia_resumo", json.dumps(cache, ensure_ascii=False))
@@ -594,6 +595,7 @@ def ia_post(caminho, dado):
             return r, 200
         return {"erro": "não encontrado"}, 404
     except ErroIA as e:
+        log("IA: %s" % e)
         return {"erro": str(e)}, 200
     except Exception as e:  # nunca derrubar o vigia por causa da IA
         log("IA: erro inesperado: %s" % e)

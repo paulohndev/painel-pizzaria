@@ -17,7 +17,9 @@ MODELOS = {
 
 
 class ErroIA(Exception):
-    pass
+    def __init__(self, texto, codigo=0, detalhe=""):
+        super().__init__(texto)
+        self.codigo, self.detalhe = codigo, detalhe
 
 
 def provedor_de(texto):
@@ -36,6 +38,8 @@ class IA:
         self.chave = (ia.get("chave") or "").strip()
         if not self.provedor and self.chave:
             self.provedor = "claude" if self.chave.startswith("sk-ant-") else "openai"
+        self.desligar_raciocinio = True  # respostas diretas (sem "pensar" antes), mais rápidas e baratas
+        self.ultimo_diag = ""
         rapido, forte = MODELOS.get(self.provedor, ("", ""))
         self.modelo = (ia.get("modelo") or "").strip() or rapido
         self.modelo_forte = (ia.get("modelo_forte") or "").strip() or forte
@@ -64,7 +68,7 @@ class IA:
                 raise ErroIA("A chave da IA foi recusada. Confira a linha 'chave' na seção [ia] do config.ini.")
             if e.code == 429:
                 raise ErroIA("A IA está sem crédito ou recebendo pedidos demais. Confira o saldo da conta e tente de novo.")
-            raise ErroIA("A IA respondeu com erro %s. %s" % (e.code, msg or ""))
+            raise ErroIA("A IA respondeu com erro %s. %s" % (e.code, msg or ""), e.code, msg or "")
         except (urllib.error.URLError, OSError) as e:
             raise ErroIA("Sem conexão com a IA (%s)." % getattr(e, "reason", e))
 
@@ -85,14 +89,26 @@ class IA:
             msgs = [{"role": m["role"], "content": m["content"]} for m in mensagens]
             tools = [{"name": f["name"], "description": f["description"], "input_schema": f["parameters"]} for f in ferramentas or []]
             for _ in range(voltas):
-                corpo = {"model": modelo, "max_tokens": max_tokens, "system": sistema, "messages": msgs}
+                corpo = {"model": modelo, "max_tokens": max(max_tokens, 2000), "system": sistema, "messages": msgs}
                 if tools:
                     corpo["tools"] = tools
-                r = self._post(URL_CLAUDE, corpo, {"x-api-key": self.chave, "anthropic-version": "2023-06-01"})
+                if self.desligar_raciocinio:
+                    corpo["thinking"] = {"type": "disabled"}
+                try:
+                    r = self._post(URL_CLAUDE, corpo, {"x-api-key": self.chave, "anthropic-version": "2023-06-01"})
+                except ErroIA as e:
+                    if e.codigo == 400 and "thinking" in (e.detalhe or "").lower() and self.desligar_raciocinio:
+                        self.desligar_raciocinio = False
+                        continue
+                    raise
                 blocos = r.get("content") or []
                 usos = [b for b in blocos if b.get("type") == "tool_use"]
                 if not usos or not executar:
-                    return "".join(b.get("text", "") for b in blocos if b.get("type") == "text").strip(), feitas
+                    txt = "".join(b.get("text", "") for b in blocos if b.get("type") == "text").strip()
+                    if not txt:
+                        self.ultimo_diag = "claude stop=%s blocos=%s" % (r.get("stop_reason"), [b.get("type") for b in blocos])
+                        raise ErroIA("A IA não devolveu texto (%s). Tente de novo." % self.ultimo_diag)
+                    return txt, feitas
                 msgs.append({"role": "assistant", "content": blocos})
                 res = []
                 for u in usos:
@@ -106,16 +122,27 @@ class IA:
         tools = [{"type": "function", "function": {"name": f["name"], "description": f["description"], "parameters": f["parameters"]}}
                  for f in ferramentas or []]
         for _ in range(voltas):
-            corpo = {"model": modelo, "messages": msgs, "max_completion_tokens": max_tokens}
+            corpo = {"model": modelo, "messages": msgs, "max_completion_tokens": max(max_tokens, 2000)}
             if tools:
                 corpo["tools"] = tools
-                if "luna" in modelo:
-                    corpo["reasoning_effort"] = "none"  # exigido pela OpenAI para usar ferramentas no Luna
-            r = self._post(URL_OPENAI, corpo, {"Authorization": "Bearer " + self.chave})
-            msg = ((r.get("choices") or [{}])[0]).get("message") or {}
+            if self.desligar_raciocinio and modelo.startswith(("gpt-5", "gpt-6", "o")):
+                corpo["reasoning_effort"] = "none"  # resposta direta; exigido pela OpenAI para usar ferramentas no Luna
+            try:
+                r = self._post(URL_OPENAI, corpo, {"Authorization": "Bearer " + self.chave})
+            except ErroIA as e:
+                if e.codigo == 400 and "reasoning" in (e.detalhe or "").lower() and self.desligar_raciocinio:
+                    self.desligar_raciocinio = False
+                    continue
+                raise
+            ch0 = (r.get("choices") or [{}])[0]
+            msg = ch0.get("message") or {}
             chamadas = msg.get("tool_calls") or []
             if not chamadas or not executar:
-                return (msg.get("content") or "").strip(), feitas
+                txt = (msg.get("content") or "").strip()
+                if not txt:
+                    self.ultimo_diag = "openai finish=%s" % ch0.get("finish_reason")
+                    raise ErroIA("A IA não devolveu texto (%s). Tente de novo." % self.ultimo_diag)
+                return txt, feitas
             msgs.append({"role": "assistant", "content": msg.get("content"), "tool_calls": chamadas})
             for ch in chamadas:
                 fn = ch.get("function") or {}
