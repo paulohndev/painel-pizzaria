@@ -95,10 +95,11 @@ meses = 15
 
 [turnos]
 ; Horário de início e fim de cada turno (formato HH:MM-HH:MM).
+; Deixe vazio (ex.: "tarde =") para não usar um turno.
 ; Pedidos fora desses horários aparecem como "Outro horário".
-almoco = 10:00-15:00
-tarde = 15:00-18:00
-noite = 18:00-03:00
+almoco = 05:00-17:00
+tarde =
+noite = 17:00-05:00
 
 [clientes]
 ; Cliente "ativo" = pediu nos últimos X dias

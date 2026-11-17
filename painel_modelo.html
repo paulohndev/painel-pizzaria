@@ -379,6 +379,7 @@ const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const DIAS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const SER = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)'];
+function corTurno(t){ const n=(D.turnos[t]||'').toLowerCase(); return n.startsWith('almo')?'var(--s1)':n.startsWith('tard')?'var(--s2)':n.startsWith('noit')?'var(--s3)':'var(--s4)'; }
 function parseD(s){return new Date(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10),+s.slice(11,13),+s.slice(14,16));}
 function mesLbl(k){return MESES[+k.slice(5,7)-1]+'/'+k.slice(2,4);}
 function store(k,v){try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){return null}}
@@ -468,7 +469,7 @@ function renderGeral(){
   const fech=P.filter(p=>!p.cancel && okCanal(p));
   const meses=[...new Set(P.map(p=>p.k.slice(0,7)))].sort();
   const ts = F.turno==='all'?TURNOS_VIS:[F.turno];
-  const series=ts.map(t=>({nome:D.turnos[t], cor:SER[Math.min(t,3)], vals:meses.map(mm=>fech.filter(p=>p.t===t&&p.k.startsWith(mm)).reduce((s,p)=>s+(p.v||0),0))}));
+  const series=ts.map(t=>({nome:D.turnos[t], cor:corTurno(t), vals:meses.map(mm=>fech.filter(p=>p.t===t&&p.k.startsWith(mm)).reduce((s,p)=>s+(p.v||0),0))}));
   legenda($('#lgMes'), series.map(s=>[s.nome,s.cor]));
   lineChart($('#chMes'), meses, series, {lbl:mesLbl, fmt:v=>v>=1000?'R$ '+(v/1000).toLocaleString('pt-BR')+' mil':'R$ '+v, tipFmt:fmtR0, parcial:true});
 
@@ -483,7 +484,7 @@ function renderGeral(){
   const tot=fech.reduce((s,p)=>s+(p.v||0),0);
   let h='<table><tr><th>Turno</th><th class="num">Pedidos</th><th class="num">Faturamento</th><th class="num">% do total</th><th class="num">Ticket</th><th class="num">Clientes</th></tr>';
   TURNOS_VIS.forEach(t=>{const L=fech.filter(p=>p.t===t); const v=L.reduce((s,p)=>s+(p.v||0),0); const nv=L.filter(p=>p.v!=null).length;
-    h+=`<tr><td><span class="dot" style="background:${SER[Math.min(t,3)]}"></span>${esc(D.turnos[t])} <span class="muted">${esc(D.turnos_horario[t]||'')}</span></td><td class="num">${fmtN(L.length)}</td><td class="num">${fmtR0(v)}</td><td class="num">${fmtP(tot?v/tot:0)}</td><td class="num">${fmtR(nv?v/nv:0)}</td><td class="num">${fmtN(new Set(L.filter(p=>p.cli>=0).map(p=>p.cli)).size)}</td></tr>`;});
+    h+=`<tr><td><span class="dot" style="background:${corTurno(t)}"></span>${esc(D.turnos[t])} <span class="muted">${esc(D.turnos_horario[t]||'')}</span></td><td class="num">${fmtN(L.length)}</td><td class="num">${fmtR0(v)}</td><td class="num">${fmtP(tot?v/tot:0)}</td><td class="num">${fmtR(nv?v/nv:0)}</td><td class="num">${fmtN(new Set(L.filter(p=>p.cli>=0).map(p=>p.cli)).size)}</td></tr>`;});
   $('#tbTurno').innerHTML=h+'</table>';
 
   // heatmap
