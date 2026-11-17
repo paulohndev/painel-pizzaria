@@ -127,6 +127,17 @@ modelo_forte =
 ; complemento só vão para a IA se você trocar para "sim".
 dados_pessoais = nao
 
+[whatsapp]
+; Envio automático de mensagens (opcional). provedor = zapi ou evolution.
+; Z-API: preencha instancia, token e client_token (painel da Z-API).
+; Evolution API: preencha url, instancia e apikey.
+provedor =
+instancia =
+token =
+client_token =
+url =
+apikey =
+
 [atualizacao]
 ; O programa se atualiza sozinho a partir deste repositório do GitHub.
 ; Para desligar, troque "sim" por "nao".
@@ -158,6 +169,7 @@ def carregar_config():
         "pedidos_fiel": cp.getint("clientes", "pedidos_fiel", fallback=4),
         "mensagem": cp.get("clientes", "mensagem", fallback="").strip().replace("Aqui é da pizzaria. ", ""),
         "ia": {k: cp.get("ia", k, fallback="").strip() for k in ("provedor", "chave", "modelo", "modelo_forte", "dados_pessoais")},
+        "whatsapp": {k: cp.get("whatsapp", k, fallback="").strip() for k in ("provedor", "instancia", "token", "client_token", "url", "apikey")},
     }
 
 

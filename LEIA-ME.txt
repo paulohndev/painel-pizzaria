@@ -95,6 +95,28 @@ Como ligar:
        chave = (cole a chave aqui)
   3. Rode "Desligar vigia" e depois "Ligar vigia e alertas".
 
+ENVIOS PELO WHATSAPP (OPCIONAL)
+------------------------------------------------------------
+Na aba Envios você escolhe um grupo de clientes e a mensagem, revisa e
+agenda. O painel manda uma mensagem de cada vez, espaçadas (3 a 9 minutos),
+só no horário permitido e respeitando um limite por cliente conforme o
+perfil (Fã, Frequente, Novo, Ocasional, Frio, Congelado). Quem recebe 3
+mensagens seguidas sem pedir entra em pausa. No perfil do cliente dá para
+marcar "Não enviar mensagens para este cliente".
+
+Como ligar (Z-API):
+  1. Crie uma conta em z-api.io, crie uma instância e leia o QR code com
+     o WhatsApp da loja.
+  2. No config.ini, seção [whatsapp]:
+       provedor = zapi
+       instancia = (ID da instância)
+       token = (token da instância)
+       client_token = (Client-Token, em Segurança)
+  3. Rode "Desligar vigia" e depois "Ligar vigia e alertas".
+Atenção: Z-API e Evolution API não são a API oficial do WhatsApp. Envios
+em excesso para quem não espera receber podem levar o WhatsApp a restringir
+o número. Comece com pouco volume.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

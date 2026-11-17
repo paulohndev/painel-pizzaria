@@ -352,6 +352,39 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .ch-entrada textarea{flex:1;min-height:44px;max-height:140px;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;resize:none;background:#fff}
 .ch-entrada button{border:0;background:var(--sun);border-radius:14px;padding:0 16px;font:inherit;font-weight:700;cursor:pointer}
 .ch-vazio{color:var(--mut);font-size:13.5px;line-height:1.6;padding:6px 2px}
+.ev-passos{display:grid;gap:14px}
+.ev-passo{display:flex;gap:14px;align-items:flex-start}
+.ev-num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--sun);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.ev-corpo{flex:1;min-width:0}
+.ev-texto{width:100%;min-height:76px;font:inherit;font-size:14px;line-height:1.5;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;margin-top:8px;resize:vertical}
+.ev-resumo{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.ev-resumo span{background:var(--line2);border-radius:999px;padding:4px 12px;font-size:12.5px}
+.ev-resumo span b{font-weight:700}
+.ev-resumo span.ok{background:#E7F4EC;color:#1d6b40}
+.ev-resumo span.av{background:#FFF3DC;color:#8a5a00}
+.ev-st{font-size:12px;font-weight:600;white-space:nowrap}
+.ev-st.livre{color:#1d6b40}.ev-st.aguardar,.ev-st.na_fila{color:#8a5a00}.ev-st.pausado,.ev-st.bloqueado,.ev-st.so_app,.ev-st.semmsg{color:var(--tomato)}
+#tbEv td.msg{font-size:12.5px;color:var(--mut);max-width:420px;cursor:text}
+#tbEv td.msg textarea{width:100%;min-height:70px;font:inherit;font-size:13px;border:1px solid var(--sun);border-radius:10px;padding:6px 8px}
+#tbEv tr.off td{opacity:.55}
+.ev-linha{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.ev-linha:last-child{border-bottom:0}
+.ev-linha .q{color:var(--mut);min-width:96px;font-variant-numeric:tabular-nums}
+.ev-linha .n{flex:1;min-width:0}
+.ev-linha .sub{display:block;font-size:12px;color:var(--soft)}
+.ev-linha button{border:0;background:none;color:var(--soft);cursor:pointer;font-size:14px}
+.ev-linha .erro{color:var(--tomato);font-size:12px}
+.ev-stat{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.ev-stat .bola{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;background:var(--soft)}
+.ev-stat .bola.on{background:#25D366}.ev-stat .bola.off{background:var(--tomato)}
+.ev-reg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:10px}
+.ev-reg label{background:var(--bg);border-radius:14px;padding:10px 12px;font-size:12.5px;color:var(--mut);display:block;line-height:2.1}
+.ev-reg label .x{display:block;line-height:1.4;margin-bottom:2px}
+.ev-reg label b{color:var(--ink);font-size:13.5px;display:block;line-height:1.4;margin-bottom:2px}
+.ev-reg input[type=number],.ev-reg input[type=text]{font:inherit;font-size:14px;width:90px;border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:#fff}
+.env-b{font-size:10.5px;padding:1px 7px;border-radius:999px;background:var(--line2);color:var(--mut);white-space:nowrap;margin-left:4px}
+.env-b.aguardar,.env-b.na_fila{background:#FFF3DC;color:#8a5a00}.env-b.pausado,.env-b.bloqueado{background:#FDECEA;color:var(--tomato)}
+.btn.principal{background:var(--sun);font-weight:700}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -367,6 +400,7 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
     <div class="grupo">Rotina</div>
     <button data-t="hoje" class="on" title="Hoje"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></span><span class="nm">Hoje</span><span class="qt" id="qtHoje"></span></button>
     <button data-t="promocoes" title="Promoções"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span><span class="nm">Promoções</span></button>
+    <button data-t="envios" title="Envios"><span class="ic"><svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></span><span class="nm">Envios</span><span class="qt" id="qEnv" style="display:none"></span></button>
     <button data-t="resultados" title="Resultados"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span><span class="nm">Resultados</span></button>
     <div class="grupo">Análises</div>
     <button data-t="geral" title="Visão geral"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></span><span class="nm">Visão geral</span></button>
@@ -556,6 +590,44 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
   </section>
 
   <!-- BAIRROS -->
+  <section id="t-envios" class="hidden">
+    <div class="card" id="evStatus"></div>
+    <div class="card" style="margin-top:16px">
+      <h2>Novo envio</h2>
+      <p class="desc">Escolha quem vai receber e a mensagem. Cada cliente recebe o texto com o nome e o prato favorito dele. O painel tira da lista quem já recebeu mensagem há pouco tempo (veja as regras no fim da página) e manda uma de cada vez, espaçadas, dentro do horário permitido.</p>
+      <div class="ev-passos">
+        <div class="ev-passo"><div class="ev-num">1</div><div class="ev-corpo"><b>Quem vai receber</b>
+          <div class="toolbar" style="margin-top:8px">
+            <select id="evFonte"></select>
+            <select id="evPerfil"><option value="">Todos os perfis</option></select>
+            <select id="evCanal"><option value="">Qualquer canal</option><option value="proprio">Pede pelo canal próprio</option><option value="ifood">Já pediu no iFood</option><option value="food99">Já pediu no 99Food</option></select>
+            <select id="evTurno"><option value="">Qualquer turno</option></select>
+            <select id="evBairro"><option value="">Todos os bairros</option></select>
+            <input type="number" id="evDiasMin" min="0" placeholder="dias sem pedir: de" style="width:150px">
+            <input type="number" id="evDiasMax" min="0" placeholder="até" style="width:80px">
+            <input type="number" id="evPedMin" min="0" placeholder="mín. de pedidos" style="width:130px">
+            <input type="search" id="evFav" placeholder="favorito contém…" style="width:160px">
+          </div></div></div>
+        <div class="ev-passo"><div class="ev-num">2</div><div class="ev-corpo"><b>Mensagem</b>
+          <div class="toolbar" style="margin-top:8px"><select id="evMsg"></select>
+            <label class="muted" style="font-size:13px" id="evIaLbl"><input type="checkbox" id="evIa"> ✨ IA reescreve cada mensagem na hora do envio, mantendo a oferta</label></div>
+          <textarea id="evTexto" class="ev-texto"></textarea>
+          <div class="muted" style="font-size:12px;margin-top:4px">Variáveis: {nome}, {favorito} (vira "aquela pizza de calabresa"), {oferta}, {sugestao}, {sabor_promo}, {pontos}, {bairro}. Mudar o texto aqui vale só para este envio.</div>
+        </div></div>
+        <div class="ev-passo"><div class="ev-num">3</div><div class="ev-corpo"><b>Revisar e agendar</b>
+          <div class="ev-resumo" id="evResumo"></div>
+          <div class="tablebox" style="max-height:520px;overflow:auto"><table id="tbEv"></table></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px"><button class="btn principal" id="evAgendar">Agendar envio</button><span class="muted" id="evAviso" style="font-size:13px"></span></div>
+          <div id="evOk" style="font-size:13.5px;margin-top:8px"></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="two" style="margin-top:16px">
+      <div class="card"><h2>Fila de envio <span class="cont" id="evFilaN">0</span></h2><div id="evFila"></div></div>
+      <div class="card"><h2>Enviadas recentemente</h2><div id="evRecentes"></div></div>
+    </div>
+    <div class="card" style="margin-top:16px" id="evRegras"></div>
+  </section>
   <section id="t-bairros" class="hidden">
     <div class="card">
       <h2>Bairros</h2>
@@ -661,10 +733,10 @@ function marcarFiltros(){
   document.querySelectorAll('#fCanal button').forEach(b=>b.classList.toggle('on', F.canal===b.dataset.v));
 }
 let aba='hoje';
-const PAGINAS={hoje:'Hoje',promocoes:'Promoções',resultados:'Resultados',geral:'Visão geral',clientes:'Clientes',produtos:'Produtos',bairros:'Bairros'};
+const PAGINAS={envios:'Envios pelo WhatsApp',hoje:'Hoje',promocoes:'Promoções',resultados:'Resultados',geral:'Visão geral',clientes:'Clientes',produtos:'Produtos',bairros:'Bairros'};
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{aba=b.dataset.t; $('#pgTitulo').textContent=PAGINAS[aba]||''; window.scrollTo({top:0});
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  ['hoje','geral','clientes','produtos','bairros','promocoes','resultados'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
+  ['hoje','geral','clientes','produtos','bairros','promocoes','resultados','envios'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
 
 // ------------------------------------------------------------ gráfico de linhas (SVG)
 function lineChart(el, cats, series, opt){
@@ -842,7 +914,7 @@ function renderClientes(){
   F2.slice(pag*PAG,(pag+1)*PAG).forEach(c=>{const w=waLink(c); const feito=!!contatos[c.id];
     const turnosTxt=c.tc.map((n,t)=>n?`${D.turnos[t].slice(0,1)}${n}`:null).filter(Boolean).join(' · ');
     const sub=[c.bairro, c.pontos?fmtN(c.pontos)+' pts':''].filter(Boolean).join(' · ');
-    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${c.i}">${esc(c.nome)}</a><span class="sub">${esc(sub)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
+    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${c.i}">${esc(c.nome)}</a>${envSelo(c.i)}<span class="sub">${esc(sub)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?'<span class="sub">ativo em outro turno</span>':''}</td>
@@ -983,7 +1055,7 @@ function renderPromocoes(){
   let h='<tr><th>Cliente</th><th></th><th>Feito</th><th>Por que este cliente</th><th>Sugestão</th><th class="num">Total gasto</th></tr>';
   G.slice(pPag*PAG,(pPag+1)*PAG).forEach(r=>{ const c=D.clientes[r.cli]; const rec=r.recs[0]; const m=msgPromo(r,rec); const w=waLink(c,m); const feito=!!contatos[c.id];
     const outras=r.recs.slice(1).map(x=>`<span class="tag" title="${esc(x.motivo)}">${esc(CAMP[x.tipo]?CAMP[x.tipo].nome:x.titulo)}${x.sugestao?': '+esc(x.sugestao):''}</span>`).join(' ');
-    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${r.cli}">${esc(c.nome||'(sem nome)')}</a><span class="sub">mandar ${esc(r.quando)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
+    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${r.cli}">${esc(c.nome||'(sem nome)')}</a>${envSelo(r.cli)}<span class="sub">mandar ${esc(r.quando)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(m)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td class="why">${esc(rec.motivo)}${outras?`<div class="tags">${outras}</div>`:''}</td>
@@ -1144,13 +1216,13 @@ function renderHojeBlocos(){
       if(q && !semAc([c?c.nome:'', c?c.tel:'', it.cli>=0?bairroCli(it.cli):'', it.motivo].join(' ')).includes(q)) return false;
       return true; });
     if(!itens.length) return; vis+=itens.length;
-    h+=`<div class="card" style="margin-top:20px"><h2>${b.nome} <span class="cont">${itens.length}${itens.length<L[b.id].length?' de '+L[b.id].length:''}</span></h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Cliente</th><th></th><th>Feito</th><th>Por quê</th><th class="num">Total gasto</th></tr>`;
+    h+=`<div class="card" style="margin-top:20px"><h2>${b.nome} <span class="cont">${itens.length}${itens.length<L[b.id].length?' de '+L[b.id].length:''}</span>${b.id!=='avaliacao'?`<button class="btn" style="margin-left:auto;font-size:12.5px" data-envbloco="${b.id}">📨 Enviar para esta lista</button>`:''}</h2><p class="desc">${b.dica}</p><div class="tablebox"><table><tr><th>Cliente</th><th></th><th>Feito</th><th>Por quê</th><th class="num">Total gasto</th></tr>`;
     itens.forEach(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
       if(!c){ h+=`<tr><td class="muted">Cliente não identificado (pedido ${esc(it.aval?it.aval[5]:'')})</td><td>—</td><td></td><td class="why">${esc(it.motivo)}</td><td></td></tr>`; return; }
       const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
       const msg=b.promo!=null?msgPromoCasa(PROMOS[b.promo],it.cli):b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da Pizzaria Mariá. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
       const w=waLink(c,msg); const feito=!!cInfo(c.id); const bb=bairroCli(it.cli);
-      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${c.app||bb?`<span class="sub">${esc(bb)}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</span>`:''}</td>
+      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${envSelo(it.cli)}${c.app||bb?`<span class="sub">${esc(bb)}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</span>`:''}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:'<span class="muted">sem telefone</span>'}</td>
         <td class="ck"><input type="checkbox" data-id="${c.id}" data-camp="${b.camp||'avaliacao'}" ${feito?'checked':''}></td>
         <td class="why">${esc(it.motivo)}</td>
@@ -1158,6 +1230,7 @@ function renderHojeBlocos(){
     h+='</table></div></div>'; });
   if(!vis && ativo) h='<div class="card" style="margin-top:20px"><p class="muted" style="margin:0">Ninguém com esses filtros. <button class="limpar" onclick="limparHoje()">Limpar filtros</button></p></div>';
   $('#hojeBlocos').innerHTML=h;
+  $('#hojeBlocos').querySelectorAll('[data-envbloco]').forEach(b=>b.onclick=()=>irParaEnvio('hoje:'+b.dataset.envbloco));
   $('#hojeBlocos').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, cb.dataset.camp, cb.checked); if($('#hOcultar').checked) renderHojeBlocos(); });
 }
 function limparHoje(){ HF.bloco=null; $('#hBusca').value=''; $('#hMotivo').value=''; $('#hBairro').value=''; $('#hOcultar').checked=false; renderHoje(); }
@@ -1326,7 +1399,7 @@ function ping(a){
   $('#pings').prepend(el); while($('#pings').children.length>3) $('#pings').lastChild.remove();
   setTimeout(fora, 14000); $('#sino').classList.remove('pulsa'); void $('#sino').offsetWidth; $('#sino').classList.add('pulsa');
 }
-function abrirPeloLink(){ const h=decodeURIComponent(location.hash||''); if(h.startsWith('#alerta=')) abrirGaveta(h.slice(8)); else if(h==='#alertas') abrirGaveta(); }
+function abrirPeloLink(){ const h=decodeURIComponent(location.hash||''); if(h.startsWith('#alerta=')) abrirGaveta(h.slice(8)); else if(h==='#alertas') abrirGaveta(); else if(h==='#envios'){ const b=document.querySelector('#tabs button[data-t=envios]'); if(b) b.click(); } }
 window.addEventListener('hashchange',abrirPeloLink);
 function acompanhar(){
   api('/api/estado').then(e=>{
@@ -1393,7 +1466,7 @@ function iaAbrir(a){
   const c=D.clientes[cli]; const row=a.closest('tr,.al,.pf-topo,.pf-sec');
   let motivo=''; if(row){ const w=row.querySelector('.why'); const p=row.querySelector('p'); motivo=w?w.innerText:p?p.innerText:''; }
   const al=a.closest('.al'); const tipo=(row&&row.querySelector('input[data-camp="avaliacao"]'))||(al&&String(al.dataset.id||'').startsWith('avaliacao'))?'avaliacao':'';
-  IA_CTX={num, ref, cli, chave:c.chave, motivo, tipo, base:a.href.split('?')[0]};
+  IA_CTX={num, ref, cli, chave:c.chave, motivo, tipo, base:a.href.split('?')[0], a};
   $('#iaTitulo').textContent='Mensagem para '+primeiroNome(c);
   $('#iaTxt').value=ref; $('#iaPub').classList.add('hidden'); $('#iaCopiarPub').classList.add('hidden');
   $('#iaModal').classList.remove('hidden'); iaGerar(false); return true;
@@ -1419,7 +1492,7 @@ $('#iaFechar').onclick=iaFechar; $('#iaModal').addEventListener('click',e=>{ if(
 $('#iaOutra').onclick=()=>iaGerar(true);
 $('#iaPadrao').onclick=()=>{ $('#iaTxt').value=IA_CTX.ref; $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem padrão.'; };
 $('#iaCopiarPub').onclick=()=>{ try{ navigator.clipboard.writeText($('#iaPubTxt').value); $('#iaCopiarPub').textContent='Copiada ✓'; setTimeout(()=>$('#iaCopiarPub').textContent='Copiar resposta pública',1500);}catch(e){} };
-$('#iaEnviar').onclick=()=>{ window.open(IA_CTX.base+'?text='+encodeURIComponent($('#iaTxt').value),'_blank','noopener'); iaFechar(); };
+$('#iaEnviar').onclick=()=>{ window.open(IA_CTX.base+'?text='+encodeURIComponent($('#iaTxt').value),'_blank','noopener'); if(IA_CTX.a) marcarPeloBotao(IA_CTX.cli, IA_CTX.a); iaFechar(); };
 if(IA_ON) document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.button) return;
   if(iaAbrir(a)) e.preventDefault(); },true);
 
@@ -1463,6 +1536,206 @@ $('#chFechar').onclick=fecharChat; $('#chEnviar').onclick=chatEnviar;
 $('#chTxt').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); chatEnviar(); } });
 if(AO_VIVO){ $('#perguntar').classList.remove('hidden'); $('#perguntar').onclick=abrirChat; }
 if(AO_VIVO) setTimeout(()=>iaResumo(false),800);
+
+
+// ------------------------------------------------------------ ENVIOS (WhatsApp automático)
+const ENV=(D&&D.envio)||{}; const ENVCFG=(D&&D.envio_cfg)||{ativo:false,regras:null,perfis:[]};
+const ENV_PERFIL=Object.fromEntries((ENVCFG.perfis||[]).map(p=>[p[0],p[1]]));
+function envDe(cli){ const e=ENV[cli]; if(!e) return null; return {pf:e[0], ult:e[1]?new Date(e[1].replace(' ','T')):null, st:e[2], lib:e[3], mot:e[4], n30:e[5], taxa:e[6], fila:e[7]}; }
+function dtCurta(s){ if(!s) return ''; const d=new Date(s.length>10?s.replace(' ','T'):s+'T12:00'); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+(s.length>10?' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''); }
+function envTexto(e){
+  if(!e) return '';
+  const ha=e.ult?Math.floor((new Date()-e.ult)/864e5):null;
+  if(e.st==='bloqueado') return '🚫 não quer receber';
+  if(e.st==='so_app') return 'só pede por app';
+  if(e.st==='na_fila') return '🕒 na fila · '+dtCurta(e.fila);
+  if(e.st==='pausado') return '⏸ pausado até '+dtCurta(e.lib);
+  if(e.st==='aguardar') return '⏳ só a partir de '+dtCurta(e.lib.slice(0,10));
+  if(ha!=null) return '📨 recebeu há '+(ha===0?'menos de 1 dia':ha+' d');
+  return '';
+}
+function envSelo(cli){ const e=envDe(cli); const t=envTexto(e); return t?` <span class="env-b ${e.st}" title="${esc(e.mot||'')}">${esc(t)}</span>`:''; }
+// aviso ao clicar no WhatsApp de quem não deveria receber agora
+window.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a) return;
+  const u=new URL(a.href); const num=(u.pathname.match(/\d+/)||[''])[0]; const cli=TEL_IDX[num.slice(-11)]; if(cli==null) return;
+  const en=envDe(cli); if(!en||!['aguardar','pausado','bloqueado'].includes(en.st)) return;
+  const c=D.clientes[cli]; const txt=en.st==='bloqueado'?`${primeiroNome(c)} pediu para não receber mensagens.`:
+    `${primeiroNome(c)} ${en.ult?'recebeu mensagem em '+en.ult.toLocaleDateString('pt-BR'):'já recebeu mensagens'} (${en.mot}). O recomendado é esperar até ${dtCurta(en.lib.slice(0,10))}.`;
+  if(!confirm(txt+'\n\nAbrir o WhatsApp mesmo assim?')){ e.preventDefault(); e.stopPropagation(); } },true);
+// clicou no WhatsApp: conta como mensagem enviada para o limite de frequência
+document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||e.defaultPrevented) return;
+  const u=new URL(a.href); const num=(u.pathname.match(/\d+/)||[''])[0]; const cli=TEL_IDX[num.slice(-11)]; if(cli==null) return;
+  marcarPeloBotao(cli, a); });
+function marcarPeloBotao(cli, a){ const c=D.clientes[cli]; if(!c) return; const row=a&&a.closest('tr,.al'); const cb=row&&row.querySelector('td.ck input[type=checkbox]');
+  if(cb&&!cb.checked){ cb.checked=true; cb.dispatchEvent(new Event('change')); return; }
+  if(cb) return; const i=cInfo(c.id); if(i&&diasEntre(i.d,new Date())===0) return; marcar(c.id,'whatsapp',true); }
+
+let EV={fonte:'', tpl:'', textos:{}, desmarcados:new Set(), marcados:new Set(), estado:null, timer:null};
+function fontesEnvio(){
+  const L=listaDoDia(); const pc=porCliente(); const ops=[];
+  blocosDia().forEach(b=>{ if(b.id!=='avaliacao'&&L[b.id].length) ops.push(['hoje:'+b.id,'Hoje · '+b.nome+' ('+L[b.id].length+')']); });
+  SEGS.forEach(sg=>{ let n=0; pc.forEach((x,cli)=>{ if(sg.f(x.n,diasEntre(x.ult,REF))) n++; }); ops.push(['seg:'+sg.id,'Grupo · '+sg.nome+' ('+fmtN(n)+')']); });
+  ops.push(['mig','Migraram para iFood/99']); ops.push(['todos','Todos os clientes com telefone']);
+  return ops;
+}
+function opcoesMsg(){
+  const o=[]; Object.keys(CAMP).forEach(k=>o.push(['camp:'+k,'Campanha · '+CAMP[k].nome]));
+  PROMOS.forEach((p,k)=>{ if(p.msg) o.push(['casa:'+k,'Promoção da casa · '+p.nome]); });
+  o.push(['livre','Texto livre']); return o;
+}
+function tplDe(op){ if(op.startsWith('camp:')) return cpTexto(op.slice(5),'msg'); if(op.startsWith('casa:')) return (PROMOS[+op.slice(5)]||{}).msg||''; return EV.livre||'Oi {nome}! '; }
+function msgPadraoFonte(f){ if(f.startsWith('hoje:')){ const b=blocosDia().find(x=>'hoje:'+x.id===f); if(b){ if(b.promo!=null) return 'casa:'+b.promo; if(b.camp&&CAMP[b.camp]) return 'camp:'+b.camp; } }
+  if(f==='mig') return 'camp:canal_proprio'; if(f==='seg:fs'||f==='seg:es'||f==='seg:pe') return 'camp:reativar'; if(f==='seg:no') return 'camp:segundo'; return ''; }
+function irParaEnvio(fonte){ document.querySelector('#tabs button[data-t=envios]').click(); $('#evFonte').value=fonte; EV.fonte=fonte; const m=msgPadraoFonte(fonte); if(m){ $('#evMsg').value=m; $('#evTexto').value=tplDe(m); }
+  EV.textos={}; EV.desmarcados=new Set(); EV.marcados=new Set(); renderEvLista(); $('#t-envios').scrollIntoView({behavior:'smooth'}); }
+function preencherTpl(tpl, op, cli){
+  const c=D.clientes[cli]; const pf=PERF[cli]||[]; let sug='', base='', oferta='', sp='';
+  if(op.startsWith('camp:')){ const k=op.slice(5); const rec=((REC_DE[cli]||{}).recs||[]).find(r=>r.tipo===k);
+    if(/\{sugestao\}|\{base\}/.test(tpl+cpTexto(k,'oferta'))){ if(!rec) return null; sug=rec.sugestao||''; base=rec.base||''; }
+    const s2=sug?(SUG_SABOR.has(k)?falaSabor(sug):falaItem(sug)):''; oferta=cpTexto(k,'oferta').replace(/\{sugestao\}/g,s2); sug=s2; base=base?falaItem(base):''; }
+  if(op.startsWith('casa:')){ const p=PROMOS[+op.slice(5)]||{}; oferta=p.oferta||''; const sab=p.sabores||[];
+    sp=saborNaPromo(p,pf[0])?'Aquela pizza de '+falaSabor(pf[0]):(sab.length?'Pizza grande de '+(sab.length>1?sab.slice(0,-1).join(', ')+' ou '+sab[sab.length-1]:sab[0]):''); }
+  return juntarPreps(tpl.replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,falaFav(pf[0])).replace(/\{sugestao\}/g,sug).replace(/\{base\}/g,base||falaItem(pf[0]))
+    .replace(/\{oferta\}/g,oferta).replace(/\{sabor_promo\}/g,sp).replace(/\{pontos\}/g,c.pontos||0).replace(/\{bairro\}/g,bairroCli(cli)||'')).replace(/\s+([!.,?])/g,'$1').trim();
+}
+function publicoEnvio(){
+  const f=$('#evFonte').value; const pc=porCliente(); let clis=[];
+  if(f.startsWith('hoje:')){ const L=listaDoDia(); clis=(L[f.slice(5)]||[]).map(it=>it.cli); }
+  else if(f.startsWith('seg:')){ const sg=SEGS.find(x=>'seg:'+x.id===f); pc.forEach((x,cli)=>{ if(sg&&sg.f(x.n,diasEntre(x.ult,REF))) clis.push(cli); }); }
+  else if(f==='mig'){ Object.keys(CLI_CAN).forEach(k=>{ const st=situacaoCanal(+k); if(st&&st.tipo==='migrou') clis.push(+k); }); }
+  else pc.forEach((x,cli)=>clis.push(cli));
+  const pf=$('#evPerfil').value, cn=$('#evCanal').value, tu=$('#evTurno').value, bai=$('#evBairro').value, fav=semAc($('#evFav').value.trim());
+  const dmin=$('#evDiasMin').value===''?null:+$('#evDiasMin').value, dmax=$('#evDiasMax').value===''?null:+$('#evDiasMax').value, pmin=$('#evPedMin').value===''?null:+$('#evPedMin').value;
+  return [...new Set(clis)].filter(cli=>{ const c=D.clientes[cli]; if(!c||!c.tel) return false; const x=pc.get(cli); const e=envDe(cli);
+    if(pf&&(!e||e.pf!==pf)) return false;
+    if(cn&&!(CLI_GRP[cli]&&CLI_GRP[cli].has(cn))) return false;
+    if(tu!==''&&String((PERF[cli]||[])[5])!==tu) return false;
+    if(bai&&bairroCli(cli)!==bai) return false;
+    if(fav&&!semAc((PERF[cli]||[])[0]||'').includes(fav)) return false;
+    const d=x?diasEntre(x.ult,REF):9999; if(dmin!=null&&d<dmin) return false; if(dmax!=null&&d>dmax) return false;
+    if(pmin!=null&&(!x||x.n<pmin)) return false; return true; })
+   .sort((a,b)=>((pc.get(b)||{}).v||0)-((pc.get(a)||{}).v||0));
+}
+function evMarcado(cli,e){ if(EV.desmarcados.has(cli)) return false; if(EV.marcados.has(cli)) return true; return !e||e.st==='livre'; }
+function renderEvLista(){
+  const op=$('#evMsg').value; const tpl=$('#evTexto').value; const clis=publicoEnvio();
+  let h='<tr><th style="width:34px"><input type="checkbox" id="evTodos" title="Marcar/desmarcar os que podem receber"></th><th>Cliente</th><th>Perfil</th><th>Última mensagem</th><th>Situação</th><th>Mensagem (clique para editar)</th></tr>';
+  let sel=0, pode=0, espera=0, semMsg=0; const LIM=400;
+  clis.slice(0,LIM).forEach(cli=>{ const c=D.clientes[cli]; const e=envDe(cli);
+    const txt=EV.textos[cli]!=null?EV.textos[cli]:preencherTpl(tpl,op,cli);
+    const bloq=!e||e.st==='bloqueado'||e.st==='so_app'||e.st==='na_fila'||txt==null;
+    const mk=!bloq&&evMarcado(cli,e); if(mk) sel++; if(e&&e.st==='livre') pode++; else espera++; if(txt==null) semMsg++;
+    const st=txt==null?['semmsg','sem sugestão para este cliente']:!e?['bloqueado','sem telefone']:[e.st,{livre:'✓ pode receber',aguardar:'⏳ esperar até '+dtCurta((e.lib||'').slice(0,10)),pausado:'⏸ pausado até '+dtCurta(e.lib),bloqueado:'🚫 não quer receber',so_app:'só pede por app',na_fila:'🕒 já na fila'}[e.st]];
+    h+=`<tr class="${mk?'':'off'}"><td><input type="checkbox" data-evc="${cli}" ${mk?'checked':''} ${bloq?'disabled':''}></td>
+      <td><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a><span class="sub">${esc(bairroCli(cli)||'')}</span></td>
+      <td>${esc(e?ENV_PERFIL[e.pf]||e.pf:'')}${e&&e.taxa>=0?`<span class="sub">responde ${e.taxa}%</span>`:''}</td>
+      <td>${e&&e.ult?e.ult.toLocaleDateString('pt-BR')+`<span class="sub">${fmtN(e.n30)} no último mês</span>`:'<span class="muted">nunca</span>'}</td>
+      <td><span class="ev-st ${st[0]}" title="${esc(e&&e.mot||'')}">${esc(st[1])}</span></td>
+      <td class="msg" data-evt="${cli}">${txt==null?'':esc(txt)}</td></tr>`; });
+  if(!clis.length) h+='<tr><td colspan="6" class="muted" style="padding:20px">Ninguém com telefone nesse grupo e filtros.</td></tr>';
+  $('#tbEv').innerHTML=h;
+  const r=ENVCFG.regras||{}; const med=((+r.intervalo_min||3)+(+r.intervalo_max||9))/2;
+  $('#evResumo').innerHTML=`<span><b>${fmtN(clis.length)}</b> no grupo${clis.length>LIM?' (mostrando '+LIM+')':''}</span><span class="ok"><b>${fmtN(sel)}</b> selecionados</span>`+
+    (espera?`<span class="av"><b>${fmtN(espera)}</b> fora do limite de frequência (desmarcados)</span>`:'')+(semMsg?`<span class="av"><b>${fmtN(semMsg)}</b> sem sugestão para essa campanha</span>`:'')+
+    (sel?`<span>~${sel*med<60?Math.max(1,Math.round(sel*med))+' min':(Math.round(sel*med/60*10)/10).toLocaleString('pt-BR')+' h'} de envio, 1 a cada ${r.intervalo_min}–${r.intervalo_max} min, das ${String(r.horario||'').replace('-',' às ')}</span>`:'');
+  $('#evAgendar').textContent=sel?`Agendar envio de ${fmtN(sel)} mensage${sel===1?'m':'ns'}`:'Agendar envio';
+  $('#evAgendar').disabled=!sel||!ENVCFG.ativo||!AO_VIVO;
+  $('#evAviso').textContent=!AO_VIVO?'Abra pelo atalho Painel Mariá para enviar.':!ENVCFG.ativo?'Ligue o envio automático no config.ini (seção [whatsapp]) para agendar.':'';
+  $('#tbEv').querySelectorAll('input[data-evc]').forEach(cb=>cb.onchange=()=>{ const cli=+cb.dataset.evc; if(cb.checked){ EV.marcados.add(cli); EV.desmarcados.delete(cli);} else { EV.desmarcados.add(cli); EV.marcados.delete(cli);} renderEvLista(); });
+  const todos=$('#evTodos'); if(todos) todos.onchange=()=>{ clis.slice(0,LIM).forEach(cli=>{ const e=envDe(cli); if(todos.checked){ EV.desmarcados.delete(cli); if(e&&e.st==='livre') EV.marcados.add(cli);} else { EV.desmarcados.add(cli); EV.marcados.delete(cli);} }); renderEvLista(); };
+  $('#tbEv').querySelectorAll('td.msg').forEach(td=>td.onclick=()=>{ if(td.querySelector('textarea')) return; const cli=+td.dataset.evt; const t=td.textContent;
+    td.innerHTML=`<textarea>${esc(t)}</textarea>`; const ta=td.querySelector('textarea'); ta.focus(); ta.onblur=()=>{ EV.textos[cli]=ta.value; td.textContent=ta.value; }; });
+}
+function agendarEnvio(){
+  const op=$('#evMsg').value, tpl=$('#evTexto').value; const msgs=[]; let forcar=false;
+  publicoEnvio().slice(0,400).forEach(cli=>{ const e=envDe(cli); if(!e||['bloqueado','so_app','na_fila'].includes(e.st)) return; if(!evMarcado(cli,e)) return;
+    const txt=EV.textos[cli]!=null?EV.textos[cli]:preencherTpl(tpl,op,cli); if(!txt) return; if(e.st!=='livre') forcar=true;
+    msgs.push({chave:D.clientes[cli].chave, texto:txt, campanha:op.startsWith('camp:')?op.slice(5):op.startsWith('casa:')?'promo_'+(PROMOS[+op.slice(5)]||{}).id:'livre'}); });
+  if(!msgs.length) return;
+  const b=$('#evAgendar'); b.disabled=true; b.textContent='Agendando…';
+  api('/api/envios/agendar',{mensagens:msgs, ia:$('#evIa').checked, forcar}).then(r=>{
+    if(r.erro){ $('#evAviso').textContent=r.erro; b.disabled=false; return; }
+    $('#evOk').innerHTML=`✓ ${fmtN(r.agendados)} mensagens agendadas, de ${dtCurta(r.inicio)} até ${dtCurta(r.fim)}.`+(r.pulados&&r.pulados.length?` ${r.pulados.length} ficaram de fora (${esc(r.pulados.slice(0,3).map(p=>(p.nome||'').split(' ')[0]+': '+p.motivo).join('; '))}${r.pulados.length>3?'…':''}).`:'');
+    msgs.forEach(m=>{ const cli=IDX_CHAVE[m.chave]; if(ENV[cli]){ ENV[cli][2]='na_fila'; ENV[cli][7]=r.inicio; } });
+    EV.textos={}; EV.marcados=new Set(); EV.desmarcados=new Set(); renderEvLista(); evAtualizar();
+  }).catch(()=>{ $('#evAviso').textContent='Não consegui falar com o vigia.'; b.disabled=false; });
+}
+function evAtualizar(){
+  if(!AO_VIVO){ renderEvStatus(null); return; }
+  api('/api/envios').then(r=>{ EV.estado=r; renderEvStatus(r); }).catch(()=>{});
+}
+function renderEvStatus(r){
+  const conn=EV.conn;
+  let h=`<h2>Envio automático ${ENVCFG.ativo?'<span class="tag" style="background:#E7F4EC;color:#1d6b40">ligado · '+esc(ENVCFG.nome)+'</span>':'<span class="tag">desligado</span>'}</h2>`;
+  if(!ENVCFG.ativo){ h+=`<p class="desc">Para o painel mandar as mensagens sozinho, conecte o WhatsApp da loja a um serviço de envio e preencha a seção <b>[whatsapp]</b> do <b>config.ini</b>:<br>
+    • <b>Z-API</b> (z-api.io): crie uma instância, leia o QR code com o WhatsApp da loja e copie <b>ID da instância</b>, <b>Token</b> e <b>Client-Token</b> (em Segurança) para <code>provedor = zapi</code>, <code>instancia</code>, <code>token</code> e <code>client_token</code>.<br>
+    • <b>Evolution API</b>: <code>provedor = evolution</code>, <code>url</code>, <code>instancia</code> e <code>apikey</code>.<br>Depois rode "Desligar vigia" e "Ligar vigia e alertas". Até lá, você pode montar a lista aqui e continuar enviando pelo botão WhatsApp de cada cliente.</p>`; }
+  else if(r){
+    h+=`<div class="ev-stat"><span><i class="bola ${conn==null?'':conn.ok?'on':'off'}"></i>${conn==null?'conferindo conexão…':esc(conn.texto)}</span>
+      <span>Hoje: <b>${fmtN(r.enviados_hoje)}</b> de ${fmtN(r.limite_hoje)} automáticas${r.manuais_hoje?' · '+fmtN(r.manuais_hoje)+' pelo botão':''}</span>
+      <span>Na fila: <b>${fmtN(r.fila_total)}</b>${r.fim_previsto?' · termina ~'+dtCurta(r.fim_previsto):''}</span>
+      ${r.pausada?`<span style="color:var(--tomato)"><b>⏸ Pausado:</b> ${esc(r.pausada)}</span><button class="btn principal" data-eva="retomar">Retomar</button>`:(r.fila_total?'<button class="btn" data-eva="pausar">Pausar</button>':'')}
+      ${r.fila_total?'<button class="btn" data-eva="cancelar_tudo">Cancelar a fila</button>':''}
+      <button class="btn" id="evTestar">Testar conexão</button></div>`;
+  }
+  $('#evStatus').innerHTML=h;
+  $('#evStatus').querySelectorAll('[data-eva]').forEach(b=>b.onclick=()=>{ if(b.dataset.eva==='cancelar_tudo'&&!confirmar(b)) return; api('/api/envios/acao',{acao:b.dataset.eva}).then(x=>{ EV.estado=x; renderEvStatus(x); }); });
+  const t=$('#evTestar'); if(t) t.onclick=()=>{ EV.conn=null; renderEvStatus(EV.estado); api('/api/envios/conexao').then(c=>{ EV.conn=c; renderEvStatus(EV.estado); }); };
+  // fila
+  const NOME_C=k=>{ if(!k) return ''; if(CAMP[k]) return CAMP[k].nome; if(k.startsWith('promo_')){ const p=PROMOS.find(x=>'promo_'+x.id===k); return p?p.nome:k; } return {livre:'Texto livre',whatsapp:'Botão WhatsApp',envio:'Envio'}[k]||k; };
+  const fila=(r&&r.fila)||[]; $('#evFilaN').textContent=r?fmtN(r.fila_total):'0';
+  $('#qEnv').style.display=r&&r.fila_total?'':'none'; $('#qEnv').textContent=r?r.fila_total:'';
+  $('#evFila').innerHTML=fila.length?fila.slice(0,60).map(x=>`<div class="ev-linha"><span class="q">${dtCurta(x.quando)}</span><span class="n">${esc(x.nome||'')}<span class="sub">${esc(NOME_C(x.campanha))}${x.ia?' · ✨ IA':''}</span></span><button title="Cancelar esta" data-evx="${x.id}">✕</button></div>`).join('')+(fila.length>60?`<div class="muted" style="font-size:12px;padding-top:8px">e mais ${fmtN(r.fila_total-60)}…</div>`:'')
+    :'<div class="muted" style="font-size:13px">Nada na fila.</div>';
+  $('#evFila').querySelectorAll('[data-evx]').forEach(b=>b.onclick=()=>api('/api/envios/acao',{acao:'cancelar',id:+b.dataset.evx}).then(x=>{ EV.estado=x; renderEvStatus(x); }));
+  const rec=(r&&r.recentes)||[];
+  $('#evRecentes').innerHTML=rec.length?rec.slice(0,40).map(x=>`<div class="ev-linha"><span class="q">${dtCurta(x.quando)}</span><span class="n">${esc(x.nome||'(cliente)')}<span class="sub">${esc(NOME_C(x.campanha))}${x.via==='manual'?' · pelo botão':''}</span>${x.status!=='enviado'?`<span class="erro">${x.status==='erro'?'erro: ':'cancelada: '}${esc(x.erro||'')}</span>`:''}</span><span title="${esc(x.texto||'')}">${x.status==='enviado'?'✓':x.status==='erro'?'⚠️':'—'}</span></div>`).join('')
+    :'<div class="muted" style="font-size:13px">Nenhuma mensagem ainda.</div>';
+}
+function renderEvRegras(){
+  const r=ENVCFG.regras; if(!r){ $('#evRegras').innerHTML=''; return; }
+  const cont={}; Object.values(ENV).forEach(e=>cont[e[0]]=(cont[e[0]]||0)+1);
+  let h=`<h2>Regras de frequência</h2><p class="desc">Cada cliente recebe no máximo 1 mensagem a cada X dias, conforme o perfil. Quem recebe ${r.pausa_sem_resposta} mensagens seguidas sem fazer nenhum pedido entra em pausa. Estas regras valem para o envio automático e para os avisos quando você clica em WhatsApp.</p><div class="ev-reg">`;
+  (ENVCFG.perfis||[]).forEach(([k,n,x])=>{ h+=`<label><b>${esc(n)} · ${fmtN(cont[k]||0)} clientes</b><span class="x">${esc(x)}</span><span>1 mensagem a cada <input type="number" min="1" max="365" data-rp="${k}" value="${r.perfis[k]}"> dias</span></label>`; });
+  h+=`</div><div class="ev-reg">
+    <label><b>Pausa para quem não responde</b>depois de <input type="number" min="1" max="20" data-rg="pausa_sem_resposta" value="${r.pausa_sem_resposta}"> mensagens sem pedido, pausar por <input type="number" min="1" max="365" data-rg="dias_pausa" value="${r.dias_pausa}"> dias</label>
+    <label><b>Ritmo de envio</b>1 mensagem a cada <input type="number" min="1" max="120" data-rg="intervalo_min" value="${r.intervalo_min}"> a <input type="number" min="1" max="240" data-rg="intervalo_max" value="${r.intervalo_max}"> minutos (sorteado)</label>
+    <label><b>Limites</b>até <input type="number" min="1" max="60" data-rg="por_hora" value="${r.por_hora}"> por hora e <input type="number" min="1" max="500" data-rg="por_dia" value="${r.por_dia}"> por dia</label>
+    <label><b>Horário de envio</b><input type="text" data-rg="horario" value="${esc(r.horario)}" style="width:120px"> (ex.: 10:00-21:00)</label>
+    <label><b>Aquecimento</b><span><input type="checkbox" data-rg="aquecimento" ${r.aquecimento?'checked':''}> nos primeiros 7 dias, começa com 10 por dia e sobe 5 por dia</span></label>
+    <label><b>Clientes que só pedem por app</b><span><input type="checkbox" data-rg="incluir_so_app" ${r.incluir_so_app?'checked':''}> incluir (o telefone veio do iFood/99; usar para marketing pode ir contra os termos deles)</span></label>
+  </div><div style="margin-top:12px">${AO_VIVO?'<button class="btn principal" id="evSalvarRegras">Salvar regras</button> <span class="muted" id="evRegrasMsg" style="font-size:13px"></span>':'<span class="muted">Abra pelo atalho Painel Mariá para mudar as regras.</span>'}</div>`;
+  $('#evRegras').innerHTML=h;
+  const b=$('#evSalvarRegras'); if(b) b.onclick=()=>{ const n={perfis:{}}; $('#evRegras').querySelectorAll('[data-rp]').forEach(i=>n.perfis[i.dataset.rp]=+i.value);
+    $('#evRegras').querySelectorAll('[data-rg]').forEach(i=>n[i.dataset.rg]=i.type==='checkbox'?i.checked:i.type==='number'?+i.value:i.value);
+    b.disabled=true; $('#evRegrasMsg').textContent='Salvando…';
+    api('/api/envios/regras',{regras:n}).then(x=>{ if(x.erro){ $('#evRegrasMsg').textContent=x.erro; b.disabled=false; return; } $('#evRegrasMsg').textContent='Salvo. Atualizando o painel…';
+      api('/api/estado').then(e0=>{ let k=0; const t=setInterval(()=>{ k++; api('/api/estado').then(e=>{ if(e.versao!==e0.versao||k>30){ clearInterval(t); location.reload(); } }); },1500); }); }); };
+}
+let EV_PRONTO=false;
+function renderEnvios(){
+  if(!EV_PRONTO){ EV_PRONTO=true;
+    $('#evFonte').innerHTML=fontesEnvio().map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');
+    $('#evMsg').innerHTML=opcoesMsg().map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');
+    $('#evPerfil').innerHTML='<option value="">Todos os perfis</option>'+(ENVCFG.perfis||[]).map(p=>`<option value="${p[0]}">${esc(p[1])}</option>`).join('');
+    $('#evTurno').innerHTML='<option value="">Qualquer turno</option>'+D.turnos.slice(0,-1).map((t,i)=>`<option value="${i}">Cliente ${/^noite/i.test(t)?'da':'do'} ${esc(t.toLowerCase())}</option>`).join('');
+    const bs={}; porCliente().forEach((x,cli)=>{ const b=bairroCli(cli); if(b) bs[b]=(bs[b]||0)+1; });
+    $('#evBairro').innerHTML='<option value="">Todos os bairros</option>'+Object.keys(bs).sort((a,b)=>bs[b]-bs[a]).map(b=>`<option>${esc(b)}</option>`).join('');
+    const ini=$('#evFonte').value; const m=msgPadraoFonte(ini)||'camp:reativar'; $('#evMsg').value=m; $('#evTexto').value=tplDe(m);
+    $('#evIa').disabled=!IA_ON; $('#evIaLbl').style.opacity=IA_ON?1:.5; $('#evIaLbl').title=IA_ON?'':'Ligue a IA no config.ini para usar';
+    $('#evFonte').onchange=()=>{ const m=msgPadraoFonte($('#evFonte').value); if(m){ $('#evMsg').value=m; $('#evTexto').value=tplDe(m); } EV.textos={}; EV.marcados=new Set(); EV.desmarcados=new Set(); renderEvLista(); };
+    $('#evMsg').onchange=()=>{ $('#evTexto').value=tplDe($('#evMsg').value); EV.textos={}; renderEvLista(); };
+    let tm=null; $('#evTexto').oninput=()=>{ if($('#evMsg').value==='livre') EV.livre=$('#evTexto').value; EV.textos={}; clearTimeout(tm); tm=setTimeout(renderEvLista,250); };
+    ['#evPerfil','#evCanal','#evTurno','#evBairro'].forEach(x=>$(x).onchange=renderEvLista);
+    ['#evDiasMin','#evDiasMax','#evPedMin','#evFav'].forEach(x=>$(x).oninput=()=>{ clearTimeout(tm); tm=setTimeout(renderEvLista,300); });
+    $('#evAgendar').onclick=agendarEnvio;
+    renderEvRegras();
+  }
+  renderEvLista(); renderEvStatus(EV.estado); evAtualizar();
+  if(ENVCFG.ativo&&AO_VIVO&&EV.conn==null) api('/api/envios/conexao').then(c=>{ EV.conn=c; renderEvStatus(EV.estado); }).catch(()=>{});
+  clearInterval(EV.timer); EV.timer=setInterval(()=>{ if(aba==='envios') evAtualizar(); else clearInterval(EV.timer); },30000);
+}
+if(AO_VIVO) setTimeout(()=>api('/api/envios').then(r=>{ EV.estado=r; $('#qEnv').style.display=r.fila_total?'':'none'; $('#qEnv').textContent=r.fila_total; }).catch(()=>{}),1500);
 
 // ------------------------------------------------------------ PERFIL DO CLIENTE
 const IDX_CHAVE={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.chave) IDX_CHAVE[c.chave]=c.uniu_em!=null?c.uniu_em:i; });
@@ -1555,6 +1828,7 @@ function renderPerfil(c, cli, psAll, RAll){
     </div>
     ${secCanais(c,cli)}
     ${secPromos(cli)}
+    ${cli>=0&&c.tel?'<div class="pf-sec" id="pfEnv"><h3>Mensagens</h3><div class="pf-carregando">Carregando…</div></div>':''}
     ${sugs.length?`<div class="pf-sec"><h3>Sugestões para este cliente</h3>${sugs.map(x=>`<div class="pf-sug"><b>${esc(x.t)}</b>${esc(x.m)}</div>`).join('')}</div>`:''}
     ${R&&R.enderecos&&R.enderecos.length?`<div class="pf-sec"><h3>Endereços</h3>${R.enderecos.map(e=>`<div class="linha"><span>${esc(e.texto)}${e.complemento?`<span class="sub">${esc(e.complemento)}${e.referencia?' · '+esc(e.referencia):''}</span>`:''}</span><span>${fmtN(e.vezes)} pedido${e.vezes>1?'s':''}<span class="sub">último ${new Date(e.ultimo+'T12:00').toLocaleDateString('pt-BR')}</span></span></div>`).join('')}</div>`:''}
     <div class="pf-sec"><h3>Pedidos</h3><div id="pfPedidos">${pedidosPerfil(ps,R)}</div></div>
@@ -1562,11 +1836,26 @@ function renderPerfil(c, cli, psAll, RAll){
   </div>`;
   $('#perfil').innerHTML=h;
   $('#pfFechar').onclick=fecharPerfil;
+  if(cli>=0&&c.tel) secEnvios(c,cli);
   $('#perfil').querySelectorAll('#pfTurno button').forEach(b=>b.onclick=()=>{ PF_T=b.dataset.v==='all'?'all':+b.dataset.v; const k=PF_CTX; renderPerfil(k.c,k.cli,k.ps,k.R); });
   const cp=$('#pfCopiar'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(c.tel); cp.textContent='Copiado ✓'; }catch(e){} };
   $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open'));
   $('#perfil').querySelectorAll('button[data-vinc]').forEach(b=>b.onclick=()=>decidirVinculo(b.dataset.a,b.dataset.p,b.dataset.vinc,b));
   const mais=$('#pfMais'); if(mais) mais.onclick=()=>{ $('#pfPedidos').innerHTML=pedidosPerfil(ps,R,true); $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open')); };
+}
+function secEnvios(c,cli){
+  const box=$('#pfEnv'); if(!box) return; const e=envDe(cli);
+  const topo=e?`<div class="linha"><span>Perfil para mensagens</span><span>${esc(ENV_PERFIL[e.pf]||e.pf)} · 1 a cada ${(ENVCFG.regras||{perfis:{}}).perfis[e.pf]||'?'} dias</span></div>
+    <div class="linha"><span>Situação</span><span>${esc(envTexto(e)||'✓ pode receber')}${e.mot?`<span class="sub">${esc(e.mot)}</span>`:''}</span></div>
+    <div class="linha"><span>Mensagens no último mês</span><span>${fmtN(e.n30)}${e.taxa>=0?`<span class="sub">pediu depois de ${e.taxa}% das mensagens</span>`:''}</span></div>`:'';
+  const fim=(hist,bloq)=>{ box.innerHTML=`<h3>Mensagens</h3>${topo}${hist}${AO_VIVO?`<label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px"><input type="checkbox" id="pfOptout" ${bloq?'checked':''}> Não enviar mensagens para este cliente</label>`:''}`;
+    const o=$('#pfOptout'); if(o) o.onchange=()=>api('/api/envios/optout',{id:c.id, bloquear:o.checked}).then(()=>{ if(ENV[cli]){ ENV[cli][2]=o.checked?'bloqueado':'livre'; ENV[cli][4]=o.checked?'não quer receber mensagens':''; } }); };
+  if(!AO_VIVO){ fim('',false); return; }
+  api('/api/envios/cliente?id='+encodeURIComponent(c.id)+'&chave='+encodeURIComponent(c.chave||'')).then(r=>{
+    const NOME_C=k=>CAMP[k]?CAMP[k].nome:(k||'').startsWith('promo_')?((PROMOS.find(x=>'promo_'+x.id===k)||{}).nome||k):({livre:'Texto livre',whatsapp:'Botão WhatsApp'}[k]||k||'—');
+    const h=(r.mensagens||[]).length?'<div style="margin-top:8px">'+r.mensagens.slice(0,15).map(m=>`<div class="linha"><span>${esc(NOME_C(m.campanha))}${m.via==='manual'?' · pelo botão':' · automática'}${m.texto?`<span class="sub">${esc(m.texto.slice(0,140))}${m.texto.length>140?'…':''}</span>`:''}</span><span>${dtCurta(m.quando)}<span class="sub">${{enviado:'enviada',fila:'na fila',erro:'erro',cancelado:'cancelada'}[m.status]||m.status}</span></span></div>`).join('')+'</div>'
+      :'<div class="pf-carregando">Nenhuma mensagem registrada.</div>';
+    fim(h, r.bloqueado); }).catch(()=>fim('',false));
 }
 function secPromos(cli){
   const m=CLI_PROMO[cli]; if(!m||cli<0) return '';
@@ -1606,7 +1895,7 @@ document.addEventListener('click',e=>{ const a=e.target.closest('a.cli'); if(a){
 // ------------------------------------------------------------ início
 function render(){
   marcarFiltros(); prepararBuscas();
-  if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else renderResultados();
+  if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else if(aba==='envios') renderEnvios(); else renderResultados();
 }
 (function init(){
   if(!D){ document.body.innerHTML='<p style="padding:40px">Este é o modelo do painel. Rode o programa <b>pizzaria.py</b> para gerar o painel com os seus dados.</p>'; return; }

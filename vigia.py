@@ -50,6 +50,8 @@ if not JANELA or sys.stdout is None:
 import pizzaria as P  # noqa: E402
 import alertas  # noqa: E402
 import ia_painel  # noqa: E402
+import envios as E  # noqa: E402
+from whatsapp import Whats, ErroWhats, numero_br  # noqa: E402
 from ia import IA, ErroIA  # noqa: E402
 
 PORTA = int(os.environ.get("PIZZARIA_PORTA", "8766"))
@@ -131,6 +133,8 @@ class Vigia:
         self.api = P.API(base, chave)
         ESTADO["api_ia"] = P.API(base, chave)
         self.db = conectar()
+        E.preparar(self.db)
+        ESTADO["wh"] = Whats(cfg)
         self.nome_loja = P.meta_get(self.db, "nome_loja") or ""
         self.mudou = True
         self.prox = {"polling": 0, "recalculo": 0, "avaliacoes": time.time() + 120, "backlog": time.time() + 30,
@@ -273,6 +277,11 @@ class Vigia:
         D["alertas"] = ativos
         D["ao_vivo"] = True
         D["ia"] = {"ativa": self.ia.ativa, "nome": self.ia.nome()}
+        regras = E.carregar_regras()
+        D["envio"] = E.cadencia(D, self.db, regras)
+        wh = ESTADO.get("wh")
+        D["envio_cfg"] = {"ativo": bool(wh and wh.ativo), "nome": wh.nome() if wh else "", "regras": regras,
+                          "perfis": [[k, n, x] for k, n, x in E.PERFIS]}
         html = P.html_painel(D)
         with ESTADO["trava"]:
             ESTADO["html"], ESTADO["alertas"], ESTADO["gerado_em"] = html, ativos, D["gerado_em"]
@@ -443,6 +452,23 @@ class Painel(BaseHTTPRequestHandler):
                 self._json({"versao": ESTADO["versao"], "alertas": ESTADO["alertas"], "gerado_em": ESTADO["gerado_em"]})
         elif u.path == "/api/ia/resumo":  # só lê o que já foi gerado (gerar custa crédito: só por POST)
             return self._json(*ia_resumo(gerar=False))
+        elif u.path == "/api/envios":
+            db = conectar()
+            try:
+                return self._json(E.resumo(db, E.carregar_regras()))
+            finally:
+                db.close()
+        elif u.path == "/api/envios/conexao":
+            wh = ESTADO.get("wh")
+            ok, txt = wh.conectado() if wh else (False, "desligado")
+            return self._json({"ok": ok, "texto": txt, "ativo": bool(wh and wh.ativo), "nome": wh.nome() if wh else ""})
+        elif u.path == "/api/envios/cliente":
+            q = urllib.parse.parse_qs(u.query)
+            db = conectar()
+            try:
+                return self._json(E.historico_cliente(db, (q.get("id") or [""])[0], (q.get("chave") or [""])[0]))
+            finally:
+                db.close()
         elif u.path == "/api/cliente":
             chave = (urllib.parse.parse_qs(u.query).get("chave") or [""])[0]
             return self._json(perfil_cliente(chave))
@@ -471,9 +497,15 @@ class Painel(BaseHTTPRequestHandler):
                 cid = str(dado.get("id"))
                 if dado.get("on"):
                     db.execute("INSERT OR REPLACE INTO contatos VALUES (?,?,?)", (cid, datetime.now().strftime("%Y-%m-%d"), dado.get("camp") or ""))
+                    agora = E.agora_txt()
+                    db.execute("INSERT INTO envios (cliente_id, campanha, criado, agendado, enviado, status, via) VALUES (?,?,?,?,?,?,?)",
+                               (cid, dado.get("camp") or "", agora, agora, agora, "enviado", "manual"))
                 else:
                     db.execute("DELETE FROM contatos WHERE cliente_id=?", (cid,))
+                    db.execute("DELETE FROM envios WHERE id = (SELECT id FROM envios WHERE cliente_id=? AND via='manual' AND enviado >= ? "
+                               "ORDER BY enviado DESC LIMIT 1)", (cid, datetime.now().strftime("%Y-%m-%d")))
                 db.commit()
+                pedir_recalculo()
                 return self._json({"ok": True})
             if u.path == "/api/alerta":
                 aid, acao = dado.get("id"), dado.get("acao")
@@ -491,6 +523,8 @@ class Painel(BaseHTTPRequestHandler):
                 return self._json({"ok": True})
             if u.path.startswith("/api/ia/"):
                 return self._json(*ia_post(u.path, dado))
+            if u.path.startswith("/api/envios/"):
+                return self._json(*envios_post(db, u.path, dado))
             if u.path == "/api/promocoes_casa":
                 lista = dado.get("promos")
                 if not isinstance(lista, list) or len(lista) > 30:
@@ -521,6 +555,199 @@ class Painel(BaseHTTPRequestHandler):
                     v.mudou = True
                 return self._json({"ok": True})
             return self._json({"erro": "não encontrado"}, 404)
+        finally:
+            db.close()
+
+
+# ------------------------------------------------------------------ envios pelo WhatsApp
+
+def pedir_recalculo():
+    v = ESTADO.get("vigia")
+    if v is not None:
+        v.mudou = True
+
+
+def envios_post(db, caminho, dado):
+    regras = E.carregar_regras()
+    if caminho == "/api/envios/agendar":
+        wh = ESTADO.get("wh")
+        if not (wh and wh.ativo):
+            return {"erro": "O envio automático ainda não está ligado (seção [whatsapp] do config.ini)."}, 200
+        with ESTADO["trava"]:
+            D, idx = ESTADO["D"], ESTADO["por_chave"]
+        if D is None:
+            return {"erro": "O painel ainda está carregando."}, 200
+        cad = E.cadencia(D, db, regras)
+        forcar = bool(dado.get("forcar"))
+        itens, pulados = [], []
+        for m in (dado.get("mensagens") or [])[:500]:
+            cli = idx.get(str(m.get("chave") or ""))
+            texto = str(m.get("texto") or "").strip()[:2000]
+            if cli is None or not texto:
+                continue
+            c = D["clientes"][cli]
+            st = cad.get(cli)
+            if not st:
+                pulados.append({"nome": c.get("nome"), "motivo": "sem telefone"})
+                continue
+            if st[2] in ("bloqueado", "na_fila", "so_app") or (st[2] in ("aguardar", "pausado") and not forcar):
+                pulados.append({"nome": c.get("nome"), "motivo": st[4]})
+                continue
+            itens.append({"cliente_id": str(c.get("id")), "chave": c.get("chave"), "nome": c.get("nome"),
+                          "numero": numero_br(c.get("tel"), c.get("ddi")), "campanha": str(m.get("campanha") or "")[:60],
+                          "texto": texto, "ia": bool(dado.get("ia"))})
+        if not itens:
+            return {"agendados": 0, "pulados": pulados}, 200
+        lote, res = E.agendar(db, itens, regras)
+        log("envios: %d mensagem(ns) agendada(s) (lote %s), de %s até %s" % (len(res), lote, res[0][1].strftime("%d/%m %H:%M"),
+                                                                            res[-1][1].strftime("%d/%m %H:%M")))
+        pedir_recalculo()
+        return {"agendados": len(res), "lote": lote, "inicio": E.agora_txt(min(t for _, t in res))[:16],
+                "fim": E.agora_txt(max(t for _, t in res))[:16], "pulados": pulados}, 200
+    if caminho == "/api/envios/acao":
+        acao = dado.get("acao")
+        if acao == "pausar":
+            P.meta_set(db, "fila_pausada", "pausada por você")
+        elif acao == "retomar":
+            P.meta_set(db, "fila_pausada", "")
+            n = E.reagendar_pendentes(db, regras)
+            log("envios: fila retomada (%d pendente(s) reespaçada(s))" % n)
+        elif acao == "cancelar":
+            db.execute("UPDATE envios SET status='cancelado', erro='cancelado por você' WHERE id=? AND status='fila'", (int(dado.get("id") or 0),))
+        elif acao == "cancelar_lote":
+            db.execute("UPDATE envios SET status='cancelado', erro='cancelado por você' WHERE lote=? AND status='fila'", (str(dado.get("lote") or ""),))
+        elif acao == "cancelar_tudo":
+            db.execute("UPDATE envios SET status='cancelado', erro='cancelado por você' WHERE status='fila'")
+        else:
+            return {"erro": "acao"}, 400
+        db.commit()
+        pedir_recalculo()
+        return E.resumo(db, regras), 200
+    if caminho == "/api/envios/optout":
+        cid = str(dado.get("id") or "")
+        if not cid:
+            return {"erro": "cliente"}, 400
+        if dado.get("bloquear"):
+            db.execute("INSERT OR REPLACE INTO optout VALUES (?,?,?)", (cid, E.agora_txt(), "marcado no painel"))
+            db.execute("UPDATE envios SET status='cancelado', erro='cliente não quer receber' WHERE cliente_id=? AND status='fila'", (cid,))
+        else:
+            db.execute("DELETE FROM optout WHERE cliente_id=?", (cid,))
+        db.commit()
+        pedir_recalculo()
+        return {"ok": True}, 200
+    if caminho == "/api/envios/regras":
+        novo = dado.get("regras") or {}
+        r = dict(regras)
+        for k in r:
+            if k in novo:
+                r[k] = novo[k]
+        E.salvar_regras(r)
+        r = E.carregar_regras()
+        E.salvar_regras(r)
+        n = E.reagendar_pendentes(db, r) if db.execute("SELECT 1 FROM envios WHERE status='fila' LIMIT 1").fetchone() else 0
+        log("envios: regras de frequência atualizadas%s" % (" (%d na fila reespaçadas)" % n if n else ""))
+        pedir_recalculo()
+        return {"ok": True, "regras": r}, 200
+    return {"erro": "não encontrado"}, 404
+
+
+class Despachante(threading.Thread):
+    """Manda as mensagens da fila, uma por vez, no horário agendado e respeitando os limites."""
+    def __init__(self):
+        super().__init__(daemon=True)
+        self.erros_seguidos = 0
+        self.avisado = ""
+
+    def pausar(self, db, motivo):
+        P.meta_set(db, "fila_pausada", motivo)
+        db.commit()
+        log("envios: fila pausada — %s" % motivo)
+        if self.avisado != motivo:
+            self.avisado = motivo
+            notificar("Envios pausados", motivo, ENDERECO + "#envios")
+
+    def run(self):
+        time.sleep(20)
+        while True:
+            try:
+                self.passo()
+            except Exception:
+                log("envios: erro inesperado:\n" + traceback.format_exc())
+                time.sleep(60)
+            time.sleep(15)
+
+    def passo(self):
+        wh = ESTADO.get("wh")
+        if not (wh and wh.ativo):
+            return
+        db = conectar()
+        try:
+            if P.meta_get(db, "fila_pausada"):
+                return
+            agora = datetime.now()
+            item = db.execute("SELECT id, cliente_id, chave, numero, campanha, texto, criado, ia FROM envios "
+                              "WHERE status='fila' AND agendado <= ? ORDER BY agendado LIMIT 1", (E.agora_txt(agora),)).fetchone()
+            if not item:
+                return
+            eid, cid, chave, numero, camp, texto, criado, usar_ia = item
+            regras = E.carregar_regras()
+            ini, fim = E.janela(regras)
+            m = agora.hour * 60 + agora.minute
+            ult = db.execute("SELECT MAX(enviado) FROM envios WHERE via='auto' AND status='enviado'").fetchone()[0]
+            ult = E._dt(ult)
+            hora = db.execute("SELECT COUNT(*) FROM envios WHERE via='auto' AND status='enviado' AND enviado >= ?",
+                              (E.agora_txt(agora - timedelta(hours=1)),)).fetchone()[0]
+            dia = db.execute("SELECT COUNT(*) FROM envios WHERE via='auto' AND status='enviado' AND enviado >= ?",
+                             (agora.strftime("%Y-%m-%d"),)).fetchone()[0]
+            if not (ini <= m < fim) or hora >= regras["por_hora"] or dia >= E.limite_dia(db, regras, agora) or \
+                    (ult and agora - ult < timedelta(minutes=regras["intervalo_min"])):
+                if (ult and agora - ult < timedelta(minutes=regras["intervalo_min"])):
+                    return  # só espera um pouco
+                n = E.reagendar_pendentes(db, regras)
+                log("envios: fora do horário ou no limite; %d pendente(s) reagendada(s)" % n)
+                return
+            if db.execute("SELECT 1 FROM optout WHERE cliente_id=?", (str(cid),)).fetchone():
+                db.execute("UPDATE envios SET status='cancelado', erro='cliente não quer receber' WHERE id=?", (eid,))
+                db.commit()
+                return
+            with ESTADO["trava"]:
+                D, idx = ESTADO["D"], ESTADO["por_chave"]
+            cli = idx.get(chave) if chave else None
+            if D is not None and cli is not None and camp != "avaliacao":
+                ja = [p for p in D["pedidos"] if p[5] == cli and not p[7] and p[0] > (criado or "")[:16]]
+                if ja:
+                    db.execute("UPDATE envios SET status='cancelado', erro='fez um pedido antes do envio' WHERE id=?", (eid,))
+                    db.commit()
+                    log("envios: cancelada (cliente pediu antes do envio)")
+                    return
+            ia = ESTADO.get("ia")
+            if usar_ia and ia is not None and ia.ativa and D is not None and cli is not None:
+                try:
+                    r = ia_painel.gerar_mensagem(ia, D, cli, perfil_cliente(chave), "campanha: %s" % (camp or "-"), texto, "")
+                    if (r.get("texto") or "").strip():
+                        texto = r["texto"].strip()
+                except Exception as e:
+                    log("envios: IA não personalizou (%s); vai a mensagem original" % str(e)[:120])
+            try:
+                mid = wh.enviar(numero, texto)
+            except ErroWhats as e:
+                if e.permanente:
+                    self.pausar(db, str(e))
+                    return
+                self.erros_seguidos += 1
+                db.execute("UPDATE envios SET status='erro', erro=?, enviado=? WHERE id=?", (str(e)[:300], E.agora_txt(), eid))
+                db.commit()
+                log("envios: erro ao enviar: %s" % e)
+                if self.erros_seguidos >= 3:
+                    self.pausar(db, "3 erros seguidos no envio. Último: %s" % str(e)[:150])
+                return
+            self.erros_seguidos, self.avisado = 0, ""
+            agora = datetime.now()
+            db.execute("UPDATE envios SET status='enviado', enviado=?, texto=?, msg_id=? WHERE id=?", (E.agora_txt(agora), texto, mid, eid))
+            db.execute("INSERT OR REPLACE INTO contatos VALUES (?,?,?)", (str(cid), agora.strftime("%Y-%m-%d"), camp or "envio"))
+            db.commit()
+            log("envios: mensagem enviada (%s)" % (camp or "-"))
+            pedir_recalculo()
         finally:
             db.close()
 
@@ -686,6 +913,7 @@ def main():
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     v = Vigia(cfg, base, chave)
     ESTADO["vigia"] = v
+    Despachante().start()
     if "--abrir" in sys.argv:
         threading.Timer(3, lambda: webbrowser.open(ENDERECO)).start()
     v.rodar()

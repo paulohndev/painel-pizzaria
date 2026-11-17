@@ -1,12 +1,12 @@
 {
- "versao": "1.6.4",
- "notas": "Cupons da loja liberados para a IA",
+ "versao": "1.7.0",
+ "notas": "Envios pelo WhatsApp: grupos, fila espaçada, limite de frequência por perfil",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "b7428719a4864e2a800170e60dc8b1ac95a2d02d4b980340e4d6d6352f7de3a5",
+  "LEIA-ME.txt": "ab99b2f7e88c5b10de3f2f3225894aa7dc4d92c8600deb8c9791f05db099673e",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
   "Testar com dados de exemplo (Windows).bat": "67abc12a330e4ca15788207f26f9763a946397cd268254e130b1f4520af3ef37",
@@ -15,12 +15,14 @@
   "agendar.ps1": "d21373a5cfbd94d6475eec9e50e739be17f8f3d2eeb4c23d14fb924873437f9c",
   "alertas.py": "c947a0718d60486735bf8cba32f33383f2b3fe6aab2b24b2bfad941c848e6c02",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
+  "envios.py": "37f282afb3ac934438e1fe027dbd1aab35643b74bc200522871042acf168536c",
   "ia.py": "1000f8e4c948cad47672817421ff50c76e3761bfb925fc17a6d3bf1801835c3a",
   "ia_painel.py": "1c33e391d6bf4282109a0927c19e16567aa408033c686ebb1a236bee25b14a53",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "57be1d91f72f58b9505974ca13b8c11591f0d41672be643b2cd0cfc9c133accb",
-  "pizzaria.py": "b0468b6aed92e189983114d775935d8b95251ce4d7a06118b8aadd5a2886ff4a",
+  "painel_modelo.html": "14dcba423a65c2e3331c4d4ff7abb22bd9313e36881fc8ba48afcf60cd916576",
+  "pizzaria.py": "27cd5246a42d0ca26d80c15fe069ab16df9755bd8ea55f625f575b0d86cbf6b8",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "d18abb6e0e4d0db54813bdd5b902719824537792157a50769d148a7abc5dc964"
+  "vigia.py": "56a352a91348acf457154b04b62994fc60419e9586d10adbc5ea726120b8328c",
+  "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }
