@@ -111,11 +111,20 @@ SIS_AVAL = ("Você ajuda a " + CASA + " a responder avaliações ruins de client
             'Responda APENAS com JSON: {"whatsapp": "...", "resposta_publica": "..."}')
 
 
-def gerar_mensagem(ia, D, cli, perfil, motivo, referencia, tipo=""):
+RASCUNHO = ("\n\nO DONO ESCREVEU ISTO (rascunho, ideia ou instrução): \"%s\"\n"
+            "Agora a base é o texto do dono, não a mensagem de referência. Se for um rascunho, reescreva mantendo a intenção, o tom e "
+            "TODAS as informações e ofertas que ele colocou, deixando mais natural e personalizado para o cliente. Se for uma instrução "
+            "(ex.: 'fala da terça off', 'mais curta', 'sem emoji'), siga a instrução. Não acrescente ofertas, preços ou cupons que o dono "
+            "não citou (a não ser que a instrução peça para usar a oferta da referência).")
+
+
+def gerar_mensagem(ia, D, cli, perfil, motivo, referencia, tipo="", rascunho=""):
     ctx = contexto_cliente(D, cli, perfil)
     hoje = datetime.now()
     pedido = ("Hoje é %s, %s.\nMotivo do contato: %s\nMensagem de referência (mesma oferta): %s\n\nDados do cliente:\n%s" %
               (DIAS[hoje.weekday()], hoje.strftime("%d/%m %H:%M"), motivo or "-", referencia or "-", ctx))
+    if (rascunho or "").strip():
+        pedido += RASCUNHO % rascunho.strip()[:1500]
     if tipo == "avaliacao":
         txt = ia.gerar(SIS_AVAL, pedido, max_tokens=600)
         m = re.search(r"\{.*\}", txt, re.S)

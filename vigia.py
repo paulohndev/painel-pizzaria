@@ -832,7 +832,8 @@ def ia_post(caminho, dado):
                 return {"erro": "Cliente não encontrado."}, 200
             perfil = perfil_cliente(chave)
             r = ia_painel.gerar_mensagem(ia, D, cli, perfil, str(dado.get("motivo") or "")[:600],
-                                         str(dado.get("referencia") or "")[:800], str(dado.get("tipo") or ""))
+                                         str(dado.get("referencia") or "")[:800], str(dado.get("tipo") or ""),
+                                         str(dado.get("rascunho") or ""))
             return r, 200
         if caminho == "/api/ia/pergunta":
             db = conectar()

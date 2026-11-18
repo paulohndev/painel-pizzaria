@@ -1,6 +1,6 @@
 {
- "versao": "1.8.1",
- "notas": "Filtro por pontos em Hoje, Promoções, Clientes e Envios; coluna Pontos em Clientes",
+ "versao": "1.8.2",
+ "notas": "IA reescreve a mensagem a partir do que você escreveu",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -17,12 +17,12 @@
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "envios.py": "d033660bf5e3bbda905a55bb023efa1c27c9a8452dcb06785dee899c28808ef1",
   "ia.py": "1000f8e4c948cad47672817421ff50c76e3761bfb925fc17a6d3bf1801835c3a",
-  "ia_painel.py": "1c63b2f11c9af8450e6741186e0a55eaf07576ab46511d5abb1841dd683f5231",
+  "ia_painel.py": "9fa0206a45249250e8c052949dc9cabc890c03f9488baa259e9f1ae4f90576f3",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "f5f9b27862d11c862422fe55b218673203436c59f8255b7fa4417fe96de0b1c3",
+  "painel_modelo.html": "2ad5bc8b4fcf1d23e8130ea9ab9fdd992c6bea1e9a65b4168acf2f6de4e9ab5f",
   "pizzaria.py": "27cd5246a42d0ca26d80c15fe069ab16df9755bd8ea55f625f575b0d86cbf6b8",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "cbf0ae4633d624ac0429d838f4f19c6444a50f212f7234e2ccf3b612c470cbb2",
+  "vigia.py": "787226564802ed522c7fa43a082722164e10bd5fcab1b62808d5bd40779e8734",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }
