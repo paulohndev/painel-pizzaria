@@ -1,6 +1,6 @@
 {
- "versao": "1.7.1",
- "notas": "Enviar pelo sistema direto do botão WhatsApp de cada cliente",
+ "versao": "1.8.0",
+ "notas": "Pontos nas listas e na janela do WhatsApp; lembretes de clientes",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -15,14 +15,14 @@
   "agendar.ps1": "d21373a5cfbd94d6475eec9e50e739be17f8f3d2eeb4c23d14fb924873437f9c",
   "alertas.py": "c947a0718d60486735bf8cba32f33383f2b3fe6aab2b24b2bfad941c848e6c02",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
-  "envios.py": "c30b0c914a098e19b0beb664da6496e44a244aa15b6e4afcb23bea3947cb92d6",
+  "envios.py": "d033660bf5e3bbda905a55bb023efa1c27c9a8452dcb06785dee899c28808ef1",
   "ia.py": "1000f8e4c948cad47672817421ff50c76e3761bfb925fc17a6d3bf1801835c3a",
-  "ia_painel.py": "1c33e391d6bf4282109a0927c19e16567aa408033c686ebb1a236bee25b14a53",
+  "ia_painel.py": "1c63b2f11c9af8450e6741186e0a55eaf07576ab46511d5abb1841dd683f5231",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "7d3eae6866b1b6b55cd04626e683f2eae196c7be4d3d3fccfafc54aa9931032c",
+  "painel_modelo.html": "8789450b26253644929b6bdf91424b5dcc41bf450fa64167bf72f01f765b4168",
   "pizzaria.py": "27cd5246a42d0ca26d80c15fe069ab16df9755bd8ea55f625f575b0d86cbf6b8",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "a2bbadd160313093d8e30446406094dde7058bcfecc03bb465c5a9ee3b90476e",
+  "vigia.py": "cbf0ae4633d624ac0429d838f4f19c6444a50f212f7234e2ccf3b612c470cbb2",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }

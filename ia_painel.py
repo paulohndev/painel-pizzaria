@@ -40,6 +40,8 @@ def contexto_cliente(D, cli, perfil):
     rows = [p for p in D["pedidos"] if p[5] == cli]
     ok = [p for p in rows if not p[7]]
     linhas = ["Primeiro nome: %s" % (primeiro_nome(c.get("nome")) or "(sem nome)")]
+    if c.get("pontos"):
+        linhas.append("Pontos de fidelidade acumulados: %s (só mencione se a mensagem de referência falar de pontos)" % c.get("pontos"))
     if ok:
         datas = sorted(datetime.strptime(p[0], "%Y-%m-%d %H:%M") for p in ok)
         gasto = sum(p[4] or 0 for p in ok)

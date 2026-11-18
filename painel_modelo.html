@@ -344,8 +344,8 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .ia-resumo h3 small{font-family:var(--body,inherit);font-size:12px;color:var(--soft);font-weight:500;margin-left:auto}
 .ia-resumo .tx{font-size:14px;line-height:1.6;white-space:pre-line}
 .ia-resumo button{border:0;background:var(--line2);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer;color:var(--mut)}
-#chat{position:fixed;top:0;right:0;bottom:0;width:min(520px,96vw);background:var(--bg);z-index:56;box-shadow:-20px 0 50px rgba(42,27,23,.18);transform:translateX(105%);transition:transform .28s var(--ease);display:flex;flex-direction:column}
-#chat.aberta{transform:none}
+#lemb,#chat{position:fixed;top:0;right:0;bottom:0;width:min(520px,96vw);background:var(--bg);z-index:56;box-shadow:-20px 0 50px rgba(42,27,23,.18);transform:translateX(105%);transition:transform .28s var(--ease);display:flex;flex-direction:column}
+#chat.aberta,#lemb.aberta{transform:none}
 .ch-lista{flex:1;overflow-y:auto;padding:6px 20px 16px;display:flex;flex-direction:column;gap:10px}
 .ch-msg{max-width:88%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.55;white-space:pre-line;animation:pop .25s var(--ease) both}
 .ch-msg.eu{align-self:flex-end;background:var(--red2,#6e0000);color:#fff;border-bottom-right-radius:6px}
@@ -392,6 +392,40 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .env-b{font-size:10.5px;padding:1px 7px;border-radius:999px;background:var(--line2);color:var(--mut);white-space:nowrap;margin-left:4px}
 .env-b.aguardar,.env-b.na_fila{background:#FFF3DC;color:#8a5a00}.env-b.pausado,.env-b.bloqueado{background:#FDECEA;color:var(--tomato)}
 .btn.principal{background:var(--sun);font-weight:700}
+.pts{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:999px;background:#FFF3DC;color:#8a5a00;white-space:nowrap;margin-left:4px}
+.pts.alto{background:var(--sun);color:var(--ink)}
+button.pin{border:0;background:none;cursor:pointer;font-size:12px;padding:0 2px;margin-left:2px;opacity:.28;filter:grayscale(1);transition:opacity .15s}
+tr:hover button.pin,button.pin:hover{opacity:.8}
+button.pin.on{opacity:1;filter:none}
+#lembBtn{position:relative;border:0;background:#fff;width:42px;height:42px;border-radius:14px;cursor:pointer;box-shadow:0 0 0 1px var(--line);font-size:17px}
+#lembBtn .n{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--line2);color:var(--ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px}
+#lembBtn .n.hoje{background:var(--tomato);color:#fff}
+#lembBtn .n:empty{display:none}
+.lb-busca{padding:0 20px 10px;position:relative}
+.lb-busca input{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:12px;padding:9px 12px;background:#fff}
+.lb-res{position:absolute;left:20px;right:20px;top:46px;background:#fff;border-radius:12px;box-shadow:var(--sh);z-index:3;max-height:300px;overflow:auto}
+.lb-res div{padding:8px 12px;cursor:pointer;font-size:13.5px;border-bottom:1px solid var(--line2)}
+.lb-res div:hover{background:var(--bg)}
+.lb-lista{flex:1;overflow-y:auto;padding:0 20px 20px}
+.lb-grupo{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin:16px 0 6px}
+.lb-item{background:#fff;border-radius:16px;box-shadow:var(--sh);padding:12px 14px;margin-bottom:8px}
+.lb-item.atrasado{box-shadow:inset 4px 0 0 var(--tomato),var(--sh)}
+.lb-item.hoje{box-shadow:inset 4px 0 0 var(--sun),var(--sh)}
+.lb-item.feito{opacity:.55}
+.lb-item .t{display:flex;gap:8px;align-items:baseline}
+.lb-item .t .q{margin-left:auto;font-size:12px;color:var(--mut);white-space:nowrap}
+.lb-item .tx{font-size:13.5px;margin:4px 0 8px;white-space:pre-line}
+.lb-item .ac{display:flex;gap:6px;flex-wrap:wrap}
+.lb-item .ac button,.lb-item .ac a{font:inherit;font-size:12px;font-weight:600;border:0;border-radius:999px;padding:4px 11px;cursor:pointer;background:var(--line2);color:var(--ink);text-decoration:none}
+.lb-item .ac a.wa{background:#E7F4EC;color:#1d6b40}
+.lb-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.lb-chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:12.5px;cursor:pointer}
+.lb-chips button.on{background:var(--sun);border-color:var(--sun);font-weight:600}
+.lb-info{font-size:13px;color:var(--mut);margin-bottom:8px}
+.ia-pts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;margin-bottom:10px;padding:8px 12px;border-radius:12px;background:#FFF8EE}
+.ia-pts b{font-size:14px}
+.ia-pts button{border:0;background:var(--sun);border-radius:999px;padding:4px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.al-pts{font-size:12px;color:#8a5a00;margin:-4px 0 8px}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -429,6 +463,7 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
       <span class="flabel">Turno</span><div class="seg" id="fTurno"></div>
       <span class="flabel">Canal</span><div class="seg" id="fCanal"></div>
       <button id="perguntar" title="Pergunte qualquer coisa sobre suas vendas" class="hidden">✨ Perguntar</button>
+      <button id="lembBtn" title="Lembretes: clientes que você salvou para depois">📌<span class="n" id="lembN"></span></button>
       <button id="sino" title="Alertas"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="n" id="sinoN"></span></button>
     </div>
   </div>
@@ -655,11 +690,27 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 <div class="ia-modal hidden" id="iaModal"><div class="ia-box">
   <div class="ia-cab"><h3 id="iaTitulo">Mensagem</h3><button id="iaFechar" title="Fechar">✕</button></div>
   <div class="ia-freq hidden" id="iaFreq"></div>
+  <div class="ia-pts hidden" id="iaPts"></div>
   <div class="ia-status" id="iaStatus"></div>
   <textarea id="iaTxt"></textarea>
   <div id="iaPub" class="hidden"><label>Resposta pública para a avaliação (copie e cole no Cardápio Web / iFood)</label><textarea id="iaPubTxt" style="min-height:90px"></textarea></div>
   <div class="ia-ok hidden" id="iaOk"></div>
-  <div class="ia-acoes"><button class="btn principal hidden" id="iaAuto">📨 Enviar pelo sistema</button><button class="btn principal" id="iaEnviar">Abrir no WhatsApp</button><button class="btn" id="iaOutra">✨ Escrever outra</button><button class="btn" id="iaPadrao">Usar a mensagem padrão</button><button class="btn hidden" id="iaCopiarPub">Copiar resposta pública</button></div>
+  <div class="ia-acoes"><button class="btn principal hidden" id="iaAuto">📨 Enviar pelo sistema</button><button class="btn principal" id="iaEnviar">Abrir no WhatsApp</button><button class="btn" id="iaOutra">✨ Escrever outra</button><button class="btn" id="iaPadrao">Usar a mensagem padrão</button><button class="btn hidden" id="iaCopiarPub">Copiar resposta pública</button><button class="btn" id="iaLembrar">📌 Lembrar depois</button></div>
+</div></div>
+<aside id="lemb" aria-label="Lembretes">
+  <div class="gv-topo"><h3>📌 Lembretes</h3><button id="lbFechar" title="Fechar">✕</button></div>
+  <div class="lb-busca"><input type="search" id="lbBusca" placeholder="Adicionar cliente: busque por nome ou telefone"><div class="lb-res hidden" id="lbRes"></div></div>
+  <div class="lb-lista" id="lbLista"></div>
+</aside>
+<div class="ia-modal hidden" id="lbModal"><div class="ia-box">
+  <div class="ia-cab"><h3 id="lbTitulo">Lembrete</h3><button id="lbmFechar" title="Fechar">✕</button></div>
+  <div class="lb-info" id="lbInfo"></div>
+  <div id="lbAbertos"></div>
+  <div class="lb-chips" id="lbAcoes"></div>
+  <textarea id="lbTexto" placeholder="O que você quer fazer com este cliente?" style="min-height:90px"></textarea>
+  <div style="font-size:12px;font-weight:600;color:var(--mut);margin-top:12px">Lembrar quando</div>
+  <div class="lb-chips" id="lbQuando"></div>
+  <div class="ia-acoes"><button class="btn principal" id="lbSalvar" style="background:var(--sun);color:var(--ink)">Salvar lembrete</button><span class="muted" id="lbMsg" style="font-size:13px;align-self:center"></span></div>
 </div></div>
 <aside id="chat" aria-label="Pergunte ao painel">
   <div class="gv-topo"><h3>✨ Pergunte ao painel</h3><button id="chFechar" title="Fechar">✕</button></div>
@@ -922,8 +973,8 @@ function renderClientes(){
   let h='<tr>'+cols.map(c=>`<th class="${c[2]?'num ':''}${c[2]===0?'':'sort'}" data-k="${c[0]}">${c[1]}${ordCli.k===c[0]?(ordCli.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   F2.slice(pag*PAG,(pag+1)*PAG).forEach(c=>{const w=waLink(c); const feito=!!contatos[c.id];
     const turnosTxt=c.tc.map((n,t)=>n?`${D.turnos[t].slice(0,1)}${n}`:null).filter(Boolean).join(' · ');
-    const sub=[c.bairro, c.pontos?fmtN(c.pontos)+' pts':''].filter(Boolean).join(' · ');
-    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${c.i}">${esc(c.nome)}</a>${envSelo(c.i)}<span class="sub">${esc(sub)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
+    const sub=[c.bairro].filter(Boolean).join(' · ');
+    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${c.i}">${esc(c.nome)}</a>${pinBtn(c.i)}${envSelo(c.i)}<span class="sub">${esc(sub)}${ptsTag(D.clientes[c.i])}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?'<span class="sub">ativo em outro turno</span>':''}</td>
@@ -1064,7 +1115,7 @@ function renderPromocoes(){
   let h='<tr><th>Cliente</th><th></th><th>Feito</th><th>Por que este cliente</th><th>Sugestão</th><th class="num">Total gasto</th></tr>';
   G.slice(pPag*PAG,(pPag+1)*PAG).forEach(r=>{ const c=D.clientes[r.cli]; const rec=r.recs[0]; const m=msgPromo(r,rec); const w=waLink(c,m); const feito=!!contatos[c.id];
     const outras=r.recs.slice(1).map(x=>`<span class="tag" title="${esc(x.motivo)}">${esc(CAMP[x.tipo]?CAMP[x.tipo].nome:x.titulo)}${x.sugestao?': '+esc(x.sugestao):''}</span>`).join(' ');
-    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${r.cli}">${esc(c.nome||'(sem nome)')}</a>${envSelo(r.cli)}<span class="sub">mandar ${esc(r.quando)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
+    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${r.cli}">${esc(c.nome||'(sem nome)')}</a>${pinBtn(r.cli)}${envSelo(r.cli)}<span class="sub">mandar ${esc(r.quando)}${ptsTag(c)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(m)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td class="why">${esc(rec.motivo)}${outras?`<div class="tags">${outras}</div>`:''}</td>
@@ -1231,7 +1282,7 @@ function renderHojeBlocos(){
       const extra=b.id==='reativar'?{fav:(REC_DE[it.cli]||{}).favorito}:null;
       const msg=b.promo!=null?msgPromoCasa(PROMOS[b.promo],it.cli):b.camp?msgTipo(b.camp,it.cli,extra):`Oi ${primeiroNome(c)}! Aqui é da Pizzaria Mariá. Vi sua avaliação e queria entender o que aconteceu para a gente melhorar. Pode me contar?`;
       const w=waLink(c,msg); const feito=!!cInfo(c.id); const bb=bairroCli(it.cli);
-      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${envSelo(it.cli)}${c.app||bb?`<span class="sub">${esc(bb)}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</span>`:''}</td>
+      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${it.cli}">${esc(c.nome||'(sem nome)')}</a>${pinBtn(it.cli)}${envSelo(it.cli)}${c.app||bb||c.pontos?`<span class="sub">${esc(bb)}${ptsTag(c)}${c.app?` <span class="tag">${esc(c.app)}</span>`:''}</span>`:''}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:'<span class="muted">sem telefone</span>'}</td>
         <td class="ck"><input type="checkbox" data-id="${c.id}" data-camp="${b.camp||'avaliacao'}" ${feito?'checked':''}></td>
         <td class="why">${esc(it.motivo)}</td>
@@ -1382,7 +1433,7 @@ function renderAlertas(focoId){
   $('#gvLista').innerHTML=L.map(a=>{ const c=a.cliente||{}; const msg=msgAlerta(a); const w=c.tel?waLink(c,msg):null;
     return `<div class="al p${a.prio} ${a.id===focoId?'foco':''}" data-id="${esc(a.id)}">
       <div class="cab">${ICONE[a.tipo]||'•'} ${esc(ROTULO[a.tipo]||a.tipo)} ${a.prio===1?'<span class="urg">· urgente</span>':''}<span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500">${esc(quandoTxt(a.criado))}</span></div>
-      <h4>${esc(a.titulo)}</h4><p>${esc(a.texto)}</p>
+      <h4>${esc(a.titulo)}</h4><p>${esc(a.texto)}</p>${c.pontos?`<div class="al-pts">⭐ ${fmtN(c.pontos)} pontos acumulados</div>`:''}
       <div class="acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}" data-wa="${esc(a.id)}">WhatsApp</a>`:''}
         ${c.chave?`<button data-perfil="${esc(c.chave)}">Perfil</button>`:''}<button class="ok" data-ac="feito" data-id="${esc(a.id)}">✓ Feito</button><button data-ac="ignorar" data-id="${esc(a.id)}">Dispensar</button></div></div>`; }).join('');
   $('#gvLista').querySelectorAll('button[data-ac]').forEach(b=>b.onclick=()=>resolverAlerta(b.dataset.id,b.dataset.ac));
@@ -1398,8 +1449,8 @@ function resolverAlerta(id, acao){
 function abrirGaveta(focoId){ renderAlertas(focoId); $('#gaveta').classList.add('aberta'); $('#veu').classList.add('on'); }
 function fecharGaveta(){ $('#gaveta').classList.remove('aberta'); $('#veu').classList.remove('on'); if(location.hash) history.replaceState(null,'',location.pathname); }
 $('#sino').onclick=()=>abrirGaveta(); $('#gvFechar').onclick=fecharGaveta;
-$('#veu').onclick=()=>{ if($('#chat').classList.contains('aberta')) fecharChat(); else if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); };
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(!$('#iaModal').classList.contains('hidden')) iaFechar(); else if($('#chat').classList.contains('aberta')) fecharChat(); else if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); } });
+$('#veu').onclick=()=>{ if($('#lemb').classList.contains('aberta')) fecharLembretes(); else if($('#chat').classList.contains('aberta')) fecharChat(); else if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(!$('#lbModal').classList.contains('hidden')) fecharLembrete(); else if(!$('#iaModal').classList.contains('hidden')) iaFechar(); else if($('#lemb').classList.contains('aberta')) fecharLembretes(); else if($('#chat').classList.contains('aberta')) fecharChat(); else if($('#perfil').classList.contains('aberto')) fecharPerfil(); else fecharGaveta(); } });
 function ping(a){
   const el=document.createElement('div'); el.className='ping';
   el.innerHTML=`<small>${ICONE[a.tipo]||''} ${esc(ROTULO[a.tipo]||'')}${a.prio===1?' · urgente':''}</small><b>${esc(a.titulo)}</b><span>${esc(a.texto.slice(0,110))}${a.texto.length>110?'…':''}</span><i>✕</i>`;
@@ -1408,7 +1459,7 @@ function ping(a){
   $('#pings').prepend(el); while($('#pings').children.length>3) $('#pings').lastChild.remove();
   setTimeout(fora, 14000); $('#sino').classList.remove('pulsa'); void $('#sino').offsetWidth; $('#sino').classList.add('pulsa');
 }
-function abrirPeloLink(){ const h=decodeURIComponent(location.hash||''); if(h.startsWith('#alerta=')) abrirGaveta(h.slice(8)); else if(h==='#alertas') abrirGaveta(); else if(h==='#envios'){ const b=document.querySelector('#tabs button[data-t=envios]'); if(b) b.click(); } }
+function abrirPeloLink(){ const h=decodeURIComponent(location.hash||''); if(h.startsWith('#alerta=')) abrirGaveta(h.slice(8)); else if(h==='#alertas') abrirGaveta(); else if(h==='#lembretes'){ abrirLembretes(); } else if(h==='#envios'){ const b=document.querySelector('#tabs button[data-t=envios]'); if(b) b.click(); } }
 window.addEventListener('hashchange',abrirPeloLink);
 function acompanhar(){
   api('/api/estado').then(e=>{
@@ -1446,7 +1497,7 @@ function renderMultiCanal(){
     h='<tr><th>Cliente</th><th>Próprio</th><th>iFood</th><th>99Food</th><th>Situação</th><th></th></tr>';
     LL.slice(0,200).forEach(({cli,st})=>{ const c=D.clientes[cli]; const m=CLI_CAN[cli];
       const msg=msgTipo('canal_proprio',cli); const w=st.tipo==='migrou'?waLink(c,msg):null; const feito=!!cInfo(c.id);
-      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${(c.unidos||[]).length?`<span class="sub">juntado com o iFood</span>`:''}</td>
+      h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${pinBtn(cli)}${(c.unidos||[]).length||c.pontos?`<span class="sub">${(c.unidos||[]).length?'juntado com o iFood':''}${ptsTag(c)}</span>`:''}</td>
         <td>${celCanal(m,'proprio')}</td><td>${celCanal(m,'ifood')}</td><td>${celCanal(m,'food99')}</td>
         <td class="why"><b>${esc(st.curto)}</b><br>${esc(st.txt)}</td>
         <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:''}</td></tr>`; });
@@ -1480,6 +1531,9 @@ function iaAbrir(a){
   $('#iaTxt').value=ref; $('#iaPub').classList.add('hidden'); $('#iaCopiarPub').classList.add('hidden');
   $('#iaOk').classList.add('hidden'); $('#iaOutra').classList.toggle('hidden',!IA_ON);
   if(typeof prepararEnvioModal==='function') prepararEnvioModal(cli);
+  const pt=$('#iaPts'); if(c.pontos){ pt.innerHTML=`<span>⭐ <b>${fmtN(c.pontos)}</b> pontos acumulados${c.cashback?` · R$ ${fmtN(c.cashback)} de cashback`:''}</span><button id="iaAddPts">Incluir os pontos na mensagem</button>`; pt.className='ia-pts';
+    $('#iaAddPts').onclick=()=>{ const ta=$('#iaTxt'); const frase=`Ah, e você tem ${fmtN(c.pontos)} pontos acumulados com a gente, dá pra usar no próximo pedido pelo app! 😉`; if(!ta.value.includes(fmtN(c.pontos)+' pontos')) ta.value=ta.value.trim()+' '+frase; $('#iaAddPts').textContent='Incluído ✓'; $('#iaAddPts').disabled=true; }; }
+  else pt.className='ia-pts hidden';
   $('#iaModal').classList.remove('hidden');
   if(IA_ON) iaGerar(false); else { $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem pronta. Pode editar antes de enviar.'; }
   return true;
@@ -1501,7 +1555,8 @@ function iaMostrar(r){
   const pub=!!r.resposta_publica; $('#iaPub').classList.toggle('hidden',!pub); $('#iaCopiarPub').classList.toggle('hidden',!pub); if(pub) $('#iaPubTxt').value=r.resposta_publica;
 }
 function iaFechar(){ $('#iaModal').classList.add('hidden'); IA_CTX=null; }
-$('#iaFechar').onclick=iaFechar; $('#iaModal').addEventListener('click',e=>{ if(e.target.id==='iaModal') iaFechar(); });
+$('#iaFechar').onclick=iaFechar;
+$('#iaLembrar').onclick=()=>{ const cli=IA_CTX&&IA_CTX.cli; if(cli==null) return; iaFechar(); abrirLembrete(cli); }; $('#iaModal').addEventListener('click',e=>{ if(e.target.id==='iaModal') iaFechar(); });
 $('#iaOutra').onclick=()=>iaGerar(true);
 $('#iaPadrao').onclick=()=>{ $('#iaTxt').value=IA_CTX.ref; $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem padrão.'; };
 $('#iaCopiarPub').onclick=()=>{ try{ navigator.clipboard.writeText($('#iaPubTxt').value); $('#iaCopiarPub').textContent='Copiada ✓'; setTimeout(()=>$('#iaCopiarPub').textContent='Copiar resposta pública',1500);}catch(e){} };
@@ -1680,7 +1735,7 @@ function renderEvLista(){
     const mk=!bloq&&evMarcado(cli,e); if(mk) sel++; if(e&&e.st==='livre') pode++; else espera++; if(txt==null) semMsg++;
     const st=txt==null?['semmsg','sem sugestão para este cliente']:!e?['bloqueado','sem telefone']:[e.st,{livre:'✓ pode receber',aguardar:'⏳ esperar até '+dtCurta((e.lib||'').slice(0,10)),pausado:'⏸ pausado até '+dtCurta(e.lib),bloqueado:'🚫 não quer receber',so_app:'só pede por app',na_fila:'🕒 já na fila'}[e.st]];
     h+=`<tr class="${mk?'':'off'}"><td><input type="checkbox" data-evc="${cli}" ${mk?'checked':''} ${bloq?'disabled':''}></td>
-      <td><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a><span class="sub">${esc(bairroCli(cli)||'')}</span></td>
+      <td><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${pinBtn(cli)}<span class="sub">${esc(bairroCli(cli)||'')}${ptsTag(c)}</span></td>
       <td>${esc(e?ENV_PERFIL[e.pf]||e.pf:'')}${e&&e.taxa>=0?`<span class="sub">responde ${e.taxa}%</span>`:''}</td>
       <td>${e&&e.ult?e.ult.toLocaleDateString('pt-BR')+`<span class="sub">${fmtN(e.n30)} no último mês</span>`:'<span class="muted">nunca</span>'}</td>
       <td><span class="ev-st ${st[0]}" title="${esc(e&&e.mot||'')}">${esc(st[1])}</span></td>
@@ -1790,6 +1845,78 @@ function renderEnvios(){
 }
 if(AO_VIVO) setTimeout(()=>api('/api/envios').then(r=>{ EV.estado=r; $('#qEnv').style.display=r.fila_total?'':'none'; $('#qEnv').textContent=r.fila_total; }).catch(()=>{}),1500);
 
+
+// ------------------------------------------------------------ PONTOS e LEMBRETES
+const PTS_DESTAQUE=100;
+function ptsTag(c){ return c&&c.pontos?` <span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}" title="Pontos de fidelidade">⭐ ${fmtN(c.pontos)} pts</span>`:''; }
+let LEMB=[];
+function lembDe(chave){ return LEMB.filter(l=>l.chave===chave&&!l.feito); }
+function pinBtn(cli){ const c=D.clientes[cli]; if(!c||!AO_VIVO) return ''; const n=lembDe(c.chave);
+  return `<button class="pin ${n.length?'on':''}" data-pin="${cli}" title="${n.length?esc('Lembrete: '+n.map(l=>l.texto).join(' / ')):'Salvar para lembrar depois'}">📌</button>`; }
+document.addEventListener('click',e=>{ const b=e.target.closest('button[data-pin]'); if(!b) return; e.preventDefault(); e.stopPropagation(); abrirLembrete(+b.dataset.pin); });
+function hojeStr(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function lembCarregar(){ if(!AO_VIVO) return Promise.resolve(); return api('/api/lembretes').then(r=>{ const prim=!lembCarregar.ok; lembCarregar.ok=true; LEMB=r.lembretes||[]; lembContador(); if(prim&&LEMB.length&&typeof render==='function') render(); if($('#lemb').classList.contains('aberta')) lembRender(); }).catch(()=>{}); }
+function lembContador(){ const ab=LEMB.filter(l=>!l.feito); const hoje=hojeStr(); const venc=ab.filter(l=>l.quando&&l.quando<=hoje).length;
+  const n=$('#lembN'); n.textContent=ab.length||''; n.classList.toggle('hoje',venc>0); $('#lembBtn').title=venc?`${venc} lembrete(s) para hoje`:'Lembretes: clientes que você salvou para depois'; }
+function lembAcao(d){ return api('/api/lembretes',d).then(r=>{ LEMB=r.lembretes||[]; lembContador(); lembRender(); if(typeof render==='function') render(); }); }
+function quandoLabel(q){ if(!q) return 'sem data'; const hoje=hojeStr(); const am=hojeStr(new Date(Date.now()+864e5));
+  if(q<hoje) return 'atrasado · '+new Date(q+'T12:00').toLocaleDateString('pt-BR'); if(q===hoje) return 'hoje'; if(q===am) return 'amanhã';
+  return new Date(q+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'}); }
+function lembRender(){
+  const L=$('#lbLista'); if(!AO_VIVO){ L.innerHTML='<div class="ch-vazio">Os lembretes ficam salvos no vigia. Abra o painel pelo atalho <b>Painel Mariá</b>.</div>'; return; }
+  const hoje=hojeStr(); const ab=LEMB.filter(l=>!l.feito);
+  const grupos=[['Para hoje e atrasados',ab.filter(l=>l.quando&&l.quando<=hoje)],['Próximos dias',ab.filter(l=>l.quando&&l.quando>hoje)],['Sem data',ab.filter(l=>!l.quando)],['Feitos nos últimos 7 dias',LEMB.filter(l=>l.feito)]];
+  let h=''; grupos.forEach(([t,itens])=>{ if(!itens.length) return; h+=`<div class="lb-grupo">${t} · ${itens.length}</div>`;
+    itens.forEach(l=>{ const cli=IDX_CHAVE[l.chave]; const c=cli!=null?D.clientes[cli]:null; const w=c&&!l.feito?waLink(c,''):null;
+      const cls=l.feito?'feito':l.quando&&l.quando<hoje?'atrasado':l.quando===hoje?'hoje':'';
+      h+=`<div class="lb-item ${cls}"><div class="t">${cli!=null?`<a class="cli" data-i="${cli}"><b>${esc(c.nome||l.nome)}</b></a>`:`<b>${esc(l.nome||'cliente')}</b>`}${c?ptsTag(c):''}<span class="q">${l.feito?'feito '+dtCurta(l.feito):esc(quandoLabel(l.quando))}</span></div>
+        <div class="tx">${esc(l.texto||'')}</div><div class="ac">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}
+        ${l.feito?`<button data-lb="reabrir" data-id="${l.id}">Reabrir</button>`:`<button data-lb="feito" data-id="${l.id}">✓ Feito</button>${cli!=null?`<button data-lbed="${l.id}">Editar</button>`:''}`}<button data-lb="apagar" data-id="${l.id}">Apagar</button></div></div>`; }); });
+  L.innerHTML=h||'<div class="ch-vazio"><b>Nenhum lembrete.</b><br>Clique no 📌 ao lado do nome de um cliente (ou em "Lembrar depois" no perfil e na janela do WhatsApp) para salvar alguém e não esquecer de fazer algo com ele. Quando chegar o dia, o painel avisa no canto da tela.</div>';
+  L.querySelectorAll('[data-lb]').forEach(b=>b.onclick=()=>{ if(b.dataset.lb==='apagar'&&!confirmar(b)) return; lembAcao({acao:b.dataset.lb, id:+b.dataset.id}); });
+  L.querySelectorAll('[data-lbed]').forEach(b=>b.onclick=()=>{ const l=LEMB.find(x=>x.id===+b.dataset.lbed); if(l) abrirLembrete(IDX_CHAVE[l.chave], l); });
+}
+function abrirLembretes(){ lembRender(); $('#lemb').classList.add('aberta'); $('#veu').classList.add('on'); lembCarregar(); }
+function fecharLembretes(){ $('#lemb').classList.remove('aberta'); if(!$('#gaveta').classList.contains('aberta')&&!$('#perfil').classList.contains('aberto')&&!$('#chat').classList.contains('aberta')) $('#veu').classList.remove('on'); }
+$('#lembBtn').onclick=()=>{ if($('#lemb').classList.contains('aberta')) fecharLembretes(); else abrirLembretes(); };
+$('#lbFechar').onclick=fecharLembretes;
+// busca de cliente para novo lembrete
+$('#lbBusca').oninput=()=>{ const q=semAc($('#lbBusca').value.trim()); const R=$('#lbRes'); if(q.length<2){ R.classList.add('hidden'); return; }
+  const dig=q.replace(/\D/g,''); const out=[]; for(let i=0;i<D.clientes.length&&out.length<8;i++){ const c=D.clientes[i]; if(c.uniu_em!=null) continue;
+    if(semAc(c.nome).includes(q)||(dig.length>=4&&(c.tel||'').includes(dig))) out.push(i); }
+  R.innerHTML=out.map(i=>`<div data-lbc="${i}">${esc(D.clientes[i].nome||'(sem nome)')}<span class="muted" style="font-size:12px"> ${esc(fmtTel(D.clientes[i].tel||''))}</span>${ptsTag(D.clientes[i])}</div>`).join('')||'<div class="muted">Ninguém encontrado</div>';
+  R.classList.remove('hidden'); R.querySelectorAll('[data-lbc]').forEach(d=>d.onclick=()=>{ R.classList.add('hidden'); $('#lbBusca').value=''; abrirLembrete(+d.dataset.lbc); }); };
+// popup de lembrete
+let LB_CTX=null;
+const LB_ACOES=['Mandar mensagem','Oferecer cupom','Avisar dos pontos','Ligar para o cliente','Perguntar como foi o pedido','Convidar para pedir pelo app'];
+function abrirLembrete(cli, editar){
+  if(!AO_VIVO){ alert('Os lembretes funcionam quando o painel é aberto pelo atalho Painel Mariá.'); return; }
+  const c=D.clientes[cli]; if(!c) return; LB_CTX={cli, id:editar?editar.id:null, quando:editar?editar.quando:''};
+  $('#lbTitulo').textContent='📌 '+(c.nome||'Cliente'); const pc=porCliente().get(cli);
+  $('#lbInfo').innerHTML=[c.tel?esc(fmtTel(c.tel)):'',c.pontos?`<span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}">⭐ ${fmtN(c.pontos)} pontos</span>`:'',pc?`${fmtN(pc.n)} pedidos · último há ${diasEntre(pc.ult,new Date())} dias`:''].filter(Boolean).join(' · ');
+  const ab=lembDe(c.chave).filter(l=>!editar||l.id!==editar.id);
+  $('#lbAbertos').innerHTML=ab.length?'<div class="lb-grupo" style="margin-top:4px">Já salvos</div>'+ab.map(l=>`<div class="lb-item"><div class="t"><span>${esc(l.texto||'')}</span><span class="q">${esc(quandoLabel(l.quando))}</span></div><div class="ac"><button data-lbm="feito" data-id="${l.id}">✓ Feito</button><button data-lbm="apagar" data-id="${l.id}">Apagar</button></div></div>`).join(''):'';
+  $('#lbAbertos').querySelectorAll('[data-lbm]').forEach(b=>b.onclick=()=>{ if(b.dataset.lbm==='apagar'&&!confirmar(b)) return; lembAcao({acao:b.dataset.lbm,id:+b.dataset.id}).then(()=>abrirLembrete(cli)); });
+  $('#lbAcoes').innerHTML=LB_ACOES.map(t=>`<button>${esc(t)}</button>`).join('');
+  $('#lbAcoes').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const ta=$('#lbTexto'); let t=b.textContent; if(t==='Avisar dos pontos'&&c.pontos) t+=` (tem ${fmtN(c.pontos)})`; ta.value=ta.value.trim()?ta.value.trim()+'\n'+t:t; ta.focus(); });
+  const ds=[['','Sem data'],[hojeStr(),'Hoje'],[hojeStr(new Date(Date.now()+864e5)),'Amanhã'],[hojeStr(new Date(Date.now()+3*864e5)),'Em 3 dias'],[hojeStr(new Date(Date.now()+7*864e5)),'Daqui a 1 semana']];
+  const outro=LB_CTX.quando&&!ds.some(d=>d[0]===LB_CTX.quando);
+  $('#lbQuando').innerHTML=ds.map(([v,l])=>`<button data-q="${v}" class="${LB_CTX.quando===v?'on':''}">${l}</button>`).join('')+`<input type="date" id="lbData" value="${outro?LB_CTX.quando:''}" style="font:inherit;font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px">`;
+  $('#lbQuando').querySelectorAll('button').forEach(b=>b.onclick=()=>{ LB_CTX.quando=b.dataset.q; $('#lbData').value=''; $('#lbQuando').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); });
+  $('#lbData').onchange=()=>{ LB_CTX.quando=$('#lbData').value; $('#lbQuando').querySelectorAll('button').forEach(x=>x.classList.remove('on')); };
+  $('#lbTexto').value=editar?editar.texto:''; $('#lbMsg').textContent=''; $('#lbSalvar').disabled=false;
+  $('#lbModal').classList.remove('hidden'); setTimeout(()=>$('#lbTexto').focus(),50);
+}
+function fecharLembrete(){ $('#lbModal').classList.add('hidden'); LB_CTX=null; }
+$('#lbmFechar').onclick=fecharLembrete; $('#lbModal').addEventListener('click',e=>{ if(e.target.id==='lbModal') fecharLembrete(); });
+$('#lbSalvar').onclick=()=>{ const ctx=LB_CTX; if(!ctx) return; const c=D.clientes[ctx.cli]; const t=$('#lbTexto').value.trim();
+  if(!t){ $('#lbTexto').focus(); $('#lbMsg').textContent='Escreva o que fazer.'; return; }
+  $('#lbSalvar').disabled=true; $('#lbMsg').textContent='Salvando…';
+  lembAcao({acao:'salvar', id:ctx.id, cliente_id:c.id, chave:c.chave, nome:c.nome, texto:t, quando:ctx.quando}).then(()=>{ $('#lbMsg').textContent='Salvo ✓'; setTimeout(fecharLembrete,600);
+    if($('#perfil').classList.contains('aberto')){ const pl=$('#pfLembrar'); if(pl) pl.textContent='📌 Lembretes ('+lembDe(c.chave).length+')'; } })
+   .catch(()=>{ $('#lbSalvar').disabled=false; $('#lbMsg').textContent='Não consegui salvar.'; }); };
+if(AO_VIVO){ lembCarregar(); setInterval(lembCarregar,120000); } else $('#lembBtn').classList.add('hidden');
+
 // ------------------------------------------------------------ PERFIL DO CLIENTE
 const IDX_CHAVE={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.chave) IDX_CHAVE[c.chave]=c.uniu_em!=null?c.uniu_em:i; });
 function fmtTel(t){ t=(t||'').replace(/\D/g,''); if(t.length===11) return `(${t.slice(0,2)}) ${t.slice(2,7)}-${t.slice(7)}`; if(t.length===10) return `(${t.slice(0,2)}) ${t.slice(2,6)}-${t.slice(6)}`; return t; }
@@ -1861,7 +1988,7 @@ function renderPerfil(c, cli, psAll, RAll){
     <div class="pf-id"><div class="pf-av">${esc(iniciais(c.nome))}</div><div><h2>${esc(c.nome||'(sem nome)')}</h2>
       <div class="meta">${[c.tel?fmtTel(c.tel):'sem telefone', bairro, (cad.cadastro||c.cad)?'cliente desde '+new Date((cad.cadastro||c.cad)+'T12:00').toLocaleDateString('pt-BR'):(pri?'1º pedido em '+pri.toLocaleDateString('pt-BR'):'')].filter(Boolean).map(esc).join(' · ')}</div>
       <div class="pf-tags">${seg?`<span class="y">${esc(seg.nome)}</span>`:''}${c.app?`<span>só ${esc(c.app)}</span>`:''}${(cad.pontos||c.pontos)?`<span>${fmtN(cad.pontos||c.pontos)} pontos</span>`:''}${(cad.nascimento||c.nasc)?`<span>🎂 ${new Date((cad.nascimento||c.nasc).slice(0,10)+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>`:''}${ci?`<span>contatado em ${esc(ci.txt)}</span>`:''}</div></div></div>
-    <div class="pf-acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:''}${c.tel?`<button id="pfCopiar">Copiar telefone</button>`:''}${cad.email?`<button disabled style="cursor:default">${esc(cad.email)}</button>`:''}</div></div>
+    <div class="pf-acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:''}${c.tel?`<button id="pfCopiar">Copiar telefone</button>`:''}${cli>=0?`<button id="pfLembrar">📌 ${lembDe(c.chave).length?'Lembretes ('+lembDe(c.chave).length+')':'Lembrar depois'}</button>`:''}${cad.email?`<button disabled style="cursor:default">${esc(cad.email)}</button>`:''}</div></div>
   <div class="pf-corpo">
     ${tsCli.length>1&&cli>=0?`<div class="pf-filtro"><span>Ver pedidos de</span><div class="seg" id="pfTurno">${[['all','Todos os turnos']].concat(tsCli.map(t=>[t,D.turnos[t]])).map(([v,l])=>`<button data-v="${v}" class="${String(PF_T)===String(v)?'on':''}">${esc(l)}</button>`).join('')}</div></div>`:''}
     <div class="pf-kpis kpis">
@@ -1889,6 +2016,7 @@ function renderPerfil(c, cli, psAll, RAll){
   </div>`;
   $('#perfil').innerHTML=h;
   $('#pfFechar').onclick=fecharPerfil;
+  const pl=$('#pfLembrar'); if(pl) pl.onclick=()=>abrirLembrete(cli);
   if(cli>=0&&c.tel) secEnvios(c,cli);
   $('#perfil').querySelectorAll('#pfTurno button').forEach(b=>b.onclick=()=>{ PF_T=b.dataset.v==='all'?'all':+b.dataset.v; const k=PF_CTX; renderPerfil(k.c,k.cli,k.ps,k.R); });
   const cp=$('#pfCopiar'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(c.tel); cp.textContent='Copiado ✓'; }catch(e){} };

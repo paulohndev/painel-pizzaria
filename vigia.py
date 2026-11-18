@@ -458,6 +458,12 @@ class Painel(BaseHTTPRequestHandler):
                 return self._json(E.resumo(db, E.carregar_regras()))
             finally:
                 db.close()
+        elif u.path == "/api/lembretes":
+            db = conectar()
+            try:
+                return self._json({"lembretes": E.lembretes(db, (urllib.parse.parse_qs(u.query).get("todos") or [""])[0] == "1")})
+            finally:
+                db.close()
         elif u.path == "/api/envios/conexao":
             wh = ESTADO.get("wh")
             ok, txt = wh.conectado() if wh else (False, "desligado")
@@ -523,6 +529,10 @@ class Painel(BaseHTTPRequestHandler):
                 return self._json({"ok": True})
             if u.path.startswith("/api/ia/"):
                 return self._json(*ia_post(u.path, dado))
+            if u.path == "/api/lembretes":
+                if not E.lembrete_acao(db, dado):
+                    return self._json({"erro": "acao"}, 400)
+                return self._json({"lembretes": E.lembretes(db)})
             if u.path.startswith("/api/envios/"):
                 return self._json(*envios_post(db, u.path, dado))
             if u.path == "/api/promocoes_casa":
@@ -676,7 +686,23 @@ class Despachante(threading.Thread):
                 time.sleep(60)
             time.sleep(15)
 
+    def avisar_lembretes(self):
+        agora = datetime.now()
+        if agora.hour < 9 or time.time() - getattr(self, "ult_lemb", 0) < 600:
+            return
+        self.ult_lemb = time.time()
+        db = conectar()
+        try:
+            rows = E.lembretes_a_avisar(db)
+        finally:
+            db.close()
+        if rows:
+            nomes = ", ".join(((r[1] or "").split() or ["cliente"])[0] for r in rows[:4]) + (" e mais %d" % (len(rows) - 4) if len(rows) > 4 else "")
+            txt = (rows[0][2] or "")[:90] if len(rows) == 1 else "Clique para ver a lista."
+            notificar("📌 %d lembrete%s para hoje" % (len(rows), "" if len(rows) == 1 else "s"), "%s. %s" % (nomes, txt), ENDERECO + "#lembretes")
+
     def passo(self):
+        self.avisar_lembretes()
         wh = ESTADO.get("wh")
         if not (wh and wh.ativo):
             return

@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS envios (id INTEGER PRIMARY KEY AUTOINCREMENT, cliente
 CREATE INDEX IF NOT EXISTS envios_cli ON envios(cliente_id);
 CREATE INDEX IF NOT EXISTS envios_fila ON envios(status, agendado);
 CREATE TABLE IF NOT EXISTS optout (cliente_id TEXT PRIMARY KEY, em TEXT, motivo TEXT);
+CREATE TABLE IF NOT EXISTS lembretes (id INTEGER PRIMARY KEY AUTOINCREMENT, cliente_id TEXT, chave TEXT, nome TEXT, texto TEXT,
+  quando TEXT, criado TEXT, feito TEXT, avisado INTEGER DEFAULT 0);
 """
 
 PERFIS = [  # código, nome, explicação
@@ -331,3 +333,52 @@ def historico_cliente(db, cid, chave):
     bloq = db.execute("SELECT em FROM optout WHERE cliente_id=?", (str(cid),)).fetchone()
     return {"mensagens": [{"quando": (r[0] or "")[:16], "campanha": r[1], "status": r[2], "via": r[3], "texto": r[4], "erro": r[5]} for r in rows],
             "bloqueado": bool(bloq)}
+
+
+# ------------------------------------------------------------------ lembretes (clientes para lembrar depois)
+
+def lembretes(db, todos=False):
+    q = "SELECT id, cliente_id, chave, nome, texto, quando, criado, feito FROM lembretes"
+    if not todos:
+        q += " WHERE feito IS NULL OR feito >= ?"
+        rows = db.execute(q + " ORDER BY feito IS NOT NULL, COALESCE(quando, '9999'), criado", ((datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d"),)).fetchall()
+    else:
+        rows = db.execute(q + " ORDER BY criado DESC").fetchall()
+    return [{"id": r[0], "cliente_id": r[1], "chave": r[2], "nome": r[3], "texto": r[4], "quando": r[5] or "", "criado": (r[6] or "")[:16],
+             "feito": (r[7] or "")[:16]} for r in rows]
+
+
+def lembrete_acao(db, d):
+    acao = d.get("acao")
+    if acao == "salvar":
+        texto = str(d.get("texto") or "").strip()[:1000]
+        quando = str(d.get("quando") or "").strip()[:10]
+        if quando:
+            try:
+                datetime.strptime(quando, "%Y-%m-%d")
+            except ValueError:
+                quando = ""
+        if d.get("id"):
+            db.execute("UPDATE lembretes SET texto=?, quando=?, avisado=0 WHERE id=?", (texto, quando or None, int(d["id"])))
+        else:
+            db.execute("INSERT INTO lembretes (cliente_id, chave, nome, texto, quando, criado) VALUES (?,?,?,?,?,?)",
+                       (str(d.get("cliente_id") or ""), str(d.get("chave") or ""), str(d.get("nome") or "")[:120], texto, quando or None, agora_txt()))
+    elif acao == "feito":
+        db.execute("UPDATE lembretes SET feito=? WHERE id=?", (agora_txt(), int(d.get("id") or 0)))
+    elif acao == "reabrir":
+        db.execute("UPDATE lembretes SET feito=NULL WHERE id=?", (int(d.get("id") or 0),))
+    elif acao == "apagar":
+        db.execute("DELETE FROM lembretes WHERE id=?", (int(d.get("id") or 0),))
+    else:
+        return False
+    db.commit()
+    return True
+
+
+def lembretes_a_avisar(db):
+    hoje = datetime.now().strftime("%Y-%m-%d")
+    rows = db.execute("SELECT id, nome, texto FROM lembretes WHERE feito IS NULL AND avisado=0 AND quando IS NOT NULL AND quando <= ?", (hoje,)).fetchall()
+    for r in rows:
+        db.execute("UPDATE lembretes SET avisado=1 WHERE id=?", (r[0],))
+    db.commit()
+    return rows
