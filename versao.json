@@ -1,18 +1,18 @@
 {
- "versao": "2.0.0",
- "notas": "Mariá Gestão e painel num lugar só; faturamento diário automático; IA enxerga despesas, fichas e folha",
+ "versao": "2.1.0",
+ "notas": "Sistema se cuida sozinho: volta se cair, reinicia direito, confere atualização de hora em hora",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "134867e2485bf497f31f026ac2b347d6288f76c9f4344f68671f02c6b551ed95",
+  "LEIA-ME.txt": "0b40e677926b68f0c61a5cfdc5e6d1c824e5d6af9233d2f238a18a5a1b52efdf",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
   "Testar com dados de exemplo (Windows).bat": "67abc12a330e4ca15788207f26f9763a946397cd268254e130b1f4520af3ef37",
   "Ver painel sem baixar (Mac).command": "ecc6412ea3d108ef2e6d03bd3489e4f0e9e458295260e66568e7f83144b346af",
   "Ver painel sem baixar (Windows).bat": "fbcbe48518fac089b6e1f9ed821394d9076f446f267ea9c1a03ebd151e28c20d",
-  "agendar.ps1": "d21373a5cfbd94d6475eec9e50e739be17f8f3d2eeb4c23d14fb924873437f9c",
+  "agendar.ps1": "c676ad9a36419fde52e4a1d373e4ab3b61e59f6db04c558155017c0121913bcf",
   "alertas.py": "c947a0718d60486735bf8cba32f33383f2b3fe6aab2b24b2bfad941c848e6c02",
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "envios.py": "d033660bf5e3bbda905a55bb023efa1c27c9a8452dcb06785dee899c28808ef1",
@@ -22,7 +22,7 @@
   "painel_modelo.html": "42bf44d5dade14fa6a420e243ea6a9b3d3cd7f3497cfa92f7003050f677a4c8c",
   "pizzaria.py": "427f67680d7f7046963817c3ed6276668041789f9082961b81950b7718551694",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "d9767387bebf37aa6a03c579ab309cef73a55a40f84ac0b810232a292e22fb76",
+  "vigia.py": "9d34daaebfc6006e5eb0c6201ea13b94f93332ff30ff4ff85305a5d0b48d6289",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe",
   "gestao.py": "a2ac37e5df16b3d24381556c3f3fc099556d51a894848191502e4495f63fddd2",
   "gestao_casca.html": "b7c540f973bb4a29f05334beda144e1bda14824f772e385c7b055423b0ec3c35",
@@ -30,6 +30,7 @@
   "gestao_despesas.html": "29cdee6ffe61362edffd79b67b5fb99d130d5619f38f61e228f821773c3fa7f3",
   "gestao_fichas.html": "45c42ac9910612268c5a12a49ef6d74cf73b4045461ad8da6cca9213eddc7a61",
   "gestao_equipe.html": "8e6cc63926c9fe283fda89758cfe40b7d08b168d5c385a5c98cf5e05460fa38d",
-  "gestao_apps.txt": "53b5b0a3b85d8266e891c30ed756520f4d7c0f0d706fd9ade6fb539bde669680"
+  "gestao_apps.txt": "53b5b0a3b85d8266e891c30ed756520f4d7c0f0d706fd9ade6fb539bde669680",
+  "Reiniciar vigia (Windows).bat": "5e84e856b54c774385eca8a458844393e02e6d2d8054062012349a2bc95d5ce6"
  }
 }

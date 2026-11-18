@@ -158,14 +158,17 @@ O painel ao vivo fica em http://127.0.0.1:8766 (atalho "Abrir painel").
 Ele só funciona neste computador; nada fica exposto na internet.
 Horário das notificações e liga/desliga: config.ini, seção [alertas].
 Registro do que o vigia faz: dados\vigia.log
-Para parar: "Desligar vigia (Windows).bat".
+Se ele cair por qualquer motivo, volta sozinho em até 5 minutos.
+Para reiniciar na hora: "Reiniciar vigia (Windows).bat".
+Para desligar de vez (e não ligar mais sozinho): "Desligar vigia (Windows).bat".
 
 
 VERSÕES NOVAS DO PROGRAMA
 -------------------------
-O programa se atualiza sozinho: toda vez que roda, confere se tem versão nova
+O programa se atualiza sozinho: confere de hora em hora se tem versão nova
 no repositório do GitHub (config.ini, seção [atualizacao]) e baixa só os
-arquivos do programa. O config.ini e a pasta "dados" nunca são mexidos.
+arquivos do programa, e se reinicia sozinho. O config.ini, a pasta "dados" e a
+pasta Database nunca são mexidos.
 Para desligar: no config.ini, troque "ativo = sim" por "ativo = nao".
 
 

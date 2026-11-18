@@ -139,7 +139,7 @@ class Vigia:
         self.nome_loja = P.meta_get(self.db, "nome_loja") or ""
         self.mudou = True
         self.prox = {"polling": 0, "recalculo": 0, "avaliacoes": time.time() + 120, "backlog": time.time() + 30,
-                     "diario": time.time() + 60, "versao": time.time() + 3600, "loja": time.time() + 90}
+                     "diario": time.time() + 60, "versao": time.time() + 600, "loja": time.time() + 90}
         self.ultimo_toast = 0
         self.toasts_prio2_hoje = (datetime.now().date(), 0)
 
@@ -387,7 +387,7 @@ class Vigia:
                     self.prox["recalculo"] = agora + INTERVALO_RECALCULO
                     self.recalcular()
                 if agora >= self.prox["versao"]:
-                    self.prox["versao"] = agora + 3 * 3600
+                    self.prox["versao"] = agora + 3600
                     if self.checar_versao():
                         log("programa atualizado: reiniciando o vigia")
                         reiniciar()
