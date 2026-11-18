@@ -7,6 +7,8 @@ import json
 import os
 import re
 import sqlite3
+
+import gestao
 import threading
 import time
 from collections import Counter
@@ -236,7 +238,7 @@ def limpar_pessoais(obj, liberar):
     return obj
 
 
-def montar_analise(db, D, versao, liberar=False):
+def montar_analise(db, D, versao, liberar=False, extras=None):
     """Base completa (somente leitura) para a IA consultar, com tudo que a API do Cardápio Web devolve dos pedidos,
     clientes, avaliações, loja, cupons e cardápio. Refeita quando os dados mudam (no máximo a cada 10 min)."""
     with ANALISE["trava"]:
@@ -386,6 +388,13 @@ CREATE TABLE cadastro_loja (tipo TEXT, json TEXT);
         for ix in ("CREATE INDEX ip ON itens(pedido_id)", "CREATE INDEX pd ON pedidos(data)", "CREATE INDEX op ON opcoes(pedido_id)",
                    "CREATE INDEX pc ON pedidos(cliente_id)"):
             out.execute(ix)
+        for nome, (esquema, linhas) in (extras or {}).items():
+            try:
+                out.execute("CREATE TABLE %s (%s)" % (nome, esquema))
+                if linhas:
+                    out.executemany("INSERT INTO %s VALUES (%s)" % (nome, ",".join("?" * len(linhas[0]))), linhas)
+            except sqlite3.Error as e:
+                print("tabela extra %s: %s" % (nome, e))
         out.commit()
         out.close()
         os.replace(tmp, caminho_analise())
@@ -613,7 +622,7 @@ def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete
         if nome == "consultar_api" and api is not None:
             return _api_ao_vivo(api, args.get("caminho"), args.get("parametros"), liberar)
         return "ferramenta indisponível"
-    sis = sistema_pergunta(D, liberar) + GUIA_ACOES + (("\n" + extra) if extra else "")
+    sis = sistema_pergunta(D, liberar) + gestao.DESCRICAO_IA + GUIA_ACOES + (("\n" + extra) if extra else "")
     if tela:
         sis += "\nO dono está olhando agora no painel: " + tela[:2500]
     resp, feitas = ia.conversar(sis, msgs, FERRAMENTAS + FERRAMENTAS_ACAO, executar, max_tokens=3000, forte=True, voltas=14)

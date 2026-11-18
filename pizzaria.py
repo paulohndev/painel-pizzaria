@@ -138,6 +138,15 @@ client_token =
 url =
 apikey =
 
+[gestao]
+; Pasta onde o Mariá Gestão guarda despesas, fichas técnicas e folha.
+; Vazio = Área de Trabalho > Database
+pasta =
+; Turno que é a pizzaria (o faturamento diário das Despesas vem dele, do Cardápio Web)
+turno_faturamento = noite
+; Preencher o faturamento diário sozinho (sim/nao)
+faturamento_automatico = sim
+
 [atualizacao]
 ; O programa se atualiza sozinho a partir deste repositório do GitHub.
 ; Para desligar, troque "sim" por "nao".
@@ -170,6 +179,7 @@ def carregar_config():
         "mensagem": cp.get("clientes", "mensagem", fallback="").strip().replace("Aqui é da pizzaria. ", ""),
         "ia": {k: cp.get("ia", k, fallback="").strip() for k in ("provedor", "chave", "modelo", "modelo_forte", "dados_pessoais")},
         "whatsapp": {k: cp.get("whatsapp", k, fallback="").strip() for k in ("provedor", "instancia", "token", "client_token", "url", "apikey")},
+        "gestao": {k: cp.get("gestao", k, fallback="").strip() for k in ("pasta", "turno_faturamento", "faturamento_automatico")},
     }
 
 

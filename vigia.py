@@ -51,6 +51,7 @@ import pizzaria as P  # noqa: E402
 import alertas  # noqa: E402
 import ia_painel  # noqa: E402
 import envios as E  # noqa: E402
+import gestao as G  # noqa: E402
 from whatsapp import Whats, ErroWhats, numero_br  # noqa: E402
 from ia import IA, ErroIA  # noqa: E402
 
@@ -422,6 +423,71 @@ class Painel(BaseHTTPRequestHandler):
     def _host_ok(self):
         return (self.headers.get("Host") or "").split(":")[0] in ("127.0.0.1", "localhost")
 
+    def _bytes(self, b, tipo, code=200, extra=None):
+        self.send_response(code)
+        self.send_header("Content-Type", tipo)
+        self.send_header("Content-Length", str(len(b)))
+        self.send_header("Cache-Control", "no-store")
+        for k, x in (extra or {}).items():
+            self.send_header(k, x)
+        self.end_headers()
+        self.wfile.write(b)
+
+    def _redir(self, para):
+        self.send_response(302)
+        self.send_header("Location", para)
+        self.end_headers()
+
+    def _gestao_get(self, u):
+        q = urllib.parse.parse_qs(u.query)
+        app, rel = (q.get("app") or [""])[0], (q.get("p") or [""])[0]
+        cfg = ESTADO["vigia"].cfg
+        try:
+            if u.path == "/api/gestao/dados":
+                return self._json(G.dados(cfg))
+            if u.path == "/api/gestao/info":
+                return self._json(G.info(cfg, app, rel))
+            if u.path == "/api/gestao/lista":
+                return self._json(G.listar(cfg, app, rel))
+            if u.path == "/api/gestao/arq":
+                b, mt = G.ler(cfg, app, rel)
+                tipo = {"json": "application/json", "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png",
+                        "pdf": "application/pdf"}.get(rel.rsplit(".", 1)[-1].lower(), "application/octet-stream")
+                return self._bytes(b, tipo, extra={"X-Mtime": str(mt)})
+            if u.path == "/api/gestao/vendas":
+                db = conectar()
+                try:
+                    dias = max(1, min(400, int((q.get("dias") or ["120"])[0])))
+                    return self._json(G.vendas_por_dia(db, cfg, dias, P.parse_dt, P.turno_de))
+                finally:
+                    db.close()
+        except G.ErroGestao as e:
+            return self._json({"erro": str(e)}, e.codigo)
+        except (OSError, ValueError) as e:
+            log("Gestão: erro ao ler (%s)" % e)
+            return self._json({"erro": "erro ao ler"}, 500)
+        return self._json({"erro": "não encontrado"}, 404)
+
+    def _gestao_post(self, u, corpo):
+        q = urllib.parse.parse_qs(u.query)
+        app, rel = (q.get("app") or [""])[0], (q.get("p") or [""])[0]
+        cfg = ESTADO["vigia"].cfg
+        try:
+            if u.path == "/api/gestao/arq":
+                G.gravar(cfg, app, rel, corpo)
+            elif u.path == "/api/gestao/pasta":
+                G.criar_pasta(cfg, app, rel)
+            elif u.path == "/api/gestao/apagar":
+                G.apagar(cfg, app, rel)
+            else:
+                return self._json({"erro": "não encontrado"}, 404)
+            return self._json({"ok": True})
+        except G.ErroGestao as e:
+            return self._json({"erro": str(e)}, e.codigo)
+        except OSError as e:
+            log("Gestão: erro ao gravar %s/%s (%s)" % (app, rel, e))
+            return self._json({"erro": "não consegui gravar"}, 500)
+
     def _json(self, obj, code=200):
         b = json.dumps(obj, ensure_ascii=False).encode("utf-8")
         self.send_response(code)
@@ -434,7 +500,15 @@ class Painel(BaseHTTPRequestHandler):
         if not self._host_ok():
             return self._json({"erro": "host"}, 403)
         u = urllib.parse.urlparse(self.path)
-        if u.path in ("/", "/index.html"):
+        if u.path in ("/", "/index.html", "/gestao"):
+            try:
+                return self._bytes(G.pagina().encode("utf-8"), "text/html; charset=utf-8")
+            except OSError as e:
+                log("Gestão: não consegui montar a página (%s); abrindo só o painel" % e)
+                return self._redir("/painel")
+        if u.path.startswith("/api/gestao/"):
+            return self._gestao_get(u)
+        if u.path == "/painel":
             with ESTADO["trava"]:
                 html = ESTADO["html"]
             if html is None:
@@ -492,6 +566,11 @@ class Painel(BaseHTTPRequestHandler):
         if not self._host_ok() or self.headers.get("X-Painel") != "1":
             return self._json({"erro": "proibido"}, 403)
         n = int(self.headers.get("Content-Length") or 0)
+        u = urllib.parse.urlparse(self.path)
+        if u.path.startswith("/api/gestao/"):
+            if n > G.LIMITE:
+                return self._json({"erro": "arquivo grande demais"}, 413)
+            return self._gestao_post(u, self.rfile.read(n))
         try:
             dado = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
         except ValueError:
@@ -841,7 +920,15 @@ def ia_post(caminho, dado):
                 with ESTADO["trava"]:
                     versao = ESTADO["gerado_em"]
                 liberar = str((ESTADO["vigia"].cfg.get("ia") or {}).get("dados_pessoais", "")).strip().lower() in ("sim", "s", "yes", "1")
-                ia_painel.montar_analise(db, D, versao, liberar)
+                cfg_g = ESTADO["vigia"].cfg
+                try:
+                    tg = G.tabelas_ia(cfg_g)
+                    extras = {k: (G.ESQUEMA_IA[k], tg.get(k) or []) for k in G.ESQUEMA_IA}
+                    assin = G.assinatura(cfg_g)
+                except Exception as e:  # o Gestão nunca pode derrubar a IA do painel
+                    log("Gestão: não consegui ler os dados para a IA (%s)" % e)
+                    extras, assin = {}, ""
+                ia_painel.montar_analise(db, D, (versao, assin), liberar, extras)
                 if caminho == "/api/ia/dica":
                     aba = str(dado.get("aba") or "")
                     hoje = datetime.now().strftime("%Y-%m-%d")

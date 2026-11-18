@@ -126,6 +126,26 @@ Atenção: Z-API e Evolution API não são a API oficial do WhatsApp. Envios
 em excesso para quem não espera receber podem levar o WhatsApp a restringir
 o número. Comece com pouco volume.
 
+MARIÁ GESTÃO JUNTO COM O PAINEL
+------------------------------------------------------------
+Agora tudo abre num lugar só: http://127.0.0.1:8766 (atalho "Mariá Gestão"
+ou "Painel Mariá" na Área de Trabalho). Na barra da esquerda:
+  - Vendas e clientes: o painel de sempre (Hoje, Promoções, Envios...);
+  - Painel geral, Despesas, Fichas técnicas, Equipe e folha, Anotações.
+Os dados do Gestão continuam nos mesmos arquivos da pasta
+Área de Trabalho > Database. Quem lê e grava agora é o sistema, então o
+navegador não pede mais permissão para usar a pasta.
+O vigia precisa estar ligado para abrir (botão "Ligar vigia e alertas").
+
+Os dois lados conversam:
+  - Despesas > Faturamento: os dias se preenchem sozinhos com as vendas do
+    Cardápio Web do turno da noite (pizzaria), pedidos concluídos. O que você
+    digitar à mão vale mais e não é trocado. Meses que já têm só o total do
+    mês lançado ficam como estão. Para desligar: config.ini, seção [gestao],
+    faturamento_automatico = nao.
+  - A IA do "Perguntar" enxerga despesas, fichas técnicas, insumos, equipe e
+    folha (sem CPF, telefone ou PIX). Ex.: "quanto sobrou em outubro?".
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

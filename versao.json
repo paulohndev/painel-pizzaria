@@ -1,12 +1,12 @@
 {
- "versao": "1.9.0",
- "notas": "IA que age: listas de clientes, lembretes, envios e relatórios pelo chat; dica da IA em cada página; resumo do cliente ao passar o mouse",
+ "versao": "2.0.0",
+ "notas": "Mariá Gestão e painel num lugar só; faturamento diário automático; IA enxerga despesas, fichas e folha",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "ab407cd1878c3a87dbc15b602375ffeea63817448c8b3e39b1937873b0ac2e25",
+  "LEIA-ME.txt": "134867e2485bf497f31f026ac2b347d6288f76c9f4344f68671f02c6b551ed95",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
   "Testar com dados de exemplo (Windows).bat": "67abc12a330e4ca15788207f26f9763a946397cd268254e130b1f4520af3ef37",
@@ -17,12 +17,19 @@
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "envios.py": "d033660bf5e3bbda905a55bb023efa1c27c9a8452dcb06785dee899c28808ef1",
   "ia.py": "5f2c9eee71ec081abcd40e795c4446eb6df4acdb1a22fc6f46d380370aca7d47",
-  "ia_painel.py": "d130d152cc09b14c8f28cf80c16f54c2f46814a98dd16a9f247907d91d681675",
+  "ia_painel.py": "96c2b35c3762d77c3e6cc9b1e6e421e49adc8dc5731f8f67d87c41110b3a718f",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "7e307616f87f6dcbad79d4e2b8a3e1fa94f550833101863bfde20634928e04de",
-  "pizzaria.py": "27cd5246a42d0ca26d80c15fe069ab16df9755bd8ea55f625f575b0d86cbf6b8",
+  "painel_modelo.html": "42bf44d5dade14fa6a420e243ea6a9b3d3cd7f3497cfa92f7003050f677a4c8c",
+  "pizzaria.py": "427f67680d7f7046963817c3ed6276668041789f9082961b81950b7718551694",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "b73757fc39465325df064e13dd5113ff6960adf65f62db8fcd9c424bc9cccbff",
-  "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
+  "vigia.py": "d9767387bebf37aa6a03c579ab309cef73a55a40f84ac0b810232a292e22fb76",
+  "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe",
+  "gestao.py": "a2ac37e5df16b3d24381556c3f3fc099556d51a894848191502e4495f63fddd2",
+  "gestao_casca.html": "b7c540f973bb4a29f05334beda144e1bda14824f772e385c7b055423b0ec3c35",
+  "gestao_painel.html": "ca2dfd12cdd69daceabe3d4eab5e952af8809456ac7dab8b0e785f140aca594b",
+  "gestao_despesas.html": "29cdee6ffe61362edffd79b67b5fb99d130d5619f38f61e228f821773c3fa7f3",
+  "gestao_fichas.html": "45c42ac9910612268c5a12a49ef6d74cf73b4045461ad8da6cca9213eddc7a61",
+  "gestao_equipe.html": "8e6cc63926c9fe283fda89758cfe40b7d08b168d5c385a5c98cf5e05460fa38d",
+  "gestao_apps.txt": "53b5b0a3b85d8266e891c30ed756520f4d7c0f0d706fd9ade6fb539bde669680"
  }
 }

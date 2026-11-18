@@ -1,0 +1,134 @@
+{
+ "painel": {
+  "nome": "Painel geral",
+  "abas": [
+   [
+    "topo",
+    "Visão geral"
+   ],
+   [
+    "0",
+    "Despesas"
+   ],
+   [
+    "1",
+    "Equipe e folha"
+   ],
+   [
+    "2",
+    "Cardápio e preços"
+   ],
+   [
+    "fech",
+    "Fechamento do mês"
+   ]
+  ]
+ },
+ "despesas": {
+  "nome": "Despesas",
+  "abas": [
+   [
+    "lanc",
+    "Lançar"
+   ],
+   [
+    "lista",
+    "Despesas"
+   ],
+   [
+    "contas",
+    "Contas a pagar"
+   ],
+   [
+    "fat",
+    "Faturamento"
+   ],
+   [
+    "dash",
+    "Dashboard"
+   ],
+   [
+    "comp",
+    "Comparar períodos"
+   ],
+   [
+    "itens",
+    "Itens e locais"
+   ],
+   [
+    "desp",
+    "Desperdício"
+   ],
+   [
+    "conf",
+    "Orçamento e backup"
+   ]
+  ]
+ },
+ "fichas": {
+  "nome": "Fichas técnicas",
+  "abas": [
+   [
+    "painel",
+    "Painel"
+   ],
+   [
+    "preco",
+    "Precificação"
+   ],
+   [
+    "canais",
+    "Preço por canal"
+   ],
+   [
+    "combos",
+    "Combos e promoções"
+   ],
+   [
+    "fichas",
+    "Fichas técnicas"
+   ],
+   [
+    "insumos",
+    "Insumos"
+   ],
+   [
+    "sim",
+    "Simulação"
+   ],
+   [
+    "prem",
+    "Premissas e backup"
+   ]
+  ]
+ },
+ "equipe": {
+  "nome": "Equipe e folha",
+  "abas": [
+   [
+    "folha",
+    "Folha do mês"
+   ],
+   [
+    "equipe",
+    "Equipe"
+   ],
+   [
+    "hist",
+    "Histórico"
+   ],
+   [
+    "dec",
+    "13º salário"
+   ],
+   [
+    "fer",
+    "Férias"
+   ],
+   [
+    "conf",
+    "Configurações e backup"
+   ]
+  ]
+ }
+}

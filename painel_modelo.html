@@ -465,6 +465,8 @@ button.pin.on{opacity:1;filter:none}
 .heat th{background:none;border:0;font-weight:500;color:var(--soft);text-align:center;padding:2px;font-size:11px;position:static;letter-spacing:0;text-transform:none}
 .heat th.r{text-align:right;padding-right:8px}
 .heat tr:hover td{background:none}
+html.embutido #lado{display:none}
+html.embutido #area,html.embutido body.fixo #area{margin-left:0}
 </style>
 </head>
 <body>
@@ -763,6 +765,7 @@ button.pin.on{opacity:1;filter:none}
 </aside>
 
 <script>
+const EMBUTIDO=(()=>{try{return window.top!==window.self}catch(e){return true}})(); if(EMBUTIDO) document.documentElement.classList.add('embutido');
 const D = /*__DADOS__*/null;
 
 // ------------------------------------------------------------ helpers
@@ -837,7 +840,7 @@ function marcarFiltros(){
 }
 let aba='hoje';
 const PAGINAS={envios:'Envios pelo WhatsApp',hoje:'Hoje',promocoes:'Promoções',resultados:'Resultados',geral:'Visão geral',clientes:'Clientes',produtos:'Produtos',bairros:'Bairros'};
-document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{aba=b.dataset.t; $('#pgTitulo').textContent=PAGINAS[aba]||''; window.scrollTo({top:0});
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{aba=b.dataset.t; $('#pgTitulo').textContent=PAGINAS[aba]||''; window.scrollTo({top:0}); if(EMBUTIDO){ try{ parent.mariaAba&&parent.mariaAba('vendas',aba); }catch(e){} }
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
   ['hoje','geral','clientes','produtos','bairros','promocoes','resultados','envios'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
 
@@ -1627,7 +1630,7 @@ $('#iaResumoNovo').onclick=()=>iaResumo(true);
 // pergunte ao painel
 const CHAT=[];
 function mdSimples(t){ return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^\s*[-*]\s+/gm,'• '); }
-const SUGESTOES=['Como foram as vendas desta semana comparando com a passada?','Quais sabores de pizza mais cresceram no último mês?','Quais bairros estão pedindo menos que antes?',
+const SUGESTOES=['Como foram as vendas desta semana comparando com a passada?','Quanto sobrou na pizzaria em outubro tirando as despesas lançadas no Gestão?','Quais sabores de pizza mais cresceram no último mês?','Quais bairros estão pedindo menos que antes?',
   'Que promoção você sugere para quarta-feira, que é dia fraco?','Quanto do meu faturamento vem do iFood e do 99 nos últimos 30 dias?','Quem são meus 10 melhores clientes do almoço?'];
 function chatRender(){
   const L=$('#chLista');
