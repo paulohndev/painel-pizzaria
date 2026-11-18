@@ -39,6 +39,7 @@ class IA:
         if not self.provedor and self.chave:
             self.provedor = "claude" if self.chave.startswith("sk-ant-") else "openai"
         self.desligar_raciocinio = True  # respostas diretas (sem "pensar" antes), mais rápidas e baratas
+        self.pensa = set()  # modelos que não aceitam desligar o raciocínio
         self.ultimo_diag = ""
         rapido, forte = MODELOS.get(self.provedor, ("", ""))
         self.modelo = (ia.get("modelo") or "").strip() or rapido
@@ -88,21 +89,30 @@ class IA:
         if self.provedor == "claude":
             msgs = [{"role": m["role"], "content": m["content"]} for m in mensagens]
             tools = [{"name": f["name"], "description": f["description"], "input_schema": f["parameters"]} for f in ferramentas or []]
-            for _ in range(voltas):
-                corpo = {"model": modelo, "max_tokens": max(max_tokens, 2000), "system": sistema, "messages": msgs}
+            limite = max(max_tokens, 2000)
+            for _ in range(voltas + 2):
+                pensa = modelo in self.pensa
+                # se o modelo "pensa" antes de responder, precisa de mais espaço, senão gasta tudo pensando
+                corpo = {"model": modelo, "max_tokens": max(limite, 12000) if pensa else limite, "system": sistema, "messages": msgs}
                 if tools:
                     corpo["tools"] = tools
-                if self.desligar_raciocinio:
+                if not pensa:
                     corpo["thinking"] = {"type": "disabled"}
                 try:
                     r = self._post(URL_CLAUDE, corpo, {"x-api-key": self.chave, "anthropic-version": "2023-06-01"})
                 except ErroIA as e:
-                    if e.codigo == 400 and "thinking" in (e.detalhe or "").lower() and self.desligar_raciocinio:
-                        self.desligar_raciocinio = False
+                    if e.codigo == 400 and "thinking" in (e.detalhe or "").lower() and not pensa:
+                        self.pensa.add(modelo)
                         continue
                     raise
                 blocos = r.get("content") or []
                 usos = [b for b in blocos if b.get("type") == "tool_use"]
+                if not usos and r.get("stop_reason") == "max_tokens" and not any(b.get("type") == "text" and b.get("text", "").strip() for b in blocos) \
+                        and limite < 32000:
+                    # acabou o espaço só pensando: tenta de novo com mais espaço
+                    self.pensa.add(modelo)
+                    limite = min(32000, max(limite, 12000) * 2)
+                    continue
                 if not usos or not executar:
                     txt = "".join(b.get("text", "") for b in blocos if b.get("type") == "text").strip()
                     if not txt:
