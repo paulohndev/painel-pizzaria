@@ -518,13 +518,94 @@ def _api_ao_vivo(api, caminho, params, liberar):
     return txt[:20000] + ("\n(cortado)" if len(txt) > 20000 else "")
 
 
-def perguntar(ia, D, mensagens, api=None, liberar=False):
+FERRAMENTAS_ACAO = [
+    {"name": "mostrar_clientes",
+     "description": "Mostra para o dono, logo abaixo da sua resposta, uma lista clicável de clientes (com perfil, WhatsApp e lembrete). "
+                    "Use sempre que a resposta envolver clientes específicos. ids = clientes.id da base.",
+     "parameters": {"type": "object", "properties": {"titulo": {"type": "string"}, "ids": {"type": "array", "items": {"type": "integer"}},
+                                                     "notas": {"type": "object", "description": "Opcional: {id: 'motivo curto'} para mostrar ao lado de cada cliente"}},
+                    "required": ["titulo", "ids"]}},
+    {"name": "criar_lembrete",
+     "description": "Cria lembretes (📌) para clientes, para o dono tomar uma ação depois. Use SÓ quando o dono pedir para marcar/lembrar/anotar.",
+     "parameters": {"type": "object", "properties": {"ids": {"type": "array", "items": {"type": "integer"}},
+                                                     "texto": {"type": "string", "description": "O que fazer (ex.: 'Oferecer cupom de volta')"},
+                                                     "quando": {"type": "string", "description": "Data AAAA-MM-DD (opcional; vazio = sem data)"}},
+                    "required": ["ids", "texto"]}},
+    {"name": "preparar_envio",
+     "description": "Prepara um envio de WhatsApp para os clientes na tela Envios, com o texto modelo. NÃO envia: o dono revisa e confirma. "
+                    "Use quando o dono pedir para mandar mensagem para um grupo. Variáveis aceitas no texto: {nome}, {favorito}, {pontos}, {bairro}.",
+     "parameters": {"type": "object", "properties": {"ids": {"type": "array", "items": {"type": "integer"}}, "texto": {"type": "string"},
+                                                     "titulo": {"type": "string"}}, "required": ["ids", "texto"]}},
+    {"name": "gerar_relatorio",
+     "description": "Entrega um relatório para o dono abrir, imprimir ou salvar. Use quando ele pedir relatório/resumo/levantamento. "
+                    "conteudo em Markdown simples (títulos com #, tópicos com -, tabelas com |).",
+     "parameters": {"type": "object", "properties": {"titulo": {"type": "string"}, "conteudo": {"type": "string"}}, "required": ["titulo", "conteudo"]}},
+    {"name": "abrir_perfil",
+     "description": "Abre o perfil completo de um cliente na tela do dono.",
+     "parameters": {"type": "object", "properties": {"id": {"type": "integer"}}, "required": ["id"]}},
+]
+
+GUIA_ACOES = ("\nVocê também AGE no painel com as ferramentas mostrar_clientes, criar_lembrete, preparar_envio, gerar_relatorio e abrir_perfil. "
+              "Quando citar clientes específicos, chame mostrar_clientes com os ids para o dono clicar. Se o dono pedir para marcar/lembrar, "
+              "use criar_lembrete. Se pedir para mandar mensagem a um grupo, use preparar_envio (ele revisa antes de enviar). "
+              "Se pedir relatório, use gerar_relatorio e na resposta só diga o que tem nele. Nunca diga que fez uma ação sem chamar a ferramenta. "
+              "Use o histórico da conversa: se o dono disser 'esses clientes', são os da última lista que você mostrou.")
+
+
+def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete=None, extra=""):
     msgs = [{"role": m.get("role"), "content": str(m.get("content") or "")[:4000]} for m in mensagens[-12:]
             if m.get("role") in ("user", "assistant") and m.get("content")]
     if not msgs or msgs[-1]["role"] != "user":
         raise ErroIA("Faça uma pergunta.")
 
+    acoes = []
+    n = len(D["clientes"])
+
+    origem = {}
+
+    def ids_ok(v):
+        out = []
+        for x in (v or [])[:300]:
+            try:
+                i = int(x)
+            except (TypeError, ValueError):
+                continue
+            if 0 <= i < n:
+                u = D["clientes"][i].get("uniu_em")
+                j = u if u is not None else i
+                if j not in out:
+                    out.append(j)
+                    origem[j] = i
+        return out
+
     def executar(nome, args):
+        if nome == "mostrar_clientes":
+            ids = ids_ok(args.get("ids"))
+            notas = {str(k): str(v)[:160] for k, v in (args.get("notas") or {}).items()} if isinstance(args.get("notas"), dict) else {}
+            acoes.append({"tipo": "clientes", "titulo": str(args.get("titulo") or "Clientes")[:120], "ids": ids,
+                          "notas": {str(i): notas.get(str(origem.get(i, i)), notas.get(str(i), "")) for i in ids
+                                    if notas.get(str(origem.get(i, i))) or notas.get(str(i))}})
+            return "Lista com %d cliente(s) mostrada ao dono." % len(ids)
+        if nome == "criar_lembrete":
+            ids = ids_ok(args.get("ids"))
+            if not ids or fazer_lembrete is None:
+                return "Nenhum cliente válido."
+            q = str(args.get("quando") or "")[:10]
+            feitos = fazer_lembrete(ids, str(args.get("texto") or "")[:500], q)
+            acoes.append({"tipo": "lembretes", "ids": ids, "texto": str(args.get("texto") or ""), "quando": q})
+            return "%d lembrete(s) criado(s)." % feitos
+        if nome == "preparar_envio":
+            ids = ids_ok(args.get("ids"))
+            acoes.append({"tipo": "envio", "ids": ids, "texto": str(args.get("texto") or "")[:1500], "titulo": str(args.get("titulo") or "Envio sugerido pela IA")[:120]})
+            return "Envio preparado para %d cliente(s). O dono vai revisar na tela Envios antes de mandar." % len(ids)
+        if nome == "gerar_relatorio":
+            acoes.append({"tipo": "relatorio", "titulo": str(args.get("titulo") or "Relatório")[:150], "conteudo": str(args.get("conteudo") or "")[:60000]})
+            return "Relatório entregue ao dono."
+        if nome == "abrir_perfil":
+            ids = ids_ok([args.get("id")])
+            if ids:
+                acoes.append({"tipo": "perfil", "id": ids[0]})
+            return "Perfil aberto." if ids else "Cliente não encontrado."
         if nome == "consultar_sql":
             return consultar(args.get("sql"))
         if nome == "dados_da_loja":
@@ -532,5 +613,36 @@ def perguntar(ia, D, mensagens, api=None, liberar=False):
         if nome == "consultar_api" and api is not None:
             return _api_ao_vivo(api, args.get("caminho"), args.get("parametros"), liberar)
         return "ferramenta indisponível"
-    resp, feitas = ia.conversar(sistema_pergunta(D, liberar), msgs, FERRAMENTAS, executar, max_tokens=2000, forte=True, voltas=12)
-    return {"resposta": resp, "consultas": len(feitas)}
+    sis = sistema_pergunta(D, liberar) + GUIA_ACOES + (("\n" + extra) if extra else "")
+    if tela:
+        sis += "\nO dono está olhando agora no painel: " + tela[:2500]
+    resp, feitas = ia.conversar(sis, msgs, FERRAMENTAS + FERRAMENTAS_ACAO, executar, max_tokens=3000, forte=True, voltas=14)
+    return {"resposta": resp, "consultas": len(feitas), "acoes": acoes}
+
+
+# ------------------------------------------------------------------ dica de cada página
+
+PAGINAS = {
+    "hoje": "a lista do dia (quem chamar hoje: aniversários, boas-vindas, dia de costume, sumidos, migrados para apps, promoção do dia)",
+    "promocoes": "as campanhas sugeridas por cliente e as promoções da casa",
+    "envios": "os envios de WhatsApp (fila, quem pode receber, frequência)",
+    "resultados": "os resultados das campanhas, promoções da casa e cupons",
+    "geral": "a visão geral de vendas (faturamento, pedidos, canais, turnos, dias da semana)",
+    "clientes": "a lista de clientes e grupos (fiéis, sumindo, novos, esfriando, perdidos)",
+    "produtos": "os produtos e sabores mais vendidos e combinações",
+    "bairros": "as vendas por bairro",
+}
+
+SIS_DICA = ("Você é o analista da " + CASA + " O dono acabou de abrir uma página do painel. Consulte os dados com as ferramentas e escreva "
+            "2 ou 3 tópicos curtíssimos (comece cada um com '• ', máximo ~25 palavras cada) com o que é mais útil ele saber AGORA sobre esse "
+            "assunto: algo que mudou, uma oportunidade concreta ou um alerta, com números. Se citar clientes, chame mostrar_clientes. "
+            "Nada de introdução. Nunca invente números.")
+
+
+def dica_pagina(ia, D, aba, tela="", liberar=False, api=None):
+    alvo = PAGINAS.get(aba)
+    if not alvo:
+        raise ErroIA("Página sem dica.")
+    r = perguntar(ia, D, [{"role": "user", "content": "Estou abrindo a página de %s. O que eu preciso saber agora?" % alvo}],
+                  api=api, liberar=liberar, tela=tela, extra=SIS_DICA)
+    return r

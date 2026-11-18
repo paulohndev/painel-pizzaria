@@ -84,6 +84,15 @@ Com a IA ligada, o painel:
   - sugere a mensagem e a resposta pública para avaliações ruins;
   - mostra um resumo do dia no topo da aba Hoje;
   - responde perguntas sobre as vendas no botão "Perguntar".
+  - no "Perguntar", além de responder, ela age: mostra a lista dos clientes
+    que achou (clicável), marca lembretes ("marca esses para eu ligar
+    sexta"), prepara um envio de WhatsApp para você revisar (não envia
+    sozinha) e monta relatórios para imprimir ou salvar;
+  - ela sabe qual página você está vendo e quais clientes estão na tela;
+  - cada página mostra uma "Dica da IA" (gerada 1 vez por dia; ↻ gera de
+    novo, ✕ esconde até amanhã);
+  - parando o mouse sobre o nome de um cliente aparece um resumo rápido
+    dele (não gasta IA), com o botão "O que fazer com ele?".
 Para a IA vão só o primeiro nome e o histórico de pedidos. Telefone e
 endereço nunca saem do computador.
 

@@ -1,12 +1,12 @@
 {
- "versao": "1.8.3",
- "notas": "IA: corrige 'não devolveu texto' quando o modelo pensa antes de responder",
+ "versao": "1.9.0",
+ "notas": "IA que age: listas de clientes, lembretes, envios e relatórios pelo chat; dica da IA em cada página; resumo do cliente ao passar o mouse",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "ab99b2f7e88c5b10de3f2f3225894aa7dc4d92c8600deb8c9791f05db099673e",
+  "LEIA-ME.txt": "ab407cd1878c3a87dbc15b602375ffeea63817448c8b3e39b1937873b0ac2e25",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
   "Testar com dados de exemplo (Windows).bat": "67abc12a330e4ca15788207f26f9763a946397cd268254e130b1f4520af3ef37",
@@ -17,12 +17,12 @@
   "atualizador.py": "8563619d3185691c7a6b1a6361395c038ee2618dd1bc47b06e5c12f44502429b",
   "envios.py": "d033660bf5e3bbda905a55bb023efa1c27c9a8452dcb06785dee899c28808ef1",
   "ia.py": "5f2c9eee71ec081abcd40e795c4446eb6df4acdb1a22fc6f46d380370aca7d47",
-  "ia_painel.py": "9fa0206a45249250e8c052949dc9cabc890c03f9488baa259e9f1ae4f90576f3",
+  "ia_painel.py": "d130d152cc09b14c8f28cf80c16f54c2f46814a98dd16a9f247907d91d681675",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "2ad5bc8b4fcf1d23e8130ea9ab9fdd992c6bea1e9a65b4168acf2f6de4e9ab5f",
+  "painel_modelo.html": "7e307616f87f6dcbad79d4e2b8a3e1fa94f550833101863bfde20634928e04de",
   "pizzaria.py": "27cd5246a42d0ca26d80c15fe069ab16df9755bd8ea55f625f575b0d86cbf6b8",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "787226564802ed522c7fa43a082722164e10bd5fcab1b62808d5bd40779e8734",
+  "vigia.py": "b73757fc39465325df064e13dd5113ff6960adf65f62db8fcd9c424bc9cccbff",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }

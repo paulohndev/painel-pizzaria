@@ -835,17 +835,47 @@ def ia_post(caminho, dado):
                                          str(dado.get("referencia") or "")[:800], str(dado.get("tipo") or ""),
                                          str(dado.get("rascunho") or ""))
             return r, 200
-        if caminho == "/api/ia/pergunta":
+        if caminho in ("/api/ia/pergunta", "/api/ia/dica"):
             db = conectar()
             try:
                 with ESTADO["trava"]:
                     versao = ESTADO["gerado_em"]
                 liberar = str((ESTADO["vigia"].cfg.get("ia") or {}).get("dados_pessoais", "")).strip().lower() in ("sim", "s", "yes", "1")
                 ia_painel.montar_analise(db, D, versao, liberar)
+                if caminho == "/api/ia/dica":
+                    aba = str(dado.get("aba") or "")
+                    hoje = datetime.now().strftime("%Y-%m-%d")
+                    chave_cache = "ia_dica_" + aba
+                    try:
+                        cache = json.loads(P.meta_get(db, chave_cache) or "{}")
+                    except ValueError:
+                        cache = {}
+                    if cache.get("data") == hoje and not dado.get("novo"):
+                        return cache, 200
+                    r = ia_painel.dica_pagina(ia, D, aba, str(dado.get("tela") or "")[:2500], liberar, ESTADO.get("api_ia"))
+                    cache = {"data": hoje, "em": datetime.now().strftime("%H:%M"), "resposta": r["resposta"], "acoes": r["acoes"]}
+                    P.meta_set(db, chave_cache, json.dumps(cache, ensure_ascii=False))
+                    db.commit()
+                    log("IA: dica da página %s gerada" % aba)
+                    return cache, 200
             finally:
                 db.close()
-            r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [], api=ESTADO.get("api_ia"), liberar=liberar)
-            log("IA: pergunta respondida (%d consulta(s))" % r["consultas"])
+
+            def fazer_lembrete(ids, texto, quando):
+                dbl = conectar()
+                try:
+                    n = 0
+                    for i in ids:
+                        c = D["clientes"][i]
+                        E.lembrete_acao(dbl, {"acao": "salvar", "cliente_id": c.get("id"), "chave": c.get("chave"), "nome": c.get("nome"),
+                                              "texto": texto, "quando": quando})
+                        n += 1
+                    return n
+                finally:
+                    dbl.close()
+            r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [], api=ESTADO.get("api_ia"), liberar=liberar,
+                                    tela=str(dado.get("tela") or "")[:2500], fazer_lembrete=fazer_lembrete)
+            log("IA: pergunta respondida (%d consulta(s), %d ação(ões))" % (r["consultas"], len(r["acoes"])))
             return r, 200
         return {"erro": "não encontrado"}, 404
     except ErroIA as e:
