@@ -474,9 +474,15 @@ def sincronizar_clientes(api, db):
 def sincronizar_loja(api, db):
     """Dados cadastrais da loja: informações, formas de pagamento, cupons e cardápio (quando a chave permite)."""
     def todas_paginas(caminho):
-        pagina, itens = 1, []
+        pagina, itens, tam = 1, [], 50
         while True:
-            r = api.get(caminho, {"page": pagina, "per_page": 50})
+            try:
+                r = api.get(caminho, {"page": pagina, "per_page": tam})
+            except ErroAPI as e:  # cada endpoint aceita um tamanho de página diferente
+                if "per_page" in str(e) and tam > 10:
+                    tam = 20 if tam > 20 else 10
+                    continue
+                raise
             if r is None:
                 return None
             if isinstance(r, list):

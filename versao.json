@@ -1,6 +1,6 @@
 {
- "versao": "2.1.0",
- "notas": "Sistema se cuida sozinho: volta se cair, reinicia direito, confere atualização de hora em hora",
+ "versao": "2.1.1",
+ "notas": "Sistema se cuida sozinho; cupons da loja voltam a ser lidos",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -20,7 +20,7 @@
   "ia_painel.py": "96c2b35c3762d77c3e6cc9b1e6e421e49adc8dc5731f8f67d87c41110b3a718f",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
   "painel_modelo.html": "42bf44d5dade14fa6a420e243ea6a9b3d3cd7f3497cfa92f7003050f677a4c8c",
-  "pizzaria.py": "427f67680d7f7046963817c3ed6276668041789f9082961b81950b7718551694",
+  "pizzaria.py": "887203531e20ddd132965c27bf8a9c637d5e0f455c79c11b361d3d0a9a1bdc38",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
   "vigia.py": "9d34daaebfc6006e5eb0c6201ea13b94f93332ff30ff4ff85305a5d0b48d6289",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe",
