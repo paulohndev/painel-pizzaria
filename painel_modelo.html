@@ -482,6 +482,7 @@ button.pin.on{opacity:1;filter:none}
       <input type="search" id="hBusca" placeholder="Buscar nome, bairro ou motivo" style="min-width:230px">
       <select id="hMotivo"></select>
       <select id="hBairro"></select>
+      <select id="hPts" title="Filtrar por pontos de fidelidade"><option value="">Qualquer pontuação</option><option value="1">Com pontos</option><option value="50">50+ pontos</option><option value="100">100+ pontos</option><option value="200">200+ pontos</option><option value="500">500+ pontos</option><option value="1000">1.000+ pontos</option><option value="sem">Sem pontos</option></select>
       <label class="muted" style="font-size:13px"><input type="checkbox" id="hOcultar"> esconder quem já marquei</label>
       <button class="limpar hidden" id="hLimpar">Limpar filtros</button>
     </div>
@@ -556,6 +557,7 @@ button.pin.on{opacity:1;filter:none}
         <option value="nao">Só não contatados</option>
         <option value="sim">Só contatados</option>
       </select>
+      <select id="fPts" title="Filtrar por pontos de fidelidade"><option value="">Qualquer pontuação</option><option value="1">Com pontos</option><option value="50">50+ pontos</option><option value="100">100+ pontos</option><option value="200">200+ pontos</option><option value="500">500+ pontos</option><option value="1000">1.000+ pontos</option><option value="sem">Sem pontos</option></select>
       <label class="muted" style="font-size:13px"><input type="checkbox" id="soWhats" checked> só quem tem WhatsApp</label>
       <span style="margin-left:auto"></span>
       <button class="btn" id="btnCsv">Baixar lista (CSV)</button>
@@ -623,6 +625,7 @@ button.pin.on{opacity:1;filter:none}
     <div class="toolbar">
       <input type="search" id="pBusca" placeholder="Buscar nome ou item" style="min-width:220px">
       <select id="pContato"><option value="nao">Só não contatados</option><option value="">Contatados e não contatados</option><option value="sim">Só contatados</option></select>
+      <select id="pPts" title="Filtrar por pontos de fidelidade"><option value="">Qualquer pontuação</option><option value="1">Com pontos</option><option value="50">50+ pontos</option><option value="100">100+ pontos</option><option value="200">200+ pontos</option><option value="500">500+ pontos</option><option value="1000">1.000+ pontos</option><option value="sem">Sem pontos</option></select>
       <label class="muted" style="font-size:13px"><input type="checkbox" id="pSoWhats" checked> só quem tem WhatsApp</label>
       <span style="margin-left:auto"></span>
       <button class="btn" id="pCsv">Baixar lista (CSV)</button>
@@ -648,6 +651,7 @@ button.pin.on{opacity:1;filter:none}
             <input type="number" id="evDiasMin" min="0" placeholder="dias sem pedir: de" style="width:150px">
             <input type="number" id="evDiasMax" min="0" placeholder="até" style="width:80px">
             <input type="number" id="evPedMin" min="0" placeholder="mín. de pedidos" style="width:130px">
+            <select id="evPts" title="Filtrar por pontos de fidelidade"><option value="">Qualquer pontuação</option><option value="1">Com pontos</option><option value="50">50+ pontos</option><option value="100">100+ pontos</option><option value="200">200+ pontos</option><option value="500">500+ pontos</option><option value="1000">1.000+ pontos</option><option value="sem">Sem pontos</option></select>
             <input type="search" id="evFav" placeholder="favorito contém…" style="width:160px">
           </div></div></div>
         <div class="ev-passo"><div class="ev-num">2</div><div class="ev-corpo"><b>Mensagem</b>
@@ -962,23 +966,23 @@ function renderClientes(){
   fp.innerHTML='<option value="">Todos os perfis de turno</option>'+perfis.map(p=>`<option ${p===cur?'selected':''} value="${esc(p)}">Pede no: ${esc(p)} (${L.filter(c=>c.perfil===p).length})</option>`).join('');
   const q=($('#busca').value||'').toLowerCase().trim(), qd=q.replace(/\D/g,'');
   let F2=L.filter(c=>(!segSel||c.seg===segSel) && (!fp.value||c.perfil===fp.value) &&
-    (!$('#soWhats').checked || waLink(c)) &&
+    (!$('#soWhats').checked || waLink(c)) && okPts(c.pontos,$('#fPts').value) &&
     (!$('#fContato').value || ($('#fContato').value==='sim')===!!contatos[c.id]) &&
     (!q || c.nome.toLowerCase().includes(q) || (qd && (c.tel||'').includes(qd)) || (c.bairro||'').toLowerCase().includes(q)));
   const k=ordCli.k, dir=ordCli.dir;
   F2.sort((a,b)=>{const x=a[k],y=b[k]; return (x>y?1:x<y?-1:0)*dir;});
   ultimaLista=F2;
   const nPag=Math.max(1,Math.ceil(F2.length/PAG)); if(pag>=nPag)pag=nPag-1;
-  const cols=[['nome','Cliente'],['wa','',0],['ok','Feito',0],['seg','Grupo'],['dias','Sem pedir',1],['n','Pedidos',1],['gasto','Total gasto',1]];
+  const cols=[['nome','Cliente'],['wa','',0],['ok','Feito',0],['seg','Grupo'],['dias','Sem pedir',1],['n','Pedidos',1],['pontos','Pontos',1],['gasto','Total gasto',1]];
   let h='<tr>'+cols.map(c=>`<th class="${c[2]?'num ':''}${c[2]===0?'':'sort'}" data-k="${c[0]}">${c[1]}${ordCli.k===c[0]?(ordCli.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   F2.slice(pag*PAG,(pag+1)*PAG).forEach(c=>{const w=waLink(c); const feito=!!contatos[c.id];
     const turnosTxt=c.tc.map((n,t)=>n?`${D.turnos[t].slice(0,1)}${n}`:null).filter(Boolean).join(' · ');
     const sub=[c.bairro].filter(Boolean).join(' · ');
-    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${c.i}">${esc(c.nome)}</a>${pinBtn(c.i)}${envSelo(c.i)}<span class="sub">${esc(sub)}${ptsTag(D.clientes[c.i])}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
+    h+=`<tr><td class="${feito?'done':''}"><a class="cli" data-i="${c.i}">${esc(c.nome)}</a>${pinBtn(c.i)}${envSelo(c.i)}<span class="sub">${esc(sub)}${c.app?` <span class="tag" title="Só pediu por app de entrega">${esc(c.app)}</span>`:''}</span></td>
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?'<span class="sub">ativo em outro turno</span>':''}</td>
-      <td class="num">${fmtN(c.dias)} dias<span class="sub">${c.ult.toLocaleDateString('pt-BR')}</span></td><td class="num" title="${esc(c.perfil)}">${fmtN(c.n)}<span class="sub">${esc(turnosTxt)}</span></td><td class="num">${fmtR(c.gasto)}<span class="sub">ticket ${fmtR(c.tk)}</span></td></tr>`;});
+      <td class="num">${fmtN(c.dias)} dias<span class="sub">${c.ult.toLocaleDateString('pt-BR')}</span></td><td class="num" title="${esc(c.perfil)}">${fmtN(c.n)}<span class="sub">${esc(turnosTxt)}</span></td><td class="num">${c.pontos?`<span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}">⭐ ${fmtN(c.pontos)}</span>`:'<span class="muted">—</span>'}</td><td class="num">${fmtR(c.gasto)}<span class="sub">ticket ${fmtR(c.tk)}</span></td></tr>`;});
   if(!F2.length) h+=`<tr><td colspan="${cols.length}" class="muted" style="padding:20px">Nenhum cliente com esses filtros.</td></tr>`;
   $('#tbCli').innerHTML=h;
   $('#tbCli').querySelectorAll('th.sort').forEach(th=>th.onclick=()=>{const k=th.dataset.k; ordCli = ordCli.k===k?{k,dir:-ordCli.dir}:{k,dir:(k==='nome'||k==='perfil'||k==='bairro'||k==='seg')?1:-1}; renderClientes();});
@@ -986,7 +990,7 @@ function renderClientes(){
   $('#pager').innerHTML=`${fmtN(F2.length)} clientes · página ${pag+1} de ${nPag} <button class="btn" ${pag?'':'disabled'} id="pgA">‹ Anterior</button><button class="btn" ${pag<nPag-1?'':'disabled'} id="pgP">Próxima ›</button>`;
   $('#pgA').onclick=()=>{pag--;renderClientes();}; $('#pgP').onclick=()=>{pag++;renderClientes();};
 }
-['#busca','#fPerfil','#fContato','#soWhats'].forEach(s=>$(s).addEventListener(s==='#busca'?'input':'change',()=>{pag=0;renderClientes();}));
+['#busca','#fPerfil','#fContato','#soWhats','#fPts'].forEach(s=>$(s).addEventListener(s==='#busca'?'input':'change',()=>{pag=0;renderClientes();}));
 $('#btnCsv').onclick=()=>{
   const linhas=[['Nome','Telefone','WhatsApp','Grupo','Dias sem pedir','Pedidos','Total gasto','Ticket medio','Ultimo pedido','Turnos','Bairro','Pontos','Contatado em']];
   ultimaLista.forEach(c=>linhas.push([c.nome,c.tel||'',waLink(c)||'',(SEGS.find(s=>s.id===c.seg)||{}).nome,c.dias,c.n,c.gasto.toFixed(2).replace('.',','),c.tk.toFixed(2).replace('.',','),c.ult.toLocaleDateString('pt-BR'),c.perfil,c.bairro,c.pontos,(cInfo(c.id)||{}).txt||'']));
@@ -1106,6 +1110,7 @@ function renderPromocoes(){
   const q=($('#pBusca').value||'').toLowerCase().trim(); const fc=$('#pContato').value;
   let G=L.filter(r=>r.recs[0].tipo===campSel).filter(r=>{ const c=D.clientes[r.cli];
     if($('#pSoWhats').checked && !waLink(c,'')) return false;
+    if(!okPts(c.pontos,$('#pPts').value)) return false;
     if(fc && (fc==='sim')!==!!contatos[c.id]) return false;
     if(q && !((c.nome||'').toLowerCase().includes(q) || (r.favorito||'').toLowerCase().includes(q) || (r.recs[0].sugestao||'').toLowerCase().includes(q))) return false;
     return true; });
@@ -1131,7 +1136,7 @@ let ultimaPromo=[];
 $('#cpOferta').oninput=()=>{ store('camp_'+campSel+'_oferta',$('#cpOferta').value); renderPromocoes(); };
 $('#cpMsg').oninput=()=>{ store('camp_'+campSel+'_msg',$('#cpMsg').value); renderPromocoes(); };
 $('#cpReset').onclick=()=>{ try{localStorage.removeItem('camp_'+campSel+'_oferta'); localStorage.removeItem('camp_'+campSel+'_msg');}catch(e){} $('#cpOferta').value=CAMP[campSel].oferta; $('#cpMsg').value=CAMP[campSel].msg; renderPromocoes(); };
-['#pBusca','#pContato','#pSoWhats'].forEach(s=>$(s).addEventListener(s==='#pBusca'?'input':'change',()=>{pPag=0;renderPromocoes();}));
+['#pBusca','#pContato','#pSoWhats','#pPts'].forEach(s=>$(s).addEventListener(s==='#pBusca'?'input':'change',()=>{pPag=0;renderPromocoes();}));
 $('#pCsv').onclick=()=>{
   const linhas=[['Nome','Telefone','Campanha','Motivo','Sugestao','Mensagem','WhatsApp','Melhor momento','Pedidos','Total gasto','Contatado em']];
   ultimaPromo.forEach(r=>{const c=D.clientes[r.cli]; const rec=r.recs[0]; const m=msgPromo(r,rec);
@@ -1259,19 +1264,20 @@ function motivosItem(bid,it){
 }
 function renderHojeBlocos(){
   const L=HOJE_L; if(!L) return;
-  const q=semAc($('#hBusca').value.trim()), mot=$('#hMotivo').value, bai=$('#hBairro').value, ocultar=$('#hOcultar').checked;
+  const q=semAc($('#hBusca').value.trim()), mot=$('#hMotivo').value, bai=$('#hBairro').value, ocultar=$('#hOcultar').checked, hp=$('#hPts').value;
   // opções dos filtros a partir do que está na tela
   const cntM={}, cntB={};
   blocosDia().forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return; L[b.id].forEach(it=>{ it._m=it._m||motivosItem(b.id,it); it._m.forEach(m=>cntM[m]=(cntM[m]||0)+1); const bb=it.cli>=0?bairroCli(it.cli):''; if(bb) cntB[bb]=(cntB[bb]||0)+1; }); });
   const opts=(sel,cnt,todos)=>{ const ks=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b)); if(sel.value&&!cnt[sel.value]) ks.unshift(sel.value);
     const v=sel.value; sel.innerHTML=`<option value="">${todos}</option>`+ks.map(k=>`<option value="${esc(k)}">${esc(k)} (${cnt[k]||0})</option>`).join(''); sel.value=v; };
   opts($('#hMotivo'),cntM,'Todos os motivos'); opts($('#hBairro'),cntB,'Todos os bairros');
-  const ativo=!!(q||mot||bai||ocultar||HF.bloco); $('#hLimpar').classList.toggle('hidden',!ativo);
+  const ativo=!!(q||mot||bai||ocultar||hp||HF.bloco); $('#hLimpar').classList.toggle('hidden',!ativo);
   let h='', vis=0;
   blocosDia().forEach(b=>{ if(HF.bloco&&HF.bloco!==b.id) return;
     const itens=L[b.id].filter(it=>{ const c=it.cli>=0?D.clientes[it.cli]:null;
       if(mot && !(it._m||[]).includes(mot)) return false;
       if(bai && (it.cli<0||bairroCli(it.cli)!==bai)) return false;
+      if(hp && !okPts(c&&c.pontos,hp)) return false;
       if(ocultar && c && cInfo(c.id)) return false;
       if(q && !semAc([c?c.nome:'', c?c.tel:'', it.cli>=0?bairroCli(it.cli):'', it.motivo].join(' ')).includes(q)) return false;
       return true; });
@@ -1293,8 +1299,8 @@ function renderHojeBlocos(){
   $('#hojeBlocos').querySelectorAll('[data-envbloco]').forEach(b=>b.onclick=()=>irParaEnvio('hoje:'+b.dataset.envbloco));
   $('#hojeBlocos').querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=()=>{ marcar(cb.dataset.id, cb.dataset.camp, cb.checked); if($('#hOcultar').checked) renderHojeBlocos(); });
 }
-function limparHoje(){ HF.bloco=null; $('#hBusca').value=''; $('#hMotivo').value=''; $('#hBairro').value=''; $('#hOcultar').checked=false; renderHoje(); }
-$('#hBusca').addEventListener('input',renderHojeBlocos); ['#hMotivo','#hBairro','#hOcultar'].forEach(x=>$(x).addEventListener('change',renderHojeBlocos)); $('#hLimpar').onclick=limparHoje;
+function limparHoje(){ HF.bloco=null; $('#hPts').value=''; $('#hBusca').value=''; $('#hMotivo').value=''; $('#hBairro').value=''; $('#hOcultar').checked=false; renderHoje(); }
+$('#hBusca').addEventListener('input',renderHojeBlocos); ['#hMotivo','#hBairro','#hOcultar','#hPts'].forEach(x=>$(x).addEventListener('change',renderHojeBlocos)); $('#hLimpar').onclick=limparHoje;
 
 // ------------------------------------------------------------ busca em qualquer tabela
 const SEM_BUSCA=new Set(['tbCli','tbPromo']);
@@ -1721,7 +1727,7 @@ function publicoEnvio(){
     if(bai&&bairroCli(cli)!==bai) return false;
     if(fav&&!semAc((PERF[cli]||[])[0]||'').includes(fav)) return false;
     const d=x?diasEntre(x.ult,REF):9999; if(dmin!=null&&d<dmin) return false; if(dmax!=null&&d>dmax) return false;
-    if(pmin!=null&&(!x||x.n<pmin)) return false; return true; })
+    if(pmin!=null&&(!x||x.n<pmin)) return false; if(!okPts(c.pontos,$('#evPts').value)) return false; return true; })
    .sort((a,b)=>((pc.get(b)||{}).v||0)-((pc.get(a)||{}).v||0));
 }
 function evMarcado(cli,e){ if(EV.desmarcados.has(cli)) return false; if(EV.marcados.has(cli)) return true; return !e||e.st==='livre'; }
@@ -1834,7 +1840,7 @@ function renderEnvios(){
     $('#evFonte').onchange=()=>{ const m=msgPadraoFonte($('#evFonte').value); if(m){ $('#evMsg').value=m; $('#evTexto').value=tplDe(m); } EV.textos={}; EV.marcados=new Set(); EV.desmarcados=new Set(); renderEvLista(); };
     $('#evMsg').onchange=()=>{ $('#evTexto').value=tplDe($('#evMsg').value); EV.textos={}; renderEvLista(); };
     let tm=null; $('#evTexto').oninput=()=>{ if($('#evMsg').value==='livre') EV.livre=$('#evTexto').value; EV.textos={}; clearTimeout(tm); tm=setTimeout(renderEvLista,250); };
-    ['#evPerfil','#evCanal','#evTurno','#evBairro'].forEach(x=>$(x).onchange=renderEvLista);
+    ['#evPerfil','#evCanal','#evTurno','#evBairro','#evPts'].forEach(x=>$(x).onchange=renderEvLista);
     ['#evDiasMin','#evDiasMax','#evPedMin','#evFav'].forEach(x=>$(x).oninput=()=>{ clearTimeout(tm); tm=setTimeout(renderEvLista,300); });
     $('#evAgendar').onclick=agendarEnvio;
     renderEvRegras();
@@ -1848,6 +1854,7 @@ if(AO_VIVO) setTimeout(()=>api('/api/envios').then(r=>{ EV.estado=r; $('#qEnv').
 
 // ------------------------------------------------------------ PONTOS e LEMBRETES
 const PTS_DESTAQUE=100;
+function okPts(p,v){ p=+p||0; if(!v) return true; if(v==='sem') return p<=0; return p>=+v; }
 function ptsTag(c){ return c&&c.pontos?` <span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}" title="Pontos de fidelidade">⭐ ${fmtN(c.pontos)} pts</span>`:''; }
 let LEMB=[];
 function lembDe(chave){ return LEMB.filter(l=>l.chave===chave&&!l.feito); }

@@ -1,6 +1,6 @@
 {
- "versao": "1.8.0",
- "notas": "Pontos nas listas e na janela do WhatsApp; lembretes de clientes",
+ "versao": "1.8.1",
+ "notas": "Filtro por pontos em Hoje, Promoções, Clientes e Envios; coluna Pontos em Clientes",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -19,7 +19,7 @@
   "ia.py": "1000f8e4c948cad47672817421ff50c76e3761bfb925fc17a6d3bf1801835c3a",
   "ia_painel.py": "1c63b2f11c9af8450e6741186e0a55eaf07576ab46511d5abb1841dd683f5231",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "8789450b26253644929b6bdf91424b5dcc41bf450fa64167bf72f01f765b4168",
+  "painel_modelo.html": "f5f9b27862d11c862422fe55b218673203436c59f8255b7fa4417fe96de0b1c3",
   "pizzaria.py": "27cd5246a42d0ca26d80c15fe069ab16df9755bd8ea55f625f575b0d86cbf6b8",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
   "vigia.py": "cbf0ae4633d624ac0429d838f4f19c6444a50f212f7234e2ccf3b612c470cbb2",
