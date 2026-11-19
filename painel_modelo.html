@@ -459,6 +459,67 @@ button.pin.on{opacity:1;filter:none}
 #relCorpo h1,#relCorpo h2,#relCorpo h3{font-family:var(--display);margin:14px 0 6px}
 #relCorpo table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px}
 #relCorpo td,#relCorpo th{border-bottom:1px solid var(--line2);padding:5px 8px;text-align:left}
+.ac-grupo{border-top:1px solid var(--line2);margin-top:6px;padding-top:4px}
+.ac-gcab{display:flex;gap:8px;align-items:center;padding:4px 0}
+.ac-gcab .bts{margin-left:auto;display:flex;gap:4px}
+.ac-gcab .bts button,.ac-rod button{border:0;background:var(--line2);border-radius:999px;padding:3px 9px;font:inherit;font-size:12px;cursor:pointer}
+.ac-rod{padding-top:8px}
+.ac-msg{width:100%;box-sizing:border-box;min-height:84px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;font:inherit;font-size:13.5px;line-height:1.45;resize:vertical;margin-top:4px}
+.lb-gt{display:inline-block;font-size:11px;font-weight:600;color:#7a4a00;background:#FFF4DE;border-radius:999px;padding:1px 8px;margin-bottom:3px}
+.ia-instr{display:flex;gap:8px;margin:2px 0 6px}
+.ia-instr input{flex:1;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font:inherit;font-size:13.5px}
+.ia-instr button{border:0;border-radius:999px;padding:8px 14px;background:linear-gradient(135deg,#4a0c06,#6e0000);color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.ia-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.ia-chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer;color:var(--mut)}
+.ia-chips button:hover{color:var(--ink);border-color:var(--sun)}
+.ls-wrap{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;align-items:start}
+.ls-lado{position:sticky;top:90px;max-height:calc(100vh - 120px);overflow:auto}
+.ls-lado input{width:100%;box-sizing:border-box;margin:6px 0 8px}
+.ls-it{padding:9px 11px;border-radius:12px;cursor:pointer;margin-bottom:4px}
+.ls-it b{display:block;font-size:13.5px;line-height:1.3}
+.ls-it span{font-size:11.5px;color:var(--soft)}
+.ls-it:hover{background:var(--line2)}
+.ls-it.on{background:#FFF4DE}
+.ls-cab{display:flex;gap:14px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.ls-cab .bts{display:flex;gap:6px;flex-wrap:wrap}
+.ls-tit{cursor:pointer;margin:0}
+.ls-tit .ed,.lp-g h3 .ed{font-size:13px;color:var(--soft);opacity:0;transition:opacity .2s}
+.ls-tit:hover .ed,.lp-g h3:hover .ed{opacity:1}
+.ls-ferr{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.ls-ferr .seg{flex-wrap:wrap}
+.ls-sel{font-size:13px;color:var(--mut);padding:8px 12px;border-radius:12px;background:var(--line2);margin-bottom:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ls-sel.on{background:#FFF4DE;color:var(--ink)}
+.ls-sel button{border:0;background:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.ls-tb td{vertical-align:top}
+.ls-tb tr.ls-gr td{background:#FBF7F2;border-top:2px solid var(--line);padding-top:10px}
+.ls-nota{font-size:12.5px;color:var(--mut);max-width:280px}
+.ls-ac{white-space:nowrap}
+.ls-ac .mini{border:0;background:#fff;border-radius:999px;padding:3px 8px;font:inherit;font-size:12px;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+.lp-topo{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.lp-ac{display:flex;gap:8px;position:relative;flex-wrap:wrap}
+.lp-ac input{min-width:220px}
+.lp-ac .lb-res{position:absolute;top:100%;right:0;width:320px;z-index:5}
+.lp-g{margin-top:14px}
+.lp-gcab{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px}
+.lp-g h3{margin:0;font-family:var(--display);font-size:17px}
+.lp-g h3[data-ren]{cursor:pointer}
+.lp-gcab .bts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lp-gcab .bts button,.lp-data{border:0;background:var(--line2);border-radius:999px;padding:5px 11px;font:inherit;font-size:12.5px;cursor:pointer}
+.lp-data input{border:0;background:transparent;font:inherit;font-size:12.5px}
+.lp-bar{height:5px;border-radius:9px;background:var(--line2);margin-top:6px;width:220px;overflow:hidden}
+.lp-bar i{display:block;height:100%;background:#2e9e57;border-radius:9px}
+.lp-it{display:grid;grid-template-columns:minmax(180px,1.1fr) minmax(160px,1.6fr) 120px auto;gap:12px;align-items:center;padding:9px 4px;border-top:1px solid var(--line2);font-size:13.5px}
+.lp-it .sub{display:block;font-size:11.5px;color:var(--soft)}
+.lp-it .tx{color:var(--mut);font-size:13px}
+.lp-it .q{font-size:12px;color:var(--soft)}
+.lp-it.atrasado .q{color:#b42318;font-weight:600}
+.lp-it.hoje .q{color:#8a5a00;font-weight:600}
+.lp-it.feito{opacity:.6}
+.lp-it .ac{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.lp-it .ac button{border:0;background:var(--line2);border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
+@media (max-width:900px){.ls-wrap{grid-template-columns:1fr}.ls-lado{position:static;max-height:none}.lp-it{grid-template-columns:1fr}}
+html.sobre,html.sobre body{background:transparent!important}
+html.sobre #lado,html.sobre #area{visibility:hidden!important}
 .heat{width:auto}
 .heat td{padding:0;border:0;text-align:center;font-size:11px}
 .heat td.c{width:clamp(16px,2.2vw,30px);height:26px;border:3px solid #fff;border-radius:8px}
@@ -477,6 +538,8 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
     <button data-t="hoje" class="on" title="Hoje"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></span><span class="nm">Hoje</span><span class="qt" id="qtHoje"></span></button>
     <button data-t="promocoes" title="Promoções"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span><span class="nm">Promoções</span></button>
     <button data-t="envios" title="Envios"><span class="ic"><svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></span><span class="nm">Envios</span><span class="qt" id="qEnv" style="display:none"></span></button>
+    <button data-t="listas" title="Listas"><span class="ic"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.2"/><circle cx="3.5" cy="12" r="1.2"/><circle cx="3.5" cy="18" r="1.2"/></svg></span><span class="nm">Listas</span><span class="qt" id="qLis" style="display:none"></span></button>
+    <button data-t="lembretes" title="Lembretes"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg></span><span class="nm">Lembretes</span><span class="qt" id="qLem" style="display:none"></span></button>
     <button data-t="resultados" title="Resultados"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span><span class="nm">Resultados</span></button>
     <div class="grupo">Análises</div>
     <button data-t="geral" title="Visão geral"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg></span><span class="nm">Visão geral</span></button>
@@ -709,6 +772,25 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
     </div>
     <div class="card" style="margin-top:16px" id="evRegras"></div>
   </section>
+  <section id="t-listas" class="hidden">
+    <div class="ls-wrap">
+      <div class="card ls-lado"><h2>Listas <span class="cont" id="lsN">0</span></h2>
+        <p class="desc">Clientes separados pela IA (ou por você) para trabalhar com calma. No chat, clique em "📄 Abrir como página" ou peça "salva isso numa lista".</p>
+        <input type="search" id="lsBusca" placeholder="Buscar lista">
+        <div id="lsListas"></div>
+      </div>
+      <div class="card ls-main" id="lsMain"></div>
+    </div>
+  </section>
+  <section id="t-lembretes" class="hidden">
+    <div class="card">
+      <div class="lp-topo"><div><h2 style="margin:0">Lembretes <span class="cont" id="lpN">0</span></h2>
+        <p class="desc" style="margin:4px 0 0">Clientes que você (ou a IA) separou para fazer algo depois, agrupados pelo motivo.</p></div>
+        <div class="lp-ac"><input type="search" id="lpBusca" placeholder="Buscar cliente ou texto"><input type="search" id="lpNovo" placeholder="+ Novo: digite o nome do cliente"><div class="lb-res hidden" id="lpRes"></div></div></div>
+      <div class="seg" id="lpFiltro" style="margin:14px 0 4px"><button data-f="pend" class="on">Pendentes</button><button data-f="hoje">Hoje e atrasados</button><button data-f="prox">Próximos dias</button><button data-f="sem">Sem data</button><button data-f="feito">Feitos</button></div>
+    </div>
+    <div id="lpGrupos"></div>
+  </section>
   <section id="t-bairros" class="hidden">
     <div class="card">
       <h2>Bairros</h2>
@@ -730,6 +812,8 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div class="ia-cab"><h3 id="iaTitulo">Mensagem</h3><button id="iaFechar" title="Fechar">✕</button></div>
   <div class="ia-freq hidden" id="iaFreq"></div>
   <div class="ia-pts hidden" id="iaPts"></div>
+  <div class="ia-instr" id="iaInstrBox"><input id="iaInstr" placeholder="Diga à IA o que você quer dizer (ex.: fala da Quinta do Clone, bem descontraído, sem emoji)"><button id="iaInstrBtn">✨ Escrever</button></div>
+  <div class="ia-chips" id="iaChips"><button>Mais curta</button><button>Mais descontraída</button><button>Mais carinhosa</button><button>Sem emoji</button><button>Falar da promoção de hoje</button><button>Lembrar dos pontos</button><button>Convidar para pedir pelo app</button></div>
   <div class="ia-status" id="iaStatus"></div>
   <textarea id="iaTxt"></textarea>
   <div id="iaPub" class="hidden"><label>Resposta pública para a avaliação (copie e cole no Cardápio Web / iFood)</label><textarea id="iaPubTxt" style="min-height:90px"></textarea></div>
@@ -758,7 +842,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div class="ia-acoes"><button class="btn principal" id="lbSalvar" style="background:var(--sun);color:var(--ink)">Salvar lembrete</button><span class="muted" id="lbMsg" style="font-size:13px;align-self:center"></span></div>
 </div></div>
 <aside id="chat" aria-label="Pergunte ao painel">
-  <div class="gv-topo"><h3>✨ Pergunte ao painel</h3><button id="chFechar" title="Fechar">✕</button></div>
+  <div class="gv-topo"><h3>✨ Pergunte à IA</h3><button id="chFechar" title="Fechar">✕</button></div>
   <div class="ch-lista" id="chLista"></div>
   <div class="ch-sug" id="chSug"></div>
   <div class="ch-entrada"><textarea id="chTxt" placeholder="Ex.: quanto vendi de calabresa no iFood em outubro?"></textarea><button id="chEnviar">Enviar</button></div>
@@ -839,10 +923,10 @@ function marcarFiltros(){
   document.querySelectorAll('#fCanal button').forEach(b=>b.classList.toggle('on', F.canal===b.dataset.v));
 }
 let aba='hoje';
-const PAGINAS={envios:'Envios pelo WhatsApp',hoje:'Hoje',promocoes:'Promoções',resultados:'Resultados',geral:'Visão geral',clientes:'Clientes',produtos:'Produtos',bairros:'Bairros'};
+const PAGINAS={listas:'Listas de clientes',lembretes:'Lembretes',envios:'Envios pelo WhatsApp',hoje:'Hoje',promocoes:'Promoções',resultados:'Resultados',geral:'Visão geral',clientes:'Clientes',produtos:'Produtos',bairros:'Bairros'};
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{aba=b.dataset.t; $('#pgTitulo').textContent=PAGINAS[aba]||''; window.scrollTo({top:0}); if(EMBUTIDO){ try{ parent.mariaAba&&parent.mariaAba('vendas',aba); }catch(e){} }
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  ['hoje','geral','clientes','produtos','bairros','promocoes','resultados','envios'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
+  ['hoje','geral','clientes','produtos','bairros','promocoes','resultados','envios','listas','lembretes'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
 
 // ------------------------------------------------------------ gráfico de linhas (SVG)
 function lineChart(el, cats, series, opt){
@@ -1577,7 +1661,7 @@ function iaAbrir(a){
   IA_CTX={num, ref, cli, chave:c.chave, motivo, tipo, base:a.href.split('?')[0], a};
   $('#iaTitulo').textContent='Mensagem para '+primeiroNome(c);
   $('#iaTxt').value=ref; $('#iaPub').classList.add('hidden'); $('#iaCopiarPub').classList.add('hidden');
-  $('#iaOk').classList.add('hidden'); $('#iaOutra').classList.toggle('hidden',!IA_ON);
+  $('#iaOk').classList.add('hidden'); $('#iaOutra').classList.toggle('hidden',!IA_ON); $('#iaInstr').value=''; $('#iaInstrBox').classList.toggle('hidden',!IA_ON); $('#iaChips').classList.toggle('hidden',!IA_ON);
   if(typeof prepararEnvioModal==='function') prepararEnvioModal(cli);
   const pt=$('#iaPts'); if(c.pontos){ pt.innerHTML=`<span>⭐ <b>${fmtN(c.pontos)}</b> pontos acumulados${c.cashback?` · R$ ${fmtN(c.cashback)} de cashback`:''}</span><button id="iaAddPts">Incluir os pontos na mensagem</button>`; pt.className='ia-pts';
     $('#iaAddPts').onclick=()=>{ const ta=$('#iaTxt'); const frase=`Ah, e você tem ${fmtN(c.pontos)} pontos acumulados com a gente, dá pra usar no próximo pedido pelo app! 😉`; if(!ta.value.includes(fmtN(c.pontos)+' pontos')) ta.value=ta.value.trim()+' '+frase; $('#iaAddPts').textContent='Incluído ✓'; $('#iaAddPts').disabled=true; }; }
@@ -1588,27 +1672,31 @@ function iaAbrir(a){
 }
 function iaEditado(){ const t=$('#iaTxt').value.trim(); return !!(IA_CTX&&t&&t!==(IA_CTX.gerado||'').trim()&&t!==(IA_CTX.ref||'').trim()); }
 function iaBotaoOutra(){ const b=$('#iaOutra'); if(!b||b.disabled) return; b.textContent=iaEditado()?'✨ Reescrever a partir do meu texto':'✨ Escrever outra'; }
-function iaGerar(nova){
+function iaGerar(nova, instr){
+  instr=(instr||'').trim();
   const rasc=nova&&iaEditado()?$('#iaTxt').value.trim():'';
   const k=IA_CTX.chave+'|'+IA_CTX.ref+'|'+IA_CTX.tipo; const st=$('#iaStatus');
-  if(!nova && IA_CACHE[k]) return iaMostrar(IA_CACHE[k]);
-  st.className='ia-status'; st.innerHTML=rasc?'<span class="gira"></span> A IA está reescrevendo a partir do que você escreveu…':'<span class="gira"></span> A IA está escrevendo uma mensagem para este cliente…'; $('#iaOutra').disabled=true;
+  if(!nova && !instr && IA_CACHE[k]) return iaMostrar(IA_CACHE[k]);
+  st.className='ia-status'; st.innerHTML=instr?'<span class="gira"></span> A IA está escrevendo do jeito que você pediu…':rasc?'<span class="gira"></span> A IA está reescrevendo a partir do que você escreveu…':'<span class="gira"></span> A IA está escrevendo uma mensagem para este cliente…'; $('#iaOutra').disabled=true;
   const ctx=IA_CTX;
-  api('/api/ia/mensagem',{chave:ctx.chave, motivo:ctx.motivo, referencia:ctx.ref, tipo:ctx.tipo, rascunho:rasc}).then(r=>{
+  api('/api/ia/mensagem',{chave:ctx.chave, motivo:ctx.motivo, referencia:ctx.ref, tipo:ctx.tipo, rascunho:rasc, instrucao:instr}).then(r=>{
     if(IA_CTX!==ctx) return; $('#iaOutra').disabled=false;
     if(r.erro){ st.className='ia-status erro'; st.textContent=r.erro+(rasc?' Seu texto continua abaixo.':' A mensagem padrão está abaixo.'); iaBotaoOutra(); return; }
-    if(!rasc) IA_CACHE[k]=r; iaMostrar(r, rasc);
+    if(!rasc&&!instr) IA_CACHE[k]=r; iaMostrar(r, rasc||instr);
   }).catch(()=>{ $('#iaOutra').disabled=false; iaBotaoOutra(); st.className='ia-status erro'; st.textContent='Não consegui falar com a IA agora.'+(rasc?' Seu texto continua abaixo.':' A mensagem padrão está abaixo.'); });
 }
 function iaMostrar(r, rasc){
-  $('#iaStatus').className='ia-status'; $('#iaStatus').textContent=rasc?'✨ Reescrita pela IA a partir do seu texto. Pode editar de novo e pedir outra.':'✨ Escrita pela IA ('+(D.ia.nome||'IA')+') para este cliente. Escreva sua ideia por cima e clique em "Escrever outra" para a IA seguir o que você escreveu.';
+  $('#iaStatus').className='ia-status'; $('#iaStatus').textContent=rasc?'✨ Escrita pela IA seguindo o que você pediu. Pode ajustar o pedido acima ou editar o texto.':'✨ Escrita pela IA ('+(D.ia.nome||'IA')+') para este cliente. Escreva sua ideia por cima e clique em "Escrever outra" para a IA seguir o que você escreveu.';
   $('#iaTxt').value=r.texto||IA_CTX.ref; IA_CTX.gerado=$('#iaTxt').value; iaBotaoOutra();
   const pub=!!r.resposta_publica; $('#iaPub').classList.toggle('hidden',!pub); $('#iaCopiarPub').classList.toggle('hidden',!pub); if(pub) $('#iaPubTxt').value=r.resposta_publica;
 }
 function iaFechar(){ $('#iaModal').classList.add('hidden'); IA_CTX=null; }
 $('#iaFechar').onclick=iaFechar;
 $('#iaLembrar').onclick=()=>{ const cli=IA_CTX&&IA_CTX.cli; if(cli==null) return; iaFechar(); abrirLembrete(cli); }; $('#iaModal').addEventListener('click',e=>{ if(e.target.id==='iaModal') iaFechar(); });
-$('#iaOutra').onclick=()=>iaGerar(true);
+$('#iaOutra').onclick=()=>iaGerar(true, $('#iaInstr').value);
+$('#iaInstrBtn').onclick=()=>{ if($('#iaInstr').value.trim()) iaGerar(true, $('#iaInstr').value); else $('#iaInstr').focus(); };
+$('#iaInstr').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('#iaInstrBtn').click(); } });
+$('#iaChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const i=$('#iaInstr'); i.value=(i.value.trim()?i.value.trim()+', ':'')+b.textContent.toLowerCase(); iaGerar(true, i.value); });
 $('#iaTxt').addEventListener('input',iaBotaoOutra);
 $('#iaPadrao').onclick=()=>{ $('#iaTxt').value=IA_CTX.ref; iaBotaoOutra(); $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem padrão.'; };
 $('#iaCopiarPub').onclick=()=>{ try{ navigator.clipboard.writeText($('#iaPubTxt').value); $('#iaCopiarPub').textContent='Copiada ✓'; setTimeout(()=>$('#iaCopiarPub').textContent='Copiar resposta pública',1500);}catch(e){} };
@@ -1639,7 +1727,8 @@ function chatRender(){
     :'<div class="ch-vazio">Pergunte qualquer coisa sobre vendas, clientes, produtos, canais, bairros ou promoções. A IA consulta os seus dados e responde.</div>';
   if(CHAT.pendente) L.innerHTML+='<div class="ch-msg ia"><span class="gira"></span> Consultando os dados…</div>';
   ligarAcoes(L, CHAT);
-  $('#chSug').innerHTML=CHAT.length?'':SUGESTOES.map(t=>`<button>${esc(t)}</button>`).join('');
+  if(DICA_CHAT&&(SOBRE||!CHAT.length)) L.insertAdjacentHTML(SOBRE?'beforeend':'afterbegin',`<div class="ia-dica" style="margin:0 0 10px"><div class="cab">✨ Sobre esta página</div><div class="tx">${DICA_CHAT.carregando?'<span class="gira"></span> Olhando os números desta página…':mdSimples(DICA_CHAT.resposta||DICA_CHAT.erro||'')}</div></div>`);
+  $('#chSug').innerHTML=CHAT.length&&!(SOBRE&&DICA_CHAT)?'':sugestoesPagina().map(t=>`<button>${esc(t)}</button>`).join('');
   $('#chSug').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('#chTxt').value=b.textContent; chatEnviar(); });
   L.scrollTop=L.scrollHeight;
 }
@@ -1648,17 +1737,18 @@ function chatEnviar(){
   CHAT.push({role:'user',content:t}); CHAT.pendente=true; chatRender();
   api('/api/ia/pergunta',{mensagens:CHAT.filter(m=>!m.erro).map(m=>({role:m.role,content:m.content+idsDoHistorico(m)})), tela:telaContexto()}).then(r=>{
     CHAT.pendente=false; if(r.erro) CHAT.push({role:'assistant',content:r.erro,erro:true});
-    else { const ac=r.acoes||[]; const fx=[]; ac.forEach(a=>{ if(a.tipo==='lembretes') fx.push('criou '+a.ids.length+' lembrete'+(a.ids.length===1?'':'s')); });
+    else { const ac=r.acoes||[]; const fx=[]; ac.forEach(a=>{ if(a.tipo==='lembretes') fx.push('criou '+a.ids.length+' lembrete'+(a.ids.length===1?'':'s')); if(a.tipo==='lista') fx.push('salvou uma lista'); });
+      if(ac.some(a=>a.tipo==='lista')) listasCarregar(); const pg=ac.find(a=>a.tipo==='pagina'); if(pg) setTimeout(()=>{ fecharChat(); irPara(pg.pagina); },700);
       CHAT.push({role:'assistant',content:r.resposta||'Pronto.',acoes:ac,meta:[r.consultas?`consultou os dados ${r.consultas} ${r.consultas===1?'vez':'vezes'}`:'',...fx].filter(Boolean).join(' · ')});
       if(ac.some(a=>a.tipo==='lembretes')) lembCarregar(); const pf=ac.find(a=>a.tipo==='perfil'); if(pf){ fecharChat(); abrirPerfil({i:pf.id}); } }
     chatRender();
   }).catch(()=>{ CHAT.pendente=false; CHAT.push({role:'assistant',content:'Não consegui falar com a IA agora.',erro:true}); chatRender(); });
 }
-function abrirChat(pergunta){ chatRender(); if(pergunta){ $('#chTxt').value=pergunta; setTimeout(chatEnviar,50); } $('#chat').classList.add('aberta'); $('#veu').classList.add('on'); setTimeout(()=>$('#chTxt').focus(),300); }
+function abrirChat(pergunta){ if(typeof pergunta!=='string') pergunta=''; chatRender(); if(SOBRE&&window.__paginaExterna) dicaNoChat(window.__paginaExterna); if(pergunta){ $('#chTxt').value=pergunta; setTimeout(chatEnviar,50); } $('#chat').classList.add('aberta'); $('#veu').classList.add('on'); setTimeout(()=>$('#chTxt').focus(),300); }
 function fecharChat(){ $('#chat').classList.remove('aberta'); if(!$('#gaveta').classList.contains('aberta')&&!$('#perfil').classList.contains('aberto')) $('#veu').classList.remove('on'); }
 $('#chFechar').onclick=fecharChat; $('#chEnviar').onclick=chatEnviar;
 $('#chTxt').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); chatEnviar(); } });
-if(AO_VIVO){ $('#perguntar').classList.remove('hidden'); $('#perguntar').onclick=abrirChat; }
+if(AO_VIVO){ $('#perguntar').classList.remove('hidden'); $('#perguntar').onclick=()=>{ if(EMBUTIDO&&parent.mariaIA) parent.mariaIA(); else abrirChat(); }; }
 if(AO_VIVO) setTimeout(()=>iaResumo(false),800);
 
 
@@ -1908,16 +1998,16 @@ if(AO_VIVO) setTimeout(()=>api('/api/envios').then(r=>{ EV.estado=r; $('#qEnv').
 const PTS_DESTAQUE=100;
 function okPts(p,v){ p=+p||0; if(!v) return true; if(v==='sem') return p<=0; return p>=+v; }
 function ptsTag(c){ return c&&c.pontos?` <span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}" title="Pontos de fidelidade">⭐ ${fmtN(c.pontos)} pts</span>`:''; }
-let LEMB=[];
+let LEMB=[]; const LP={f:'pend'};
 function lembDe(chave){ return LEMB.filter(l=>l.chave===chave&&!l.feito); }
 function pinBtn(cli){ const c=D.clientes[cli]; if(!c||!AO_VIVO) return ''; const n=lembDe(c.chave);
   return `<button class="pin ${n.length?'on':''}" data-pin="${cli}" title="${n.length?esc('Lembrete: '+n.map(l=>l.texto).join(' / ')):'Salvar para lembrar depois'}">📌</button>`; }
 document.addEventListener('click',e=>{ const b=e.target.closest('button[data-pin]'); if(!b) return; e.preventDefault(); e.stopPropagation(); abrirLembrete(+b.dataset.pin); });
 function hojeStr(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function lembCarregar(){ if(!AO_VIVO) return Promise.resolve(); return api('/api/lembretes').then(r=>{ const prim=!lembCarregar.ok; lembCarregar.ok=true; LEMB=r.lembretes||[]; lembContador(); if(prim&&LEMB.length&&typeof render==='function') render(); if($('#lemb').classList.contains('aberta')) lembRender(); }).catch(()=>{}); }
+function lembCarregar(){ if(!AO_VIVO) return Promise.resolve(); return api('/api/lembretes'+(LP.f==='feito'?'?todos=1':'')).then(r=>{ const prim=!lembCarregar.ok; lembCarregar.ok=true; LEMB=r.lembretes||[]; lembContador(); if(prim&&LEMB.length&&typeof render==='function') render(); if($('#lemb').classList.contains('aberta')) lembRender(); if(aba==='lembretes') renderLembPag(); }).catch(()=>{}); }
 function lembContador(){ const ab=LEMB.filter(l=>!l.feito); const hoje=hojeStr(); const venc=ab.filter(l=>l.quando&&l.quando<=hoje).length;
-  const n=$('#lembN'); n.textContent=ab.length||''; n.classList.toggle('hoje',venc>0); $('#lembBtn').title=venc?`${venc} lembrete(s) para hoje`:'Lembretes: clientes que você salvou para depois'; }
-function lembAcao(d){ return api('/api/lembretes',d).then(r=>{ LEMB=r.lembretes||[]; lembContador(); lembRender(); if(typeof render==='function') render(); }); }
+  const n=$('#lembN'); n.textContent=ab.length||''; n.classList.toggle('hoje',venc>0); const q=$('#qLem'); if(q){ q.textContent=ab.length; q.style.display=ab.length?'':'none'; } $('#lembBtn').title=venc?`${venc} lembrete(s) para hoje`:'Lembretes: clientes que você salvou para depois'; }
+function lembAcao(d){ if(LP.f==='feito') d.todos=1; return api('/api/lembretes',d).then(r=>{ LEMB=r.lembretes||[]; lembContador(); lembRender(); if(typeof render==='function') render(); }); }
 function quandoLabel(q){ if(!q) return 'sem data'; const hoje=hojeStr(); const am=hojeStr(new Date(Date.now()+864e5));
   if(q<hoje) return 'atrasado · '+new Date(q+'T12:00').toLocaleDateString('pt-BR'); if(q===hoje) return 'hoje'; if(q===am) return 'amanhã';
   return new Date(q+'T12:00').toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'}); }
@@ -1928,12 +2018,14 @@ function lembRender(){
   let h=''; grupos.forEach(([t,itens])=>{ if(!itens.length) return; h+=`<div class="lb-grupo">${t} · ${itens.length}</div>`;
     itens.forEach(l=>{ const cli=IDX_CHAVE[l.chave]; const c=cli!=null?D.clientes[cli]:null; const w=c&&!l.feito?waLink(c,''):null;
       const cls=l.feito?'feito':l.quando&&l.quando<hoje?'atrasado':l.quando===hoje?'hoje':'';
-      h+=`<div class="lb-item ${cls}"><div class="t">${cli!=null?`<a class="cli" data-i="${cli}"><b>${esc(c.nome||l.nome)}</b></a>`:`<b>${esc(l.nome||'cliente')}</b>`}${c?ptsTag(c):''}<span class="q">${l.feito?'feito '+dtCurta(l.feito):esc(quandoLabel(l.quando))}</span></div>
+      h+=`<div class="lb-item ${cls}">${l.grupo_titulo?`<div class="lb-gt">${esc(l.grupo_titulo)}</div>`:''}<div class="t">${cli!=null?`<a class="cli" data-i="${cli}"><b>${esc(c.nome||l.nome)}</b></a>`:`<b>${esc(l.nome||'cliente')}</b>`}${c?ptsTag(c):''}<span class="q">${l.feito?'feito '+dtCurta(l.feito):esc(quandoLabel(l.quando))}</span></div>
         <div class="tx">${esc(l.texto||'')}</div><div class="ac">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}
         ${l.feito?`<button data-lb="reabrir" data-id="${l.id}">Reabrir</button>`:`<button data-lb="feito" data-id="${l.id}">✓ Feito</button>${cli!=null?`<button data-lbed="${l.id}">Editar</button>`:''}`}<button data-lb="apagar" data-id="${l.id}">Apagar</button></div></div>`; }); });
+  if(h) h='<button class="btn" id="lbPagina" style="margin:0 0 8px;font-size:12.5px">Abrir a página de lembretes ↗</button>'+h;
   L.innerHTML=h||'<div class="ch-vazio"><b>Nenhum lembrete.</b><br>Clique no 📌 ao lado do nome de um cliente (ou em "Lembrar depois" no perfil e na janela do WhatsApp) para salvar alguém e não esquecer de fazer algo com ele. Quando chegar o dia, o painel avisa no canto da tela.</div>';
   L.querySelectorAll('[data-lb]').forEach(b=>b.onclick=()=>{ if(b.dataset.lb==='apagar'&&!confirmar(b)) return; lembAcao({acao:b.dataset.lb, id:+b.dataset.id}); });
   L.querySelectorAll('[data-lbed]').forEach(b=>b.onclick=()=>{ const l=LEMB.find(x=>x.id===+b.dataset.lbed); if(l) abrirLembrete(IDX_CHAVE[l.chave], l); });
+  const lp=$('#lbPagina'); if(lp) lp.onclick=()=>{ fecharLembretes(); irPara('lembretes'); };
 }
 function abrirLembretes(){ lembRender(); $('#lemb').classList.add('aberta'); $('#veu').classList.add('on'); lembCarregar(); }
 function fecharLembretes(){ $('#lemb').classList.remove('aberta'); if(!$('#gaveta').classList.contains('aberta')&&!$('#perfil').classList.contains('aberto')&&!$('#chat').classList.contains('aberta')) $('#veu').classList.remove('on'); }
@@ -1978,42 +2070,229 @@ if(AO_VIVO){ lembCarregar(); setInterval(lembCarregar,120000); } else $('#lembBt
 
 
 // ------------------------------------------------------------ IA QUE AGE: listas, lembretes, envios, relatórios
+// ------------------------------------------------------------ IA QUE AGE: grupos, listas, lembretes, mensagens, envios, relatórios
 let PC_MEMO=null; function pcMemo(){ if(!PC_MEMO) PC_MEMO=porCliente(); return PC_MEMO; }
-function idsDoHistorico(m){ const ids=[]; (m.acoes||[]).forEach(a=>{ if(a.ids) ids.push(...a.ids); }); return ids.length?`\n[clientes mostrados nesta resposta, ids: ${[...new Set(ids)].slice(0,200).join(', ')}]`:''; }
+function gruposDe(a){ if(a.grupos&&a.grupos.length) return a.grupos; return [{titulo:a.titulo||a.texto||'Clientes', ids:a.ids||[], notas:a.notas||{}}]; }
+function idsDoHistorico(m){
+  const p=[]; (m.acoes||[]).forEach(a=>{
+    if(a.tipo==='clientes'||a.tipo==='lembretes') gruposDe(a).forEach(g=>p.push(`"${g.titulo}": ids ${(g.ids||[]).slice(0,150).join(', ')}`));
+    else if(a.tipo==='lista') p.push(`lista salva id ${a.id} ("${a.titulo}")`);
+    else if(a.tipo==='mensagem') p.push(`mensagem escrita para o cliente id ${a.id}`); });
+  return p.length?`\n[nesta resposta: ${p.join(' | ')}]`:''; }
 function cliLinha(cli, nota){ const c=D.clientes[cli]; if(!c) return ''; const x=pcMemo().get(cli); const w=waLink(c,'');
   return `<div class="ac-cli"><div class="n"><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${ptsTag(c)}${pinBtn(cli)}<span class="sub">${esc(nota||'')}${nota&&x?' · ':''}${x?fmtN(x.n)+' pedidos · último há '+diasEntre(x.ult,new Date())+' d · '+fmtR0(x.v):''}</span></div>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}</div>`; }
+function nomePagina(pg){ return {g_painel:'Painel geral',g_despesas:'Despesas',g_fichas:'Fichas técnicas',g_equipe:'Equipe e folha'}[pg]||PAGINAS[pg]||pg; }
 function acaoHTML(a, k, lim){
-  if(a.tipo==='clientes'){ const ids=a.ids||[]; const LIM=a.todos?ids.length:(lim||12);
-    return `<div class="ac-box"><div class="cab">👥 ${esc(a.titulo)} <span class="muted">${fmtN(ids.length)}</span><span class="bts">${ids.length?`<button data-ac="envio" data-k="${k}">📨 Mandar mensagem</button><button data-ac="pin" data-k="${k}">📌 Lembrar todos</button>`:''}</span></div>
-      ${ids.slice(0,LIM).map(i=>cliLinha(i,(a.notas||{})[i])).join('')}${ids.length>LIM?`<div class="ac-mais"><button class="btn" data-ac="todos" data-k="${k}" style="font-size:12px">Ver todos os ${fmtN(ids.length)}</button></div>`:''}</div>`; }
-  if(a.tipo==='lembretes') return `<div class="ac-box"><div class="cab">📌 ${fmtN(a.ids.length)} lembrete${a.ids.length===1?'':'s'} criado${a.ids.length===1?'':'s'} <span class="muted">${esc(a.texto)}${a.quando?' · '+esc(quandoLabel(a.quando)):''}</span><span class="bts"><button data-ac="verlemb">Ver lembretes</button></span></div></div>`;
-  if(a.tipo==='envio') return `<div class="ac-box"><div class="cab">📨 ${esc(a.titulo)} <span class="muted">${fmtN(a.ids.length)} clientes · nada foi enviado ainda</span><span class="bts"><button class="p" data-ac="revisar" data-k="${k}">Revisar e agendar</button></span></div><div class="muted" style="font-size:12.5px;white-space:pre-line">${esc(a.texto)}</div></div>`;
+  if(a.tipo==='clientes'){ const gs=gruposDe(a); const tot=gs.reduce((s,g)=>s+g.ids.length,0); const LIM=lim||8; const ab=a.abertos||{};
+    return `<div class="ac-box"><div class="cab">👥 ${esc(a.titulo||'Clientes')} <span class="muted">${fmtN(tot)} cliente${tot===1?'':'s'}${gs.length>1?' em '+gs.length+' grupos':''}</span><span class="bts">${tot&&AO_VIVO?`<button class="p" data-ac="pagina" data-k="${k}">📄 Abrir como página</button><button data-ac="pin" data-k="${k}">📌 Lembrar</button>`:''}</span></div>
+      ${gs.map((g,gi)=>`<div class="ac-grupo">${gs.length>1?`<div class="ac-gcab"><b>${esc(g.titulo)}</b> <span class="muted">${fmtN(g.ids.length)}</span><span class="bts"><button data-ac="envio" data-k="${k}" data-g="${gi}" title="Mandar mensagem para este grupo">📨</button>${AO_VIVO?`<button data-ac="pin" data-k="${k}" data-g="${gi}" title="Lembrar deste grupo">📌</button>`:''}</span></div>`:''}
+        ${g.ids.slice(0,ab[gi]?g.ids.length:LIM).map(i=>cliLinha(i,(g.notas||{})[i])).join('')}
+        ${g.ids.length>LIM&&!ab[gi]?`<div class="ac-mais"><button class="btn" data-ac="todos" data-k="${k}" data-g="${gi}" style="font-size:12px">Ver todos os ${fmtN(g.ids.length)}</button></div>`:''}</div>`).join('')}
+      ${gs.length===1&&tot?`<div class="ac-rod"><button data-ac="envio" data-k="${k}" data-g="0">📨 Mandar mensagem para ${tot===1?'ele':'eles'}</button></div>`:''}</div>`; }
+  if(a.tipo==='lista') return `<div class="ac-box"><div class="cab">📄 Lista salva: ${esc(a.titulo)} <span class="muted">${fmtN(a.n||0)} clientes${a.grupos>1?' · '+a.grupos+' grupos':''}</span><span class="bts"><button class="p" data-ac="abrirlista" data-k="${k}">Abrir a página</button></span></div></div>`;
+  if(a.tipo==='lembretes'){ const gs=gruposDe(a); const n=gs.reduce((s,g)=>s+(g.ids||[]).length,0);
+    return `<div class="ac-box"><div class="cab">📌 ${fmtN(n)} lembrete${n===1?'':'s'} criado${n===1?'':'s'}${gs.length>1?' em '+gs.length+' grupos':''}${a.quando?' · '+esc(quandoLabel(a.quando)):''}<span class="bts"><button data-ac="verlemb">Ver lembretes</button></span></div>${gs.map(g=>`<div class="ac-cli"><div class="n"><b>${esc(g.titulo||'')}</b><span class="sub">${fmtN((g.ids||[]).length)} cliente(s)${g.texto&&g.texto!==g.titulo?' · '+esc(g.texto):''}</span></div></div>`).join('')}</div>`; }
+  if(a.tipo==='mensagem'){ const c=D.clientes[a.id]; if(!c) return '';
+    return `<div class="ac-box"><div class="cab">💬 Para <a class="cli" data-i="${a.id}">${esc(c.nome||'')}</a>${ptsTag(c)}<span class="bts">${waLink(c,'')?`<button class="p" data-ac="msgwa" data-k="${k}">Abrir no WhatsApp</button>`:''}<button data-ac="msged" data-k="${k}">${ENVCFG.ativo?'Revisar / enviar pelo sistema':'Revisar e ajustar'}</button><button data-ac="msgcp" data-k="${k}">Copiar</button></span></div><textarea class="ac-msg" data-msg="${k}">${esc(a.texto||'')}</textarea></div>`; }
+  if(a.tipo==='envio') return `<div class="ac-box"><div class="cab">📨 ${esc(a.titulo)} <span class="muted">${fmtN((a.ids||[]).length)} clientes · nada foi enviado ainda</span><span class="bts"><button class="p" data-ac="revisar" data-k="${k}">Revisar e agendar</button></span></div><div class="muted" style="font-size:12.5px;white-space:pre-line">${esc(a.texto)}</div></div>`;
   if(a.tipo==='relatorio') return `<div class="ac-box"><div class="cab">📄 ${esc(a.titulo)}<span class="bts"><button class="p" data-ac="rel" data-k="${k}">Abrir relatório</button></span></div></div>`;
   if(a.tipo==='perfil'){ const c=D.clientes[a.id]; return c?`<div class="ac-box"><div class="cab">👤 Perfil de ${esc(c.nome)} aberto<span class="bts"><button data-ac="perfil" data-k="${k}">Abrir de novo</button></span></div></div>`:''; }
+  if(a.tipo==='pagina') return `<div class="ac-box"><div class="cab">↪ Abri a página ${esc(nomePagina(a.pagina))}<span class="bts"><button data-ac="irpag" data-k="${k}">Ir de novo</button></span></div></div>`;
   return '';
 }
 function acaoDe(lista, k){ const [mi,ai]=String(k).split('_').map(Number); return ((lista[mi]||{}).acoes||[])[ai]; }
 function ligarAcoes(box, lista){
-  box.querySelectorAll('[data-ac]').forEach(b=>b.onclick=()=>{ const a=acaoDe(lista,b.dataset.k); const t=b.dataset.ac;
-    if(t==='verlemb'){ fecharChat(); abrirLembretes(); return; }
-    if(!a) return;
-    if(t==='todos'){ a.todos=true; if(lista===CHAT) chatRender(); else renderDica(aba); }
-    else if(t==='envio') irParaEnvioIA(a.ids, 'Oi {nome}! ', a.titulo);
-    else if(t==='revisar') irParaEnvioIA(a.ids, a.texto, a.titulo);
-    else if(t==='pin'){ const txt=prompt('O que fazer com estes '+a.ids.length+' clientes?','Mandar mensagem'); if(!txt) return;
-      Promise.all(a.ids.map(i=>api('/api/lembretes',{acao:'salvar',cliente_id:D.clientes[i].id,chave:D.clientes[i].chave,nome:D.clientes[i].nome,texto:txt,quando:''}))).then(()=>{ lembCarregar(); b.textContent='📌 Salvos ✓'; b.disabled=true; }); }
+  box.querySelectorAll('textarea[data-msg]').forEach(t=>t.oninput=()=>{ const a=acaoDe(lista,t.dataset.msg); if(a) a.texto=t.value; });
+  box.querySelectorAll('[data-ac]').forEach(b=>b.onclick=()=>{ const t=b.dataset.ac;
+    if(t==='verlemb'){ fecharChat(); irPara('lembretes'); return; }
+    const a=acaoDe(lista,b.dataset.k); if(!a) return;
+    const gs=a.tipo==='clientes'?gruposDe(a):[]; const g=b.dataset.g!=null?gs[+b.dataset.g]:null;
+    if(t==='todos'){ a.abertos=a.abertos||{}; a.abertos[b.dataset.g]=1; if(lista===CHAT) chatRender(); else renderDica(aba); }
+    else if(t==='envio'){ const ids=g?g.ids:gs.flatMap(x=>x.ids); irParaEnvioIA(ids,'Oi {nome}! ',g?g.titulo:a.titulo); }
+    else if(t==='revisar') irParaEnvioIA(a.ids,a.texto,a.titulo);
+    else if(t==='pin') lembrarGrupos(g?[g]:gs, b);
+    else if(t==='pagina'){ b.disabled=true; b.textContent='Salvando…'; salvarComoLista(a.titulo||'Lista da IA','',gs).then(id=>{ fecharChat(); abrirLista(id); }).catch(()=>{ b.disabled=false; b.textContent='Não consegui salvar'; }); }
+    else if(t==='abrirlista'){ fecharChat(); abrirLista(a.id); }
     else if(t==='rel') abrirRelatorio(a);
-    else if(t==='perfil'){ fecharChat(); abrirPerfil({i:a.id}); } });
+    else if(t==='perfil'){ fecharChat(); abrirPerfil({i:a.id}); }
+    else if(t==='msgwa'){ const w=waLink(D.clientes[a.id],a.texto); if(w){ window.open(w,'_blank','noopener'); marcar(D.clientes[a.id].id,'whatsapp',true); } }
+    else if(t==='msged') abrirMensagemPronta(a.id,a.texto);
+    else if(t==='msgcp'){ try{ navigator.clipboard.writeText(a.texto); b.textContent='Copiada ✓'; }catch(e){} }
+    else if(t==='irpag'){ fecharChat(); irPara(a.pagina); } });
 }
+function lembrarGrupos(gs, b){
+  if(!AO_VIVO) return; const n=gs.reduce((s,g)=>s+g.ids.length,0);
+  const txt=prompt(gs.length>1?`O que fazer com estes ${n} clientes? (cada grupo vira um bloco na página de Lembretes)`:`O que fazer com ${n===1?'este cliente':'estes '+n+' clientes'}?`,'Mandar mensagem'); if(!txt) return;
+  let p=Promise.resolve(); gs.forEach(g=>{ p=p.then(()=>api('/api/lembretes',{acao:'salvar_varios', texto:txt, quando:'', grupo_titulo:g.titulo,
+    itens:g.ids.map(i=>{ const c=D.clientes[i]; const nt=(g.notas||{})[i]; return {cliente_id:c.id, chave:c.chave, nome:c.nome, texto:txt+(nt?' — '+nt:'')}; })})); });
+  p.then(()=>{ lembCarregar(); if(b){ b.textContent='📌 Salvos ✓'; b.disabled=true; } }).catch(()=>{ if(b) b.textContent='Não consegui salvar'; });
+}
+function abrirMensagemPronta(cli, texto){ const c=D.clientes[cli]; const w=c&&waLink(c,texto); if(!w){ alert('Este cliente não tem telefone cadastrado.'); return; }
+  const a=document.createElement('a'); a.href=w; const ref=new URL(w).searchParams.get('text')||''; IA_CACHE[c.chave+'|'+ref+'|']={texto:ref}; iaAbrir(a); }
 function irParaEnvioIA(ids, texto, titulo){
   EV.listaIA={ids:ids.slice(), titulo:titulo||'Lista da IA'}; EV.livre=texto;
-  fecharChat(); document.querySelector('#tabs button[data-t=envios]').click();
+  fecharChat(); irPara('envios');
   const f=$('#evFonte'); if(![...f.options].some(o=>o.value==='ia')) f.insertAdjacentHTML('afterbegin','<option value="ia"></option>');
   f.querySelector('option[value=ia]').textContent='IA · '+EV.listaIA.titulo+' ('+ids.length+')'; f.value='ia';
   $('#evMsg').value='livre'; $('#evTexto').value=texto; EV.textos={}; EV.marcados=new Set(); EV.desmarcados=new Set();
   ['#evPerfil','#evCanal','#evTurno','#evBairro','#evPts'].forEach(x=>$(x).value=''); ['#evDiasMin','#evDiasMax','#evPedMin','#evFav'].forEach(x=>$(x).value='');
   renderEvLista(); $('#t-envios').scrollIntoView({behavior:'smooth'});
 }
+function abrirChatCom(texto){ abrirChat(); setTimeout(()=>{ const t=$('#chTxt'); t.value=texto; t.focus(); t.setSelectionRange(t.value.length,t.value.length); },60); }
+function baixarArquivo(nome, conteudo, tipo){ const b=new Blob([conteudo],{type:tipo}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=nome; a.click(); }
+
+// ------------------------------------------------------------ IA POR CIMA DE QUALQUER PÁGINA (inclusive do Gestão)
+let SOBRE=false, SOBRE_T=null, DICA_CHAT=null;
+function algoAberto(){ return $('#chat').classList.contains('aberta')||$('#perfil').classList.contains('aberto')||$('#lemb').classList.contains('aberta')||$('#gaveta').classList.contains('aberta')||[...document.querySelectorAll('.ia-modal')].some(m=>!m.classList.contains('hidden')); }
+function modoSobre(on, ctx){ SOBRE=!!on; document.documentElement.classList.toggle('sobre',SOBRE);
+  window.__telaExterna=SOBRE&&ctx?ctx.tela||'':''; window.__paginaExterna=SOBRE&&ctx?ctx.pagina||'':''; if(!SOBRE) DICA_CHAT=null;
+  clearInterval(SOBRE_T); if(SOBRE) SOBRE_T=setInterval(()=>{ if(!algoAberto()){ modoSobre(false); try{ parent.mariaFimSobre(); }catch(e){} } },400); }
+function irPara(pg){ if(SOBRE) modoSobre(false);
+  if(EMBUTIDO){ try{ if(parent.mariaIr){ parent.mariaIr(pg); return; } }catch(e){} }
+  const b=document.querySelector('#tabs button[data-t="'+pg+'"]'); if(b) b.click(); }
+function dicaNoChat(pg){ DICA_CHAT={carregando:true}; chatRender();
+  api('/api/ia/dica',{aba:pg, tela:window.__telaExterna||''}).then(r=>{ if(!SOBRE) return; DICA_CHAT=r.erro?{erro:r.erro}:r; chatRender(); }).catch(()=>{ DICA_CHAT={erro:'Não consegui olhar esta página agora.'}; chatRender(); }); }
+const SUG_PAG={
+  g_despesas:['Quais despesas mais subiram este mês?','Quanto sobrou na pizzaria no mês passado, tirando as despesas?','Onde eu consigo economizar?'],
+  g_fichas:['Quais produtos têm a menor margem?','Quanto custa fazer uma pizza grande de calabresa?','Algum preço está defasado em relação ao custo?'],
+  g_equipe:['Quanto a folha pesa no faturamento da pizzaria?','Quanto gastei com entregas no mês passado?'],
+  g_painel:['Como está o resultado deste mês até agora?','O que mais pesou nas despesas do mês?'],
+  listas:['Escreve uma mensagem diferente para cada cliente desta lista','Quem desta lista tem mais chance de voltar? Separa por chance'],
+  lembretes:['Quais lembretes estão atrasados e por qual eu começo?','Escreve as mensagens dos lembretes de hoje'],
+  clientes:['Quem são os clientes fiéis que estão sumindo? Separa por motivo','Quais clientes pedem pelo iFood e nunca pelo app próprio?'],
+  hoje:['Com quem eu falo primeiro hoje e o que digo para cada um?'],
+  produtos:['Quais sabores estão caindo e quem costumava pedir eles?'],
+  envios:['Monta uma mensagem para quem não pede há 30 dias, separando pelo prato favorito'] };
+function sugestoesPagina(){ const pg=(SOBRE&&window.__paginaExterna)||aba; return (SUG_PAG[pg]||[]).concat(SUGESTOES).slice(0,6); }
+
+// ------------------------------------------------------------ PÁGINA: LISTAS
+let LISTAS=[]; const LS={sel:null, g:'', busca:'', ord:'grupo', marc:new Set()};
+function lsContador(){ const q=$('#qLis'); if(q){ q.textContent=LISTAS.length; q.style.display=LISTAS.length?'':'none'; } }
+function listasCarregar(){ if(!AO_VIVO) return Promise.resolve(); return api('/api/listas').then(r=>{ LISTAS=r.listas||[]; lsContador(); if(aba==='listas') renderListas(); }).catch(()=>{}); }
+function listaAcao(d){ return api('/api/listas',d).then(r=>{ if(r.listas){ LISTAS=r.listas; lsContador(); } if(aba==='listas') renderListas(); return r; }); }
+function salvarComoLista(titulo, descricao, gs){ const itens=[]; gs.forEach(g=>g.ids.forEach(i=>{ const c=D.clientes[i]; if(c) itens.push({chave:c.chave, cliente_id:c.id, nome:c.nome, grupo:gs.length>1?g.titulo:'', nota:(g.notas||{})[i]||''}); }));
+  return listaAcao({acao:'salvar', titulo, descricao, origem:'ia', itens}).then(r=>r.id); }
+function abrirLista(id){ LS.sel=id; LS.g=''; LS.busca=''; LS.marc=new Set(); irPara('listas'); if(aba==='listas') renderListas(); }
+const LS_ORD={grupo:'Agrupar pelo motivo', sumido:'Sumido há mais tempo', recente:'Pediu mais recente', pedidos:'Mais pedidos', gasto:'Mais gasto', pontos:'Mais pontos', nome:'Nome'};
+function renderListas(){
+  const M=$('#lsMain');
+  if(!AO_VIVO){ $('#lsListas').innerHTML=''; M.innerHTML='<div class="ch-vazio">As listas ficam salvas no sistema. Abra pelo atalho <b>Mariá Gestão</b>.</div>'; return; }
+  const q=semAc(($('#lsBusca').value||'').trim()); $('#lsN').textContent=LISTAS.length;
+  if(LS.sel&&!LISTAS.some(l=>l.id===LS.sel)) LS.sel=null; if(!LS.sel&&LISTAS.length) LS.sel=LISTAS[0].id;
+  $('#lsListas').innerHTML=LISTAS.filter(l=>!q||semAc(l.titulo+' '+(l.descricao||'')).includes(q)).map(l=>`<div class="ls-it ${l.id===LS.sel?'on':''}" data-ls="${l.id}"><b>${esc(l.titulo)}</b><span>${fmtN(l.itens.length)} cliente${l.itens.length===1?'':'s'} · ${l.origem==='ia'?'✨ IA · ':''}${esc(dtCurta(l.atualizado||l.criado))}</span></div>`).join('')||'<div class="muted" style="padding:10px 2px">Nenhuma lista ainda.</div>';
+  $('#lsListas').querySelectorAll('[data-ls]').forEach(d=>d.onclick=()=>{ LS.sel=+d.dataset.ls; LS.g=''; LS.busca=''; LS.marc=new Set(); renderListas(); });
+  const l=LISTAS.find(x=>x.id===LS.sel);
+  if(!l){ M.innerHTML='<div class="ch-vazio"><b>Nenhuma lista ainda.</b><br>Peça à IA no "Perguntar", por exemplo: <i>"separa os clientes fiéis que sumiram por motivo e salva numa lista"</i>. Ou, quando ela mostrar clientes no chat, clique em <b>📄 Abrir como página</b>.</div>'; return; }
+  const pc=pcMemo(); const it=l.itens.map(x=>{ const cli=IDX_CHAVE[x.chave]; return Object.assign({},x,{cli:cli!=null?cli:null, p:cli!=null?pc.get(cli):null}); });
+  const grupos=[...new Set(it.map(x=>x.grupo||''))]; if(LS.g&&!grupos.includes(LS.g)) LS.g='';
+  const fq=semAc(LS.busca||'');
+  let vis=it.filter(x=>(!LS.g||(x.grupo||'')===LS.g)&&(!fq||semAc((x.nome||'')+' '+(x.nota||'')+' '+(x.grupo||'')+' '+(x.cli!=null?bairroCli(x.cli):'')).includes(fq)));
+  const ult=x=>x.p&&x.p.ult?+x.p.ult:0;
+  const cmp={grupo:(a,b)=>grupos.indexOf(a.grupo||'')-grupos.indexOf(b.grupo||''), sumido:(a,b)=>ult(a)-ult(b), recente:(a,b)=>ult(b)-ult(a),
+    pedidos:(a,b)=>((b.p||{}).n||0)-((a.p||{}).n||0), gasto:(a,b)=>((b.p||{}).v||0)-((a.p||{}).v||0),
+    pontos:(a,b)=>((b.cli!=null?D.clientes[b.cli].pontos:0)||0)-((a.cli!=null?D.clientes[a.cli].pontos:0)||0), nome:(a,b)=>(a.nome||'').localeCompare(b.nome||'')}[LS.ord]||(()=>0);
+  vis.sort(cmp);
+  const linha=x=>{ const c=x.cli!=null?D.clientes[x.cli]:null; const p=x.p; const w=c?waLink(c,''):null; const pf=c?(PERF[x.cli]||[]):[]; const e=c?envDe(x.cli):null; const k=esc(x.chave)+'|'+esc(x.grupo||'');
+    return `<tr><td class="ck"><input type="checkbox" data-lsk="${k}" ${LS.marc.has(x.chave+'|'+(x.grupo||''))?'checked':''}></td>
+      <td>${c?`<a class="cli" data-i="${x.cli}"><b>${esc(c.nome||x.nome)}</b></a>${ptsTag(c)}${pinBtn(x.cli)}<div class="muted" style="font-size:12px">${esc([bairroCli(x.cli),c.app?'só '+c.app:''].filter(Boolean).join(' · '))}</div>`:`<b>${esc(x.nome||'cliente')}</b><div class="muted" style="font-size:12px">não encontrado nos dados atuais</div>`}</td>
+      <td class="ls-nota">${esc(x.nota||'')}${!LS.g&&grupos.length>1&&LS.ord!=='grupo'&&x.grupo?`<div class="lb-gt" style="margin-top:3px">${esc(x.grupo)}</div>`:''}</td>
+      <td class="num">${p?fmtN(p.n):'–'}</td><td>${p?'há '+diasEntre(p.ult,new Date())+' d':'–'}</td><td class="num">${p?fmtR0(p.v):'–'}</td>
+      <td>${pf[0]?esc(limparNome(pf[0])):'–'}</td><td style="font-size:12px">${e?esc(envTexto(e)||'pode receber'):'–'}</td>
+      <td class="ls-ac">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}</td></tr>`; };
+  const cab='<tr><th class="ck"></th><th>Cliente</th><th>Por quê</th><th class="num">Pedidos</th><th>Último</th><th class="num">Gasto</th><th>Favorito</th><th>Mensagens</th><th></th></tr>';
+  let corpo='';
+  if(LS.ord==='grupo'&&!LS.g&&grupos.length>1){
+    grupos.forEach((g,gi)=>{ const gv=vis.filter(x=>(x.grupo||'')===g); if(!gv.length) return;
+      corpo+=`<tr class="ls-gr"><td class="ck"><input type="checkbox" data-lsg="${gi}" title="Marcar o grupo"></td><td colspan="7"><b>${esc(g||'Sem grupo')}</b> <span class="muted">${fmtN(gv.length)}</span></td><td class="ls-ac"><button class="mini" data-lsga="envio" data-gi="${gi}">📨 Mensagem</button><button class="mini" data-lsga="pin" data-gi="${gi}">📌</button><button class="mini" data-lsga="ia" data-gi="${gi}">✨</button></td></tr>`+gv.map(linha).join(''); });
+  } else corpo=vis.map(linha).join('');
+  const sel=LS.marc.size;
+  M.innerHTML=`<div class="ls-cab"><div><h2 class="ls-tit" id="lsTit" title="Clique para renomear">${esc(l.titulo)} <span class="ed">✎</span></h2><div class="muted" style="font-size:12.5px">${l.origem==='ia'?'✨ Montada pela IA · ':''}criada em ${esc(dtCurta(l.criado))} · ${fmtN(it.length)} cliente${it.length===1?'':'s'}${grupos.length>1?' em '+grupos.length+' grupos':''}</div>${l.descricao?`<p class="desc" style="margin:6px 0 0">${esc(l.descricao)}</p>`:''}</div>
+      <div class="bts">${IA_ON?'<button class="btn" data-lsa="ia">✨ Perguntar à IA sobre a lista</button>':''}<button class="btn" data-lsa="envio">📨 Mensagem para todos</button><button class="btn" data-lsa="csv">⬇ Planilha</button><button class="btn" data-lsa="apagar">🗑 Apagar lista</button></div></div>
+    <div class="ls-ferr"><input type="search" id="lsFiltroQ" placeholder="Filtrar nesta lista" value="${esc(LS.busca||'')}"><select id="lsOrd">${Object.entries(LS_ORD).map(([k,v])=>`<option value="${k}" ${LS.ord===k?'selected':''}>${v}</option>`).join('')}</select>
+      ${grupos.length>1?`<div class="seg" id="lsGr"><button data-g="" class="${!LS.g?'on':''}">Todos · ${fmtN(it.length)}</button>${grupos.map(g=>`<button data-g="${esc(g)}" class="${LS.g===g?'on':''}">${esc(g||'Sem grupo')} · ${fmtN(it.filter(x=>(x.grupo||'')===g).length)}</button>`).join('')}</div>`:''}</div>
+    <div class="ls-sel ${sel?'on':''}">${sel?`<b>${fmtN(sel)} marcado${sel===1?'':'s'}:</b> <button data-lsa="envio_sel">📨 Mandar mensagem</button><button data-lsa="pin_sel">📌 Criar lembrete</button><button data-lsa="mover">Mover para grupo…</button><button data-lsa="tirar">Tirar da lista</button><button data-lsa="limpar">Desmarcar</button>`:'Marque clientes para mandar mensagem, criar lembrete, mudar de grupo ou tirar da lista.'}</div>
+    <div class="tablebox"><table class="ls-tb">${cab}${corpo||'<tr><td colspan="9" class="muted" style="padding:16px">Ninguém com esse filtro.</td></tr>'}</table></div>`;
+  const marcados=()=>it.filter(x=>LS.marc.has(x.chave+'|'+(x.grupo||'')));
+  const clisDe=xs=>[...new Set(xs.filter(x=>x.cli!=null).map(x=>x.cli))];
+  const notasDe=xs=>{ const o={}; xs.forEach(x=>{ if(x.cli!=null&&x.nota) o[x.cli]=x.nota; }); return o; };
+  $('#lsTit').onclick=()=>{ const t=prompt('Nome da lista:',l.titulo); if(t&&t.trim()) listaAcao({acao:'renomear',id:l.id,titulo:t.trim()}); };
+  $('#lsFiltroQ').oninput=()=>{ LS.busca=$('#lsFiltroQ').value; clearTimeout(renderListas.t); renderListas.t=setTimeout(()=>{ renderListas(); const i=$('#lsFiltroQ'); i.focus(); i.setSelectionRange(i.value.length,i.value.length); },250); };
+  $('#lsOrd').onchange=()=>{ LS.ord=$('#lsOrd').value; renderListas(); };
+  M.querySelectorAll('#lsGr button').forEach(b=>b.onclick=()=>{ LS.g=b.dataset.g; renderListas(); });
+  M.querySelectorAll('input[data-lsk]').forEach(cb=>cb.onchange=()=>{ const k=cb.dataset.lsk.replace(/&amp;/g,'&'); if(cb.checked) LS.marc.add(k); else LS.marc.delete(k); renderListas(); });
+  M.querySelectorAll('input[data-lsg]').forEach(cb=>cb.onchange=()=>{ const g=grupos[+cb.dataset.lsg]; vis.filter(x=>(x.grupo||'')===g).forEach(x=>{ const k=x.chave+'|'+(x.grupo||''); if(cb.checked) LS.marc.add(k); else LS.marc.delete(k); }); renderListas(); });
+  M.querySelectorAll('[data-lsga]').forEach(b=>b.onclick=()=>{ const g=grupos[+b.dataset.gi]; const xs=it.filter(x=>(x.grupo||'')===g); const t=b.dataset.lsga;
+    if(t==='envio') irParaEnvioIA(clisDe(xs),'Oi {nome}! ',g||l.titulo);
+    else if(t==='pin') lembrarGrupos([{titulo:g||l.titulo, ids:clisDe(xs), notas:notasDe(xs)}], b);
+    else abrirChatCom(`Sobre o grupo "${g}" da lista "${l.titulo}" (clientes ids ${clisDe(xs).slice(0,150).join(', ')}): `); });
+  M.querySelectorAll('[data-lsa]').forEach(b=>b.onclick=()=>{ const t=b.dataset.lsa;
+    if(t==='ia') abrirChatCom(`Sobre a lista "${l.titulo}" que estou vendo: `);
+    else if(t==='envio') irParaEnvioIA(clisDe(vis),'Oi {nome}! ',l.titulo+(LS.g?' · '+LS.g:''));
+    else if(t==='envio_sel') irParaEnvioIA(clisDe(marcados()),'Oi {nome}! ',l.titulo);
+    else if(t==='pin_sel'){ const xs=marcados(); lembrarGrupos([{titulo:l.titulo+(LS.g?' · '+LS.g:''), ids:clisDe(xs), notas:notasDe(xs)}], b); }
+    else if(t==='mover'){ const nome=prompt('Mover para qual grupo? (escreva o nome de um grupo existente ou de um novo)', LS.g||''); if(nome==null) return;
+      listaAcao({acao:'mover_itens', id:l.id, grupo:nome.trim(), itens:marcados().map(x=>({chave:x.chave}))}).then(()=>{ LS.marc=new Set(); renderListas(); }); }
+    else if(t==='tirar'){ if(!confirm('Tirar '+LS.marc.size+' cliente(s) desta lista?')) return; listaAcao({acao:'remover_itens', id:l.id, itens:marcados().map(x=>({chave:x.chave, grupo:x.grupo||''}))}).then(()=>{ LS.marc=new Set(); renderListas(); }); }
+    else if(t==='limpar'){ LS.marc=new Set(); renderListas(); }
+    else if(t==='csv'){ const lin=[['Grupo','Cliente','Telefone','Por quê','Pedidos','Último pedido (dias)','Gasto','Pontos','Favorito']];
+      it.forEach(x=>{ const c=x.cli!=null?D.clientes[x.cli]:{}; const p=x.p; lin.push([x.grupo||'',c.nome||x.nome||'',c.tel?fmtTel(c.tel):'',x.nota||'',p?p.n:'',p?diasEntre(p.ult,new Date()):'',p?Math.round(p.v):'',c.pontos||'',x.cli!=null&&PERF[x.cli]?limparNome(PERF[x.cli][0]||''):'']); });
+      baixarArquivo((l.titulo||'lista').replace(/[^\wÀ-ú -]+/g,'').trim()+'.csv','﻿'+lin.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'),'text/csv'); }
+    else if(t==='apagar'){ if(!confirmar(b)) return; listaAcao({acao:'apagar', id:l.id}); } });
+}
+$('#lsBusca').oninput=()=>renderListas();
+
+// ------------------------------------------------------------ PÁGINA: LEMBRETES
+
+function renderLembPag(){
+  const box=$('#lpGrupos');
+  if(!AO_VIVO){ box.innerHTML='<div class="card"><div class="ch-vazio">Os lembretes ficam salvos no sistema. Abra pelo atalho <b>Mariá Gestão</b>.</div></div>'; return; }
+  $('#lpFiltro').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===LP.f));
+  const hoje=hojeStr(); const q=semAc(($('#lpBusca').value||'').trim());
+  let ls=LEMB.filter(l=>LP.f==='feito'?!!l.feito:!l.feito);
+  if(LP.f==='hoje') ls=ls.filter(l=>l.quando&&l.quando<=hoje); else if(LP.f==='prox') ls=ls.filter(l=>l.quando&&l.quando>hoje); else if(LP.f==='sem') ls=ls.filter(l=>!l.quando);
+  if(q) ls=ls.filter(l=>semAc((l.nome||'')+' '+(l.texto||'')+' '+(l.grupo_titulo||'')).includes(q));
+  $('#lpN').textContent=LEMB.filter(l=>!l.feito).length;
+  const G=new Map(); ls.forEach(l=>{ const k=l.grupo||'_avulsos'; if(!G.has(k)) G.set(k,{k, grupo:l.grupo||'', titulo:l.grupo?(l.grupo_titulo||'Grupo'):'Clientes avulsos', itens:[]}); G.get(k).itens.push(l); });
+  const prox=g=>{ const qs=g.itens.map(l=>l.quando).filter(Boolean).sort(); return qs[0]||'9999'; };
+  const gs=[...G.values()].sort((a,b)=>(a.grupo?0:1)-(b.grupo?0:1)||prox(a).localeCompare(prox(b))||String(b.itens[0].criado).localeCompare(String(a.itens[0].criado)));
+  const pc=pcMemo();
+  const item=l=>{ const cli=IDX_CHAVE[l.chave]; const c=cli!=null?D.clientes[cli]:null; const x=cli!=null?pc.get(cli):null; const w=c&&!l.feito?waLink(c,''):null;
+    const cls=l.feito?'feito':l.quando&&l.quando<hoje?'atrasado':l.quando===hoje?'hoje':'';
+    return `<div class="lp-it ${cls}"><div class="n">${c?`<a class="cli" data-i="${cli}"><b>${esc(c.nome||l.nome)}</b></a>${ptsTag(c)}`:`<b>${esc(l.nome||'cliente')}</b>`}<span class="sub">${x?fmtN(x.n)+' pedidos · último há '+diasEntre(x.ult,new Date())+' d':''}${c&&bairroCli(cli)?' · '+esc(bairroCli(cli)):''}</span></div>
+      <div class="tx">${esc(l.texto||'')}</div><div class="q">${l.feito?'feito '+esc(dtCurta(l.feito)):esc(quandoLabel(l.quando))}</div>
+      <div class="ac">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}${l.feito?`<button data-lp="reabrir" data-id="${l.id}">Reabrir</button>`:`<button data-lp="feito" data-id="${l.id}">✓ Feito</button>${cli!=null?`<button data-lped="${l.id}">Editar</button>`:''}`}<button data-lp="apagar" data-id="${l.id}" title="Apagar">🗑</button></div></div>`; };
+  box.innerHTML=gs.map(g=>{ const todos=g.grupo?LEMB.filter(l=>l.grupo===g.grupo):g.itens; const feitos=todos.filter(l=>l.feito).length; const pct=todos.length?Math.round(100*feitos/todos.length):0;
+    const pend=g.itens.filter(l=>!l.feito); const qd=pend.map(l=>l.quando).filter(Boolean).sort()[0];
+    return `<div class="card lp-g" data-gk="${esc(g.k)}"><div class="lp-gcab"><div class="lp-gt"><h3 ${g.grupo?'data-ren="1" title="Clique para renomear"':''}>${esc(g.titulo)}${g.grupo?' <span class="ed">✎</span>':''}</h3>
+        <div class="muted" style="font-size:12.5px">${fmtN(g.itens.length)} ${LP.f==='feito'?'feito'+(g.itens.length===1?'':'s'):'pendente'+(g.itens.length===1?'':'s')}${g.grupo&&feitos&&LP.f!=='feito'?' · '+feitos+' feito'+(feitos===1?'':'s'):''}${qd?' · '+esc(quandoLabel(qd)):''}</div>
+        ${g.grupo&&todos.length>1?`<div class="lp-bar"><i style="width:${pct}%"></i></div>`:''}</div>
+      <div class="bts">${pend.length?`<button data-lg="msg">📨 Mensagem para ${pend.length===1?'ele':'o grupo'}</button>`:''}${g.grupo?`<button data-lg="lista">📄 Abrir como lista</button>${pend.length?`<label class="lp-data" title="Data do grupo">📅 <input type="date" data-lg="data" value="${qd||''}"></label><button data-lg="feito">✓ Tudo feito</button>`:'<button data-lg="reabrir">Reabrir</button>'}${IA_ON?'<button data-lg="ia" title="Perguntar à IA sobre este grupo">✨</button>':''}<button data-lg="apagar" title="Apagar o grupo">🗑</button>`:''}</div></div>
+      <div class="lp-itens">${g.itens.map(item).join('')}</div></div>`; }).join('')
+    ||`<div class="card"><div class="ch-vazio">${LP.f==='feito'?'Nada feito por aqui ainda.':'<b>Nenhum lembrete '+(LP.f==='pend'?'':'neste filtro')+'.</b><br>Clique no 📌 ao lado de um cliente, use a busca acima, ou peça à IA: <i>"marca os clientes que sumiram para eu mandar mensagem na sexta"</i>.'}</div></div>`;
+  box.querySelectorAll('[data-lp]').forEach(b=>b.onclick=()=>{ if(b.dataset.lp==='apagar'&&!confirm('Apagar este lembrete?')) return; lembAcao({acao:b.dataset.lp, id:+b.dataset.id}); });
+  box.querySelectorAll('[data-lped]').forEach(b=>b.onclick=()=>{ const l=LEMB.find(x=>x.id===+b.dataset.lped); if(l) abrirLembrete(IDX_CHAVE[l.chave], l); });
+  box.querySelectorAll('.lp-g').forEach(card=>{ const g=gs.find(x=>x.k===card.dataset.gk); if(!g) return;
+    const pend=g.itens.filter(l=>!l.feito); const clis=[...new Set(pend.map(l=>IDX_CHAVE[l.chave]).filter(x=>x!=null))];
+    const h=card.querySelector('h3[data-ren]'); if(h) h.onclick=()=>{ const t=prompt('Nome do grupo:',g.titulo); if(t&&t.trim()) lembAcao({acao:'renomear_grupo', grupo:g.grupo, titulo:t.trim()}); };
+    card.querySelectorAll('[data-lg]').forEach(b=>{ const t=b.dataset.lg;
+      if(t==='data'){ b.onchange=()=>lembAcao({acao:'data_grupo', grupo:g.grupo, quando:b.value}); return; }
+      b.onclick=()=>{
+        if(t==='msg') irParaEnvioIA(clis,'Oi {nome}! ',g.titulo);
+        else if(t==='lista'){ const ids=[...new Set(g.itens.map(l=>IDX_CHAVE[l.chave]).filter(x=>x!=null))]; const notas={}; g.itens.forEach(l=>{ const c=IDX_CHAVE[l.chave]; if(c!=null&&l.texto) notas[c]=l.texto; });
+          salvarComoLista(g.titulo,'Criada a partir dos lembretes',[{titulo:g.titulo, ids, notas}]).then(abrirLista); }
+        else if(t==='feito') lembAcao({acao:'feito_grupo', grupo:g.grupo});
+        else if(t==='reabrir') lembAcao({acao:'reabrir_grupo', grupo:g.grupo});
+        else if(t==='ia') abrirChatCom(`Sobre o grupo de lembretes "${g.titulo}" (clientes ids ${clis.slice(0,150).join(', ')}; o que era para fazer: ${(pend[0]||g.itens[0]).texto||''}): `);
+        else if(t==='apagar'){ if(confirm('Apagar o grupo "'+g.titulo+'" e todos os lembretes dele?')) lembAcao({acao:'apagar_grupo', grupo:g.grupo}); } }; }); });
+}
+$('#lpFiltro').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const ant=LP.f; LP.f=b.dataset.f; if((ant==='feito')!==(LP.f==='feito')) lembCarregar(); renderLembPag(); });
+$('#lpBusca').oninput=()=>renderLembPag();
+$('#lpNovo').oninput=()=>{ const q=semAc($('#lpNovo').value.trim()); const R=$('#lpRes'); if(q.length<2){ R.classList.add('hidden'); return; }
+  const dig=q.replace(/\D/g,''); const out=[]; for(let i=0;i<D.clientes.length&&out.length<8;i++){ const c=D.clientes[i]; if(c.uniu_em!=null) continue; if(semAc(c.nome).includes(q)||(dig.length>=4&&(c.tel||'').includes(dig))) out.push(i); }
+  R.innerHTML=out.map(i=>`<div data-lpc="${i}">${esc(D.clientes[i].nome||'(sem nome)')}<span class="muted" style="font-size:12px"> ${esc(fmtTel(D.clientes[i].tel||''))}</span>${ptsTag(D.clientes[i])}</div>`).join('')||'<div class="muted">Ninguém encontrado</div>';
+  R.classList.remove('hidden'); R.querySelectorAll('[data-lpc]').forEach(d=>d.onclick=()=>{ R.classList.add('hidden'); $('#lpNovo').value=''; abrirLembrete(+d.dataset.lpc); }); };
+if(AO_VIVO) listasCarregar();
+if(EMBUTIDO){ let ultG=null; setInterval(()=>{ const g=algoAberto(); if(g!==ultG){ ultG=g; try{ parent.mariaGaveta&&parent.mariaGaveta(g); }catch(e){} } },300); }
 // relatório
 let REL=null;
 function mdRel(t){ const L=esc(t).split('\n'); let h='', tab=false;
@@ -2032,20 +2311,25 @@ $('#relCopiar').onclick=()=>{ try{ navigator.clipboard.writeText(REL.titulo+'\n\
 
 // o que está na tela (vai junto com a pergunta)
 function telaContexto(){
+  if(SOBRE&&window.__telaExterna) return window.__telaExterna;
   const p=[`Página: ${PAGINAS[aba]||aba}.`, `Filtros: turno ${F.turno==='all'?'todos':D.turnos[F.turno]}, canal ${F.canal==='all'?'todos':F.canal}.`];
   if(aba==='clientes'&&segSel){ const sg=SEGS.find(x=>x.id===segSel); if(sg) p.push('Grupo selecionado: '+sg.nome+'.'); }
   if(aba==='clientes'&&$('#busca').value) p.push('Busca: '+$('#busca').value+'.');
   if(aba==='promocoes'&&typeof campSel!=='undefined'&&CAMP[campSel]) p.push('Campanha selecionada: '+CAMP[campSel].nome+'.');
   if(aba==='hoje'&&HF.bloco){ const b=blocosDia().find(x=>x.id===HF.bloco); if(b) p.push('Lista do dia filtrada: '+b.nome+'.'); }
   if(aba==='envios'&&$('#evFonte').value) p.push('Montando envio para: '+$('#evFonte').selectedOptions[0].textContent+'.');
+  if(aba==='listas'&&LS.sel){ const l=LISTAS.find(x=>x.id===LS.sel); if(l){ p.push(`Lista aberta: "${l.titulo}" (id ${l.id}), ${l.itens.length} clientes${l.descricao?'. Critério: '+l.descricao:''}${LS.g?'. Filtrando o grupo "'+LS.g+'"':''}.`);
+    const gr={}; l.itens.forEach(it=>{ const cli=IDX_CHAVE[it.chave]; if(cli==null) return; const g=it.grupo||'(sem grupo)'; (gr[g]=gr[g]||[]).push(cli+(it.nota?' ['+it.nota.slice(0,60)+']':'')); });
+    p.push('Clientes da lista por grupo (id [nota]): '+Object.entries(gr).map(([g,ids])=>`"${g}": ${ids.slice(0,100).join(', ')}`).join(' | ')+'.'); } }
+  if(aba==='lembretes'){ const ab=LEMB.filter(l=>!l.feito); const gr={}; ab.forEach(l=>{ const g=l.grupo_titulo||'(avulsos)'; const cli=IDX_CHAVE[l.chave]; (gr[g]=gr[g]||[]).push((cli!=null?cli:'?')+(l.quando?' ('+l.quando+')':'')); });
+    p.push(`${ab.length} lembretes pendentes. Por grupo (id do cliente e data): `+Object.entries(gr).map(([g,ids])=>`"${g}": ${ids.slice(0,80).join(', ')}`).join(' | ')+'.'); }
   if($('#perfil').classList.contains('aberto')&&PF_CTX&&PF_CTX.cli>=0) p.push(`Perfil aberto: cliente id ${PF_CTX.cli} (${PF_CTX.c.nome}).`);
-  const sec=$('#t-'+aba); if(sec){ const vis=[...new Set([...sec.querySelectorAll('a.cli[data-i]')].map(x=>+x.dataset.i))].slice(0,40);
+  const sec=$('#t-'+aba); if(sec&&aba!=='listas'&&aba!=='lembretes'){ const vis=[...new Set([...sec.querySelectorAll('a.cli[data-i]')].map(x=>+x.dataset.i))].slice(0,40);
     if(vis.length) p.push('Clientes que aparecem na tela (id: nome): '+vis.map(i=>i+': '+((D.clientes[i]||{}).nome||'')).join('; ')+'.'); }
   return p.join(' ');
 }
-
 // ------------------------------------------------------------ DICA DA IA EM CADA PÁGINA
-const DICA_ABAS=['clientes','promocoes','resultados','geral','produtos','bairros','envios'];
+const DICA_ABAS=['clientes','promocoes','resultados','geral','produtos','bairros','envios','listas','lembretes'];
 const DICAS={}; const DICA_PEDIDA={};
 function dicaOculta(a){ return store('dica_off_'+a)===hojeStr(); }
 function renderDica(a){
@@ -2264,7 +2548,7 @@ document.addEventListener('click',e=>{ const a=e.target.closest('a.cli'); if(a){
 // ------------------------------------------------------------ início
 function render(){
   marcarFiltros(); prepararBuscas();
-  if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else if(aba==='envios') renderEnvios(); else renderResultados();
+  if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else if(aba==='envios') renderEnvios(); else if(aba==='listas') renderListas(); else if(aba==='lembretes') renderLembPag(); else renderResultados();
   if(typeof pedirDica==='function'&&DICA_ABAS.includes(aba)) setTimeout(()=>pedirDica(aba),300);
 }
 (function init(){

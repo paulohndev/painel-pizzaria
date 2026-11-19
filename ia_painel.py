@@ -78,11 +78,28 @@ def contexto_cliente(D, cli, perfil):
         linhas.append("Itens que mais pede: " + ", ".join("%s (%dx)" % kv for kv in itens.most_common(5)))
     if sab:
         linhas.append("Sabores/opções que mais escolhe: " + ", ".join("%s (%dx)" % kv for kv in sab.most_common(6)))
-    if peds:
-        u = next((x for x in peds if not x.get("cancelado")), None)
-        if u:
-            desc = "; ".join("%s%s" % (it.get("n"), (" (" + ", ".join(it.get("o")[:4]) + ")") if it.get("o") else "") for it in u.get("itens") or [])
-            linhas.append("Último pedido: %s" % desc)
+    validos = [x for x in peds if not x.get("cancelado")]
+    if validos:
+        linhas.append("Últimos pedidos (do mais recente):")
+        for x in validos[:6]:
+            desc = "; ".join("%s%s" % (it.get("n"), (" (" + ", ".join(it.get("o")[:4]) + ")") if it.get("o") else "") for it in x.get("itens") or [])
+            quando = str(x.get("data") or x.get("quando") or "")[:16]
+            try:
+                dq = datetime.strptime(quando[:16], "%Y-%m-%d %H:%M")
+                quando = "%s (%s %s)" % (dq.strftime("%d/%m"), DIAS[dq.weekday()], dq.strftime("%H:%M"))
+            except ValueError:
+                pass
+            linhas.append("  - %s: %s%s" % (quando, desc[:300], (" · canal " + str(x.get("canal"))) if x.get("canal") else ""))
+    nasc = str(c.get("nasc") or "")[:10]
+    if re.match(r"\d{4}-\d{2}-\d{2}", nasc):
+        try:
+            hoje = datetime.now().date()
+            an = datetime.strptime(nasc, "%Y-%m-%d").date().replace(year=hoje.year)
+            dd = (an - hoje).days
+            if -3 <= dd <= 10:
+                linhas.append("Aniversário: %s (%s)." % (an.strftime("%d/%m"), "hoje" if dd == 0 else ("daqui a %d dias" % dd if dd > 0 else "foi há %d dias" % -dd)))
+        except ValueError:
+            pass
     for a in ((perfil or {}).get("avaliacoes") or [])[:3]:
         linhas.append("Avaliação em %s: nota %s%s%s" % (a["data"][:10], a["nota"], (". Notas baixas: " + a["baixas"]) if a.get("baixas") else "",
                                                          ('. Comentário: "%s"' % a["comentario"]) if a.get("comentario") else ""))
@@ -91,10 +108,18 @@ def contexto_cliente(D, cli, perfil):
 
 # ------------------------------------------------------------------ mensagens
 
-SIS_MSG = ("Você escreve mensagens curtas de WhatsApp em nome da " + CASA +
-           "\nRegras:\n"
-           "- Português do Brasil, tom próximo e simpático, como o dono falaria com um cliente conhecido. Nada de linguagem de marketing.\n"
-           "- No máximo 3 frases curtas e no máximo 2 emojis.\n"
+SIS_MSG = ("Você escreve mensagens de WhatsApp em nome do dono da " + CASA +
+           "\nAntes de escrever, leia com atenção os dados do cliente e escolha 1 ou 2 detalhes REAIS e específicos dele para usar "
+           "(o prato/sabor que ele sempre pede, o dia ou horário de costume, quanto tempo faz que não aparece, uma avaliação, o aniversário, "
+           "a promoção do dia que combina com o que ele gosta). A mensagem tem que soar escrita para aquela pessoa, não um modelo.\n"
+           "Regras:\n"
+           "- Se o DONO deu uma instrução ou escreveu um rascunho, ele manda: siga exatamente o que ele pediu (assunto, valores, cupons, datas, "
+           "tom, tamanho). Use os dados do cliente só para deixar mais pessoal, sem mudar o que ele disse.\n"
+           "- Português do Brasil, tom próximo e natural, como o dono falaria com um cliente conhecido. Nada de linguagem de marketing, "
+           "nada de 'venha conferir', 'não perca', 'imperdível'.\n"
+           "- Varie: não comece sempre do mesmo jeito (evite abrir toda mensagem com 'Oi, Fulano!'), não repita frases das mensagens que "
+           "ele já recebeu (listadas nos dados), e não use a mesma estrutura da mensagem de referência se puder dizer melhor.\n"
+           "- Curta: de 1 a 3 frases, no máximo 2 emojis (zero se o dono pedir). Pense no horário: de tarde, 'hoje à noite'; tarde da noite, 'amanhã'.\n"
            "- Chame o cliente pelo primeiro nome.\n"
            "- Não comece com 'aqui é da pizzaria'. Só se apresente (como 'Pizzaria Mariá') se a mensagem for sobre uma avaliação.\n"
            "- Use o histórico do cliente para personalizar: cite o prato de forma natural (ex.: 'aquela pizza de camarão', "
@@ -120,11 +145,33 @@ RASCUNHO = ("\n\nO DONO ESCREVEU ISTO (rascunho, ideia ou instrução): \"%s\"\n
             "não citou (a não ser que a instrução peça para usar a oferta da referência).")
 
 
-def gerar_mensagem(ia, D, cli, perfil, motivo, referencia, tipo="", rascunho=""):
+INSTRUCAO = ("\n\nINSTRUÇÃO DO DONO (siga à risca, é o mais importante): \"%s\"\n"
+             "Escreva a mensagem que ele pediu, com as condições exatamente como ele disse, personalizada com os dados do cliente.")
+
+
+def _hist_msgs(historico):
+    linhas = []
+    for m in (historico or [])[:6]:
+        if m.get("status") not in ("enviado", "na_fila", None) and m.get("via") != "manual":
+            continue
+        t = (m.get("texto") or "").replace("\n", " ").strip()
+        linhas.append("  - %s%s: %s" % (m.get("quando", "")[:10], (" (" + m["campanha"] + ")") if m.get("campanha") else "",
+                                        (t[:220] or "(mensagem pelo WhatsApp, texto não registrado)")))
+    return ("\nMensagens que ele já recebeu (não repita):\n" + "\n".join(linhas)) if linhas else ""
+
+
+def gerar_mensagem(ia, D, cli, perfil, motivo, referencia, tipo="", rascunho="", instrucao="", historico=None, notas=None):
     ctx = contexto_cliente(D, cli, perfil)
     hoje = datetime.now()
-    pedido = ("Hoje é %s, %s.\nMotivo do contato: %s\nMensagem de referência (mesma oferta): %s\n\nDados do cliente:\n%s" %
-              (DIAS[hoje.weekday()], hoje.strftime("%d/%m %H:%M"), motivo or "-", referencia or "-", ctx))
+    dia_js = (hoje.weekday() + 1) % 7  # as promoções guardam o dia como no navegador (domingo = 0)
+    promos = ["%s: %s" % (x.get("nome"), x.get("oferta") or "") for x in (D.get("promos_casa") or [])
+              if isinstance(x, dict) and x.get("ativa", True) is not False and (not x.get("dias") or dia_js in (x.get("dias") or []))]
+    pedido = ("Hoje é %s, %s.\nMotivo do contato: %s\nMensagem de referência (mesma oferta): %s\n%s\nDados do cliente:\n%s%s%s" %
+              (DIAS[hoje.weekday()], hoje.strftime("%d/%m %H:%M"), motivo or "-", referencia or "-",
+               ("Promoções da casa valendo hoje: " + "; ".join(promos)[:600] + "\n") if promos else "",
+               ctx, _hist_msgs(historico), ("\nAnotações do dono sobre este cliente: " + " / ".join(notas)[:600]) if notas else ""))
+    if (instrucao or "").strip():
+        pedido += INSTRUCAO % instrucao.strip()[:1500]
     if (rascunho or "").strip():
         pedido += RASCUNHO % rascunho.strip()[:1500]
     if tipo == "avaliacao":
@@ -135,7 +182,8 @@ def gerar_mensagem(ia, D, cli, perfil, motivo, referencia, tipo="", rascunho="")
         except ValueError:
             j = {}
         return {"texto": (j.get("whatsapp") or txt).strip(), "resposta_publica": (j.get("resposta_publica") or "").strip()}
-    return {"texto": ia.gerar(SIS_MSG, pedido, max_tokens=400).strip().strip('"')}
+    forte = bool((instrucao or "").strip() or (rascunho or "").strip())
+    return {"texto": ia.gerar(SIS_MSG, pedido, max_tokens=500, forte=forte).strip().strip('"')}
 
 
 # ------------------------------------------------------------------ resumo do dia
@@ -527,22 +575,50 @@ def _api_ao_vivo(api, caminho, params, liberar):
     return txt[:20000] + ("\n(cortado)" if len(txt) > 20000 else "")
 
 
+GRUPOS_SCHEMA = {"type": "array", "description": "Clientes separados em grupos, um por motivo/assunto. Use SEMPRE que os clientes tiverem motivos diferentes.",
+                 "items": {"type": "object", "properties": {
+                     "titulo": {"type": "string", "description": "Título claro do grupo, dizendo o critério (ex.: 'Fãs de camarão sumidos há 30+ dias')"},
+                     "ids": {"type": "array", "items": {"type": "integer"}},
+                     "notas": {"type": "object", "description": "Opcional: {id: 'detalhe curto deste cliente'}"}},
+                     "required": ["titulo", "ids"]}}
+
 FERRAMENTAS_ACAO = [
     {"name": "mostrar_clientes",
-     "description": "Mostra para o dono, logo abaixo da sua resposta, uma lista clicável de clientes (com perfil, WhatsApp e lembrete). "
-                    "Use sempre que a resposta envolver clientes específicos. ids = clientes.id da base.",
-     "parameters": {"type": "object", "properties": {"titulo": {"type": "string"}, "ids": {"type": "array", "items": {"type": "integer"}},
-                                                     "notas": {"type": "object", "description": "Opcional: {id: 'motivo curto'} para mostrar ao lado de cada cliente"}},
-                    "required": ["titulo", "ids"]}},
+     "description": "Mostra ao dono, abaixo da sua resposta, os clientes de que você está falando (clicáveis, com perfil, WhatsApp, lembrete e botão "
+                    "'abrir como página'). Use sempre que a resposta envolver clientes específicos. Separe em grupos quando houver motivos "
+                    "diferentes. ids = clientes.id da base.",
+     "parameters": {"type": "object", "properties": {"titulo": {"type": "string", "description": "Título geral"},
+                                                     "grupos": GRUPOS_SCHEMA,
+                                                     "ids": {"type": "array", "items": {"type": "integer"}, "description": "Só se for um grupo único"},
+                                                     "notas": {"type": "object"}},
+                    "required": ["titulo"]}},
+    {"name": "salvar_lista",
+     "description": "Salva clientes como uma LISTA (página própria do painel, em 'Listas'), para o dono trabalhar com calma depois. "
+                    "Use quando ele pedir para salvar, guardar, transformar em página/lista, ou quando o levantamento for grande.",
+     "parameters": {"type": "object", "properties": {"titulo": {"type": "string"}, "descricao": {"type": "string", "description": "Critério usado e o que fazer"},
+                                                     "grupos": GRUPOS_SCHEMA},
+                    "required": ["titulo", "grupos"]}},
     {"name": "criar_lembrete",
-     "description": "Cria lembretes (📌) para clientes, para o dono tomar uma ação depois. Use SÓ quando o dono pedir para marcar/lembrar/anotar.",
-     "parameters": {"type": "object", "properties": {"ids": {"type": "array", "items": {"type": "integer"}},
-                                                     "texto": {"type": "string", "description": "O que fazer (ex.: 'Oferecer cupom de volta')"},
-                                                     "quando": {"type": "string", "description": "Data AAAA-MM-DD (opcional; vazio = sem data)"}},
-                    "required": ["ids", "texto"]}},
+     "description": "Cria lembretes (📌) para o dono agir depois. Use SÓ quando o dono pedir para marcar/lembrar/anotar. "
+                    "Cada grupo vira um bloco separado na página de Lembretes, com o título que você der.",
+     "parameters": {"type": "object", "properties": {"grupos": {"type": "array", "items": {"type": "object", "properties": {
+                         "titulo": {"type": "string", "description": "Título do bloco (o critério/motivo)"},
+                         "ids": {"type": "array", "items": {"type": "integer"}},
+                         "texto": {"type": "string", "description": "O que fazer com esses clientes"},
+                         "notas": {"type": "object", "description": "Opcional: {id: 'o que fazer com este cliente em particular'}"}},
+                         "required": ["titulo", "ids", "texto"]}},
+                                                     "quando": {"type": "string", "description": "Data AAAA-MM-DD (opcional)"}},
+                    "required": ["grupos"]}},
+    {"name": "escrever_mensagem",
+     "description": "Escreve uma mensagem de WhatsApp personalizada para UM cliente, seguindo o que o dono pediu, usando o histórico completo "
+                    "dele. O dono vê a mensagem com botão para abrir no WhatsApp ou enviar pelo sistema. Para vários clientes "
+                    "(até 8), chame uma vez para cada; acima disso use preparar_envio.",
+     "parameters": {"type": "object", "properties": {"id": {"type": "integer"},
+                                                     "instrucao": {"type": "string", "description": "O que o dono quer dizer, com as palavras e condições dele"}},
+                    "required": ["id", "instrucao"]}},
     {"name": "preparar_envio",
-     "description": "Prepara um envio de WhatsApp para os clientes na tela Envios, com o texto modelo. NÃO envia: o dono revisa e confirma. "
-                    "Use quando o dono pedir para mandar mensagem para um grupo. Variáveis aceitas no texto: {nome}, {favorito}, {pontos}, {bairro}.",
+     "description": "Prepara um envio de WhatsApp para muitos clientes na tela Envios. NÃO envia: o dono revisa e confirma. Cada mensagem é "
+                    "personalizada pela IA na hora do envio a partir do texto modelo. Variáveis: {nome}, {favorito}, {pontos}, {bairro}.",
      "parameters": {"type": "object", "properties": {"ids": {"type": "array", "items": {"type": "integer"}}, "texto": {"type": "string"},
                                                      "titulo": {"type": "string"}}, "required": ["ids", "texto"]}},
     {"name": "gerar_relatorio",
@@ -552,29 +628,40 @@ FERRAMENTAS_ACAO = [
     {"name": "abrir_perfil",
      "description": "Abre o perfil completo de um cliente na tela do dono.",
      "parameters": {"type": "object", "properties": {"id": {"type": "integer"}}, "required": ["id"]}},
+    {"name": "abrir_pagina",
+     "description": "Leva o dono para uma página do sistema. Vendas: hoje, promocoes, envios, resultados, geral, clientes, produtos, bairros, "
+                    "listas, lembretes. Gestão: g_painel, g_despesas, g_fichas, g_equipe.",
+     "parameters": {"type": "object", "properties": {"pagina": {"type": "string"}}, "required": ["pagina"]}},
 ]
 
-GUIA_ACOES = ("\nVocê também AGE no painel com as ferramentas mostrar_clientes, criar_lembrete, preparar_envio, gerar_relatorio e abrir_perfil. "
-              "Quando citar clientes específicos, chame mostrar_clientes com os ids para o dono clicar. Se o dono pedir para marcar/lembrar, "
-              "use criar_lembrete. Se pedir para mandar mensagem a um grupo, use preparar_envio (ele revisa antes de enviar). "
-              "Se pedir relatório, use gerar_relatorio e na resposta só diga o que tem nele. Nunca diga que fez uma ação sem chamar a ferramenta. "
-              "Use o histórico da conversa: se o dono disser 'esses clientes', são os da última lista que você mostrou.")
+GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_clientes, salvar_lista, criar_lembrete, escrever_mensagem, preparar_envio, "
+              "gerar_relatorio, abrir_perfil e abrir_pagina.\n"
+              "- Quando citar clientes específicos, chame mostrar_clientes. Se houver motivos diferentes, SEPARE EM GRUPOS com títulos que digam "
+              "o critério (nunca misture tudo num grupo só). Dê uma nota curta por cliente quando ajudar.\n"
+              "- Se o dono pedir para salvar/transformar em página/lista, use salvar_lista com os mesmos grupos.\n"
+              "- Se pedir para marcar/lembrar, use criar_lembrete com um grupo por motivo (o título do grupo é o que ele vai ver na página de Lembretes).\n"
+              "- Se pedir uma mensagem para alguém, use escrever_mensagem passando a instrução dele com as palavras e condições exatas que ele "
+              "usou. Antes, pesquise o cliente (pedidos, itens, horários, avaliações, mensagens já recebidas) para a mensagem ser específica.\n"
+              "- Para mandar a um grupo grande, use preparar_envio (ele revisa antes).\n"
+              "- Pesquise de verdade antes de sugerir: confira os pedidos e itens dos clientes, não suponha.\n"
+              "- Preste atenção no que o dono disse: valores, cupons, datas, tom e restrições dele valem mais que qualquer sugestão sua.\n"
+              "- Se pedir relatório, use gerar_relatorio e na resposta só diga o que tem nele. Nunca diga que fez uma ação sem chamar a ferramenta.\n"
+              "- Use o histórico da conversa: 'esses clientes' são os da última lista que você mostrou (os ids aparecem no histórico).")
 
 
-def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete=None, extra=""):
-    msgs = [{"role": m.get("role"), "content": str(m.get("content") or "")[:4000]} for m in mensagens[-12:]
+def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete=None, extra="", salvar_lista=None, escrever=None):
+    msgs = [{"role": m.get("role"), "content": str(m.get("content") or "")[:6000]} for m in mensagens[-14:]
             if m.get("role") in ("user", "assistant") and m.get("content")]
     if not msgs or msgs[-1]["role"] != "user":
         raise ErroIA("Faça uma pergunta.")
 
     acoes = []
     n = len(D["clientes"])
-
     origem = {}
 
     def ids_ok(v):
         out = []
-        for x in (v or [])[:300]:
+        for x in (v or [])[:500]:
             try:
                 i = int(x)
             except (TypeError, ValueError):
@@ -587,22 +674,73 @@ def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete
                     origem[j] = i
         return out
 
+    def notas_de(ids, notas):
+        notas = {str(k): str(v)[:200] for k, v in (notas or {}).items()} if isinstance(notas, dict) else {}
+        return {str(i): notas.get(str(origem.get(i, i))) or notas.get(str(i)) for i in ids if notas.get(str(origem.get(i, i))) or notas.get(str(i))}
+
+    def grupos_de(args, campo_texto=False):
+        gs = []
+        brutos = args.get("grupos") if isinstance(args.get("grupos"), list) else []
+        if not brutos and args.get("ids"):
+            brutos = [{"titulo": args.get("titulo") or "Clientes", "ids": args.get("ids"), "notas": args.get("notas"), "texto": args.get("texto")}]
+        for g in brutos[:20]:
+            if not isinstance(g, dict):
+                continue
+            ids = ids_ok(g.get("ids"))
+            if not ids:
+                continue
+            x = {"titulo": str(g.get("titulo") or "Clientes")[:150], "ids": ids, "notas": notas_de(ids, g.get("notas"))}
+            if campo_texto:
+                x["texto"] = str(g.get("texto") or "")[:500]
+            gs.append(x)
+        return gs
+
+    def itens_lista(gs):
+        out = []
+        for g in gs:
+            for i in g["ids"]:
+                c = D["clientes"][i]
+                out.append({"chave": c.get("chave"), "cliente_id": c.get("id"), "nome": c.get("nome"), "grupo": g["titulo"],
+                            "nota": g["notas"].get(str(i), "")})
+        return out
+
     def executar(nome, args):
         if nome == "mostrar_clientes":
-            ids = ids_ok(args.get("ids"))
-            notas = {str(k): str(v)[:160] for k, v in (args.get("notas") or {}).items()} if isinstance(args.get("notas"), dict) else {}
-            acoes.append({"tipo": "clientes", "titulo": str(args.get("titulo") or "Clientes")[:120], "ids": ids,
-                          "notas": {str(i): notas.get(str(origem.get(i, i)), notas.get(str(i), "")) for i in ids
-                                    if notas.get(str(origem.get(i, i))) or notas.get(str(i))}})
-            return "Lista com %d cliente(s) mostrada ao dono." % len(ids)
+            gs = grupos_de(args)
+            acoes.append({"tipo": "clientes", "titulo": str(args.get("titulo") or (gs[0]["titulo"] if gs else "Clientes"))[:150], "grupos": gs,
+                          "ids": [i for g in gs for i in g["ids"]]})
+            return "Mostrei %d cliente(s) em %d grupo(s)." % (sum(len(g["ids"]) for g in gs), len(gs))
+        if nome == "salvar_lista":
+            gs = grupos_de(args)
+            if not gs or salvar_lista is None:
+                return "Nenhum cliente válido."
+            lid = salvar_lista(str(args.get("titulo") or "Lista da IA")[:150], str(args.get("descricao") or "")[:2000], itens_lista(gs))
+            acoes.append({"tipo": "lista", "id": lid, "titulo": str(args.get("titulo") or "Lista da IA")[:150],
+                          "n": sum(len(g["ids"]) for g in gs), "grupos": len(gs)})
+            return "Lista salva (id %s) com %d cliente(s)." % (lid, sum(len(g["ids"]) for g in gs))
         if nome == "criar_lembrete":
-            ids = ids_ok(args.get("ids"))
-            if not ids or fazer_lembrete is None:
+            gs = grupos_de(args, campo_texto=True)
+            if not gs or fazer_lembrete is None:
                 return "Nenhum cliente válido."
             q = str(args.get("quando") or "")[:10]
-            feitos = fazer_lembrete(ids, str(args.get("texto") or "")[:500], q)
-            acoes.append({"tipo": "lembretes", "ids": ids, "texto": str(args.get("texto") or ""), "quando": q})
-            return "%d lembrete(s) criado(s)." % feitos
+            total = 0
+            for g in gs:
+                total += fazer_lembrete(g["ids"], g["texto"] or g["titulo"], q, g["titulo"], g["notas"])
+            acoes.append({"tipo": "lembretes", "grupos": [{"titulo": g["titulo"], "texto": g["texto"], "ids": g["ids"]} for g in gs],
+                          "ids": [i for g in gs for i in g["ids"]], "quando": q})
+            return "%d lembrete(s) criado(s) em %d grupo(s)." % (total, len(gs))
+        if nome == "escrever_mensagem":
+            ids = ids_ok([args.get("id")])
+            if not ids or escrever is None:
+                return "Cliente não encontrado."
+            if sum(1 for a in acoes if a["tipo"] == "mensagem") >= 8:
+                return "Limite de 8 mensagens por resposta; para mais clientes use preparar_envio."
+            try:
+                txt = escrever(ids[0], str(args.get("instrucao") or "")[:1500])
+            except ErroIA as e:
+                return "Não consegui escrever: %s" % e
+            acoes.append({"tipo": "mensagem", "id": ids[0], "texto": txt, "instrucao": str(args.get("instrucao") or "")[:300]})
+            return "Mensagem escrita e mostrada ao dono: " + txt
         if nome == "preparar_envio":
             ids = ids_ok(args.get("ids"))
             acoes.append({"tipo": "envio", "ids": ids, "texto": str(args.get("texto") or "")[:1500], "titulo": str(args.get("titulo") or "Envio sugerido pela IA")[:120]})
@@ -615,6 +753,12 @@ def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete
             if ids:
                 acoes.append({"tipo": "perfil", "id": ids[0]})
             return "Perfil aberto." if ids else "Cliente não encontrado."
+        if nome == "abrir_pagina":
+            pg = str(args.get("pagina") or "").strip().lower()
+            if pg not in PAGINAS and pg not in PAGINAS_GESTAO:
+                return "Página desconhecida."
+            acoes.append({"tipo": "pagina", "pagina": pg})
+            return "Página aberta."
         if nome == "consultar_sql":
             return consultar(args.get("sql"))
         if nome == "dados_da_loja":
@@ -624,8 +768,8 @@ def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete
         return "ferramenta indisponível"
     sis = sistema_pergunta(D, liberar) + gestao.DESCRICAO_IA + GUIA_ACOES + (("\n" + extra) if extra else "")
     if tela:
-        sis += "\nO dono está olhando agora no painel: " + tela[:2500]
-    resp, feitas = ia.conversar(sis, msgs, FERRAMENTAS + FERRAMENTAS_ACAO, executar, max_tokens=3000, forte=True, voltas=14)
+        sis += "\nO dono está olhando agora: " + tela[:3500]
+    resp, feitas = ia.conversar(sis, msgs, FERRAMENTAS + FERRAMENTAS_ACAO, executar, max_tokens=3500, forte=True, voltas=18)
     return {"resposta": resp, "consultas": len(feitas), "acoes": acoes}
 
 
@@ -640,6 +784,15 @@ PAGINAS = {
     "clientes": "a lista de clientes e grupos (fiéis, sumindo, novos, esfriando, perdidos)",
     "produtos": "os produtos e sabores mais vendidos e combinações",
     "bairros": "as vendas por bairro",
+    "listas": "as listas de clientes salvas (muitas montadas pela IA)",
+    "lembretes": "os lembretes de clientes para agir depois",
+}
+
+PAGINAS_GESTAO = {
+    "g_painel": "o painel geral do Gestão (resultado do mês, faturamento x despesas, equipe, cardápio e preços, fechamento)",
+    "g_despesas": "as despesas da pizzaria (lançamentos, categorias, faturamento diário, orçamento, desperdício)",
+    "g_fichas": "as fichas técnicas (custo de cada produto, insumos, preços praticados e margens)",
+    "g_equipe": "a equipe e a folha de pagamento",
 }
 
 SIS_DICA = ("Você é o analista da " + CASA + " O dono acabou de abrir uma página do painel. Consulte os dados com as ferramentas e escreva "
@@ -649,7 +802,7 @@ SIS_DICA = ("Você é o analista da " + CASA + " O dono acabou de abrir uma pág
 
 
 def dica_pagina(ia, D, aba, tela="", liberar=False, api=None):
-    alvo = PAGINAS.get(aba)
+    alvo = PAGINAS.get(aba) or PAGINAS_GESTAO.get(aba)
     if not alvo:
         raise ErroIA("Página sem dica.")
     r = perguntar(ia, D, [{"role": "user", "content": "Estou abrindo a página de %s. O que eu preciso saber agora?" % alvo}],

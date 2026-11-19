@@ -17,6 +17,8 @@ CREATE INDEX IF NOT EXISTS envios_fila ON envios(status, agendado);
 CREATE TABLE IF NOT EXISTS optout (cliente_id TEXT PRIMARY KEY, em TEXT, motivo TEXT);
 CREATE TABLE IF NOT EXISTS lembretes (id INTEGER PRIMARY KEY AUTOINCREMENT, cliente_id TEXT, chave TEXT, nome TEXT, texto TEXT,
   quando TEXT, criado TEXT, feito TEXT, avisado INTEGER DEFAULT 0);
+CREATE TABLE IF NOT EXISTS listas (id INTEGER PRIMARY KEY AUTOINCREMENT, titulo TEXT, descricao TEXT, origem TEXT,
+  criado TEXT, atualizado TEXT, itens TEXT);
 """
 
 PERFIS = [  # código, nome, explicação
@@ -100,6 +102,11 @@ def janela(r):
 
 def preparar(db):
     db.executescript(ESQUEMA)
+    cols = {r[1] for r in db.execute("PRAGMA table_info(lembretes)")}
+    for c in ("grupo", "grupo_titulo"):
+        if c not in cols:
+            db.execute("ALTER TABLE lembretes ADD COLUMN %s TEXT" % c)
+    db.commit()
     if not P.meta_get(db, "envios_migrado"):
         # contatos antigos (marcados à mão) viram histórico
         for cid, data, camp in db.execute("SELECT cliente_id, data, campanha FROM contatos").fetchall():
@@ -338,14 +345,28 @@ def historico_cliente(db, cid, chave):
 # ------------------------------------------------------------------ lembretes (clientes para lembrar depois)
 
 def lembretes(db, todos=False):
-    q = "SELECT id, cliente_id, chave, nome, texto, quando, criado, feito FROM lembretes"
+    q = "SELECT id, cliente_id, chave, nome, texto, quando, criado, feito, grupo, grupo_titulo FROM lembretes"
     if not todos:
         q += " WHERE feito IS NULL OR feito >= ?"
         rows = db.execute(q + " ORDER BY feito IS NOT NULL, COALESCE(quando, '9999'), criado", ((datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d"),)).fetchall()
     else:
         rows = db.execute(q + " ORDER BY criado DESC").fetchall()
     return [{"id": r[0], "cliente_id": r[1], "chave": r[2], "nome": r[3], "texto": r[4], "quando": r[5] or "", "criado": (r[6] or "")[:16],
-             "feito": (r[7] or "")[:16]} for r in rows]
+             "feito": (r[7] or "")[:16], "grupo": r[8] or "", "grupo_titulo": r[9] or ""} for r in rows]
+
+
+def _data_ok(quando):
+    quando = str(quando or "").strip()[:10]
+    if quando:
+        try:
+            datetime.strptime(quando, "%Y-%m-%d")
+        except ValueError:
+            quando = ""
+    return quando or None
+
+
+def novo_grupo():
+    return "g" + datetime.now().strftime("%y%m%d%H%M%S%f")[:-3]
 
 
 def lembrete_acao(db, d):
@@ -361,8 +382,33 @@ def lembrete_acao(db, d):
         if d.get("id"):
             db.execute("UPDATE lembretes SET texto=?, quando=?, avisado=0 WHERE id=?", (texto, quando or None, int(d["id"])))
         else:
-            db.execute("INSERT INTO lembretes (cliente_id, chave, nome, texto, quando, criado) VALUES (?,?,?,?,?,?)",
-                       (str(d.get("cliente_id") or ""), str(d.get("chave") or ""), str(d.get("nome") or "")[:120], texto, quando or None, agora_txt()))
+            db.execute("INSERT INTO lembretes (cliente_id, chave, nome, texto, quando, criado, grupo, grupo_titulo) VALUES (?,?,?,?,?,?,?,?)",
+                       (str(d.get("cliente_id") or ""), str(d.get("chave") or ""), str(d.get("nome") or "")[:120], texto, quando or None, agora_txt(),
+                        str(d.get("grupo") or "") or None, str(d.get("grupo_titulo") or "")[:150] or None))
+    elif acao == "salvar_varios":
+        # vários clientes de uma vez, num grupo com título (ex.: o que a IA separou)
+        texto = str(d.get("texto") or "").strip()[:1000]
+        quando = _data_ok(d.get("quando"))
+        grupo = str(d.get("grupo") or "") or novo_grupo()
+        titulo = str(d.get("grupo_titulo") or texto or "Grupo")[:150]
+        for it in (d.get("itens") or [])[:1000]:
+            db.execute("INSERT INTO lembretes (cliente_id, chave, nome, texto, quando, criado, grupo, grupo_titulo) VALUES (?,?,?,?,?,?,?,?)",
+                       (str(it.get("cliente_id") or ""), str(it.get("chave") or ""), str(it.get("nome") or "")[:120],
+                        (str(it.get("texto") or "").strip()[:1000] or texto), quando, agora_txt(), grupo, titulo))
+    elif acao in ("feito_grupo", "reabrir_grupo", "apagar_grupo", "renomear_grupo", "data_grupo"):
+        g = str(d.get("grupo") or "")
+        if not g:
+            return False
+        if acao == "feito_grupo":
+            db.execute("UPDATE lembretes SET feito=? WHERE grupo=? AND feito IS NULL", (agora_txt(), g))
+        elif acao == "reabrir_grupo":
+            db.execute("UPDATE lembretes SET feito=NULL WHERE grupo=?", (g,))
+        elif acao == "apagar_grupo":
+            db.execute("DELETE FROM lembretes WHERE grupo=?", (g,))
+        elif acao == "renomear_grupo":
+            db.execute("UPDATE lembretes SET grupo_titulo=? WHERE grupo=?", (str(d.get("titulo") or "")[:150], g))
+        else:
+            db.execute("UPDATE lembretes SET quando=?, avisado=0 WHERE grupo=? AND feito IS NULL", (_data_ok(d.get("quando")), g))
     elif acao == "feito":
         db.execute("UPDATE lembretes SET feito=? WHERE id=?", (agora_txt(), int(d.get("id") or 0)))
     elif acao == "reabrir":
@@ -382,3 +428,75 @@ def lembretes_a_avisar(db):
         db.execute("UPDATE lembretes SET avisado=1 WHERE id=?", (r[0],))
     db.commit()
     return rows
+
+
+# ------------------------------------------------------------------ listas de clientes (páginas salvas, muitas vindas da IA)
+
+def _itens_ok(itens):
+    out, vistos = [], set()
+    for it in (itens or [])[:3000]:
+        if not isinstance(it, dict):
+            continue
+        k = (str(it.get("chave") or ""), str(it.get("grupo") or ""))
+        if not k[0] or k in vistos:
+            continue
+        vistos.add(k)
+        out.append({"chave": k[0], "cliente_id": str(it.get("cliente_id") or ""), "nome": str(it.get("nome") or "")[:120],
+                    "grupo": k[1][:150], "nota": str(it.get("nota") or "")[:300]})
+    return out
+
+
+def listas(db):
+    rows = db.execute("SELECT id, titulo, descricao, origem, criado, atualizado, itens FROM listas ORDER BY COALESCE(atualizado, criado) DESC").fetchall()
+    out = []
+    for r in rows:
+        try:
+            itens = json.loads(r[6] or "[]")
+        except ValueError:
+            itens = []
+        out.append({"id": r[0], "titulo": r[1] or "Lista", "descricao": r[2] or "", "origem": r[3] or "", "criado": (r[4] or "")[:16],
+                    "atualizado": (r[5] or "")[:16], "itens": itens})
+    return out
+
+
+def lista_acao(db, d):
+    acao = d.get("acao")
+    lid = int(d.get("id") or 0)
+    if acao == "salvar":
+        itens = _itens_ok(d.get("itens"))
+        titulo = str(d.get("titulo") or "Lista")[:150]
+        if lid:
+            db.execute("UPDATE listas SET titulo=?, descricao=?, itens=?, atualizado=? WHERE id=?",
+                       (titulo, str(d.get("descricao") or "")[:2000], json.dumps(itens, ensure_ascii=False), agora_txt(), lid))
+        else:
+            cur = db.execute("INSERT INTO listas (titulo, descricao, origem, criado, atualizado, itens) VALUES (?,?,?,?,?,?)",
+                             (titulo, str(d.get("descricao") or "")[:2000], str(d.get("origem") or "")[:30], agora_txt(), agora_txt(),
+                              json.dumps(itens, ensure_ascii=False)))
+            lid = cur.lastrowid
+    elif acao == "renomear" and lid:
+        db.execute("UPDATE listas SET titulo=?, descricao=COALESCE(?, descricao), atualizado=? WHERE id=?",
+                   (str(d.get("titulo") or "Lista")[:150], d.get("descricao"), agora_txt(), lid))
+    elif acao in ("remover_itens", "adicionar_itens", "mover_itens") and lid:
+        r = db.execute("SELECT itens FROM listas WHERE id=?", (lid,)).fetchone()
+        if not r:
+            return 0
+        itens = json.loads(r[0] or "[]")
+        if acao == "remover_itens":
+            tira = {(str(x.get("chave")), str(x.get("grupo") or "")) for x in d.get("itens") or []}
+            itens = [x for x in itens if (x["chave"], x.get("grupo") or "") not in tira]
+        elif acao == "mover_itens":
+            alvo = str(d.get("grupo") or "")[:150]
+            muda = {str(x.get("chave")) for x in d.get("itens") or []}
+            for x in itens:
+                if x["chave"] in muda:
+                    x["grupo"] = alvo
+            itens = _itens_ok(itens)
+        else:
+            itens = _itens_ok(itens + list(d.get("itens") or []))
+        db.execute("UPDATE listas SET itens=?, atualizado=? WHERE id=?", (json.dumps(itens, ensure_ascii=False), agora_txt(), lid))
+    elif acao == "apagar" and lid:
+        db.execute("DELETE FROM listas WHERE id=?", (lid,))
+    else:
+        return 0
+    db.commit()
+    return lid or 1

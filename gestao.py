@@ -179,7 +179,8 @@ def vendas_por_dia(db, cfg, dias=120, parse_dt=None, turno_de=None):
 
 # ------------------------------------------------------------------ páginas
 
-ABAS_VENDAS = [["hoje", "Hoje"], ["promocoes", "Promoções"], ["envios", "Envios"], ["resultados", "Resultados"],
+ABAS_VENDAS = [["hoje", "Hoje"], ["promocoes", "Promoções"], ["envios", "Envios"], ["listas", "Listas"], ["lembretes", "Lembretes"],
+               ["resultados", "Resultados"],
                ["geral", "Visão geral"], ["clientes", "Clientes"], ["produtos", "Produtos"], ["bairros", "Bairros"]]
 _CACHE = {}
 

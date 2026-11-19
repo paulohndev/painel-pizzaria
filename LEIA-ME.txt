@@ -126,6 +126,22 @@ Atenção: Z-API e Evolution API não são a API oficial do WhatsApp. Envios
 em excesso para quem não espera receber podem levar o WhatsApp a restringir
 o número. Comece com pouco volume.
 
+IA EM TODO O SISTEMA, LISTAS E LEMBRETES
+------------------------------------------------------------
+- Botão "✨ Perguntar à IA" em qualquer página (também no Gestão): ela vê o
+  que está na tela e responde sobre aquilo.
+- Quando a IA mostra clientes, ela separa em grupos pelo motivo. Clique em
+  "📄 Abrir como página" para virar uma Lista (página Listas), onde dá para
+  filtrar por grupo, ordenar, marcar clientes, mandar mensagem, criar
+  lembrete, mudar de grupo e baixar a planilha.
+- Página Lembretes: os lembretes ficam agrupados pelo motivo, com filtros
+  (pendentes, hoje e atrasados, próximos, sem data, feitos) e ações para o
+  grupo inteiro (mensagem, data, tudo feito, abrir como lista).
+- Peça mensagens no chat ("escreve uma mensagem para a Andréa falando da
+  Terça Off") ou, na janela do WhatsApp, escreva no campo de cima o que você
+  quer dizer: a IA segue o seu pedido e usa o histórico do cliente (últimos
+  pedidos, mensagens que já recebeu, suas anotações).
+
 MARIÁ GESTÃO JUNTO COM O PAINEL
 ------------------------------------------------------------
 Agora tudo abre num lugar só: http://127.0.0.1:8766 (atalho "Mariá Gestão"

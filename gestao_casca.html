@@ -179,6 +179,14 @@ body.gav-on #npGav{transform:none}
 #npToast.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
 #npToast button{all:unset;cursor:pointer;color:var(--sun);font-weight:700;padding:2px 8px}
 @media print{#npFab,#npGav,#npSombra{display:none!important}}
+#iaFab{all:unset;position:fixed;right:18px;bottom:76px;z-index:25;cursor:pointer;display:flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:#FFB21E;color:#2A1B17;font-weight:700;font-size:14px;box-shadow:0 12px 28px -10px rgba(140,90,0,.55);transition:transform .2s,box-shadow .2s}
+#iaFab:hover,#iaFab:focus-visible{transform:translateY(-2px);box-shadow:0 16px 32px -10px rgba(140,90,0,.7)}
+#iaFab.carregando{opacity:.7;pointer-events:none}
+#iaFab.carregando::after{content:"";width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:giraIA .8s linear infinite}
+@keyframes giraIA{to{transform:rotate(360deg)}}
+body.vendas-gaveta #npFab,body.vendas-gaveta #iaFab,body.app-vendas #iaFab{display:none!important}
+#palco iframe.sobre{position:fixed;inset:0;left:0;z-index:90;visibility:visible;opacity:1;transform:none;background:transparent;transition:none}
+@media print{#iaFab{display:none!important}}
 
 </style>
 </head>
@@ -581,6 +589,34 @@ montarMenu();aplicarFixo();
   if(/^(alerta|envios$|lembretes$)/.test(bruto)){VENDAS_HASH='#'+bruto;const m={envios:'envios',lembretes:'hoje'}[bruto];est.abas.vendas=m||'hoje';abrir('vendas')}
   else if(h[0]&&APPS[h[0]]){if(h[1])est.abas[h[0]]=h[1];abrir(h[0])}else abrir(APPS[est.app]?est.app:'vendas');})();
 window.addEventListener('hashchange',()=>{const b=location.hash.slice(1);if(!/^(alerta|envios$|lembretes$)/.test(b))return;VENDAS_HASH='#'+b;abrir('vendas');const f=frames.vendas;try{if(f&&f.pronto)f.contentWindow.location.hash=b}catch(e){}});
+</script>
+
+<button id="iaFab" title="Perguntar à IA sobre esta página (ela vê o que está na tela)">✨ Perguntar à IA</button>
+<script>
+/* IA em qualquer página: o chat do painel de vendas abre por cima do app que estiver aberto, sabendo o que está na tela. */
+(function(){
+const PAG_G={painel:'g_painel',despesas:'g_despesas',fichas:'g_fichas',equipe:'g_equipe'};
+const IR_G={g_painel:'painel',g_despesas:'despesas',g_fichas:'fichas',g_equipe:'equipe'};
+function nomeAba(k){const t=est.abas[k];const a=((APPS[k]||{}).abas||[]).find(x=>x[0]===t);return a?a[1]:''}
+function textoVisivel(k){try{if(k==='notas'){const p=document.getElementById('notasPg');return p?p.innerText.slice(0,3000):''}
+  const f=frames[k];const d=f&&f.contentDocument;if(!d||!d.body)return '';
+  return (d.body.innerText||'').replace(/[ \t ]+/g,' ').replace(/\n\s*\n+/g,'\n').trim().slice(0,3200)}catch(e){return ''}}
+window.mariaContexto=function(){const k=est.app;const nome=(APPS[k]||{}).nome||(k==='notas'?'Anotações e metas':k);const aba=nomeAba(k);
+  return {pagina:PAG_G[k]||'',tela:'O dono está no Mariá Gestão, app "'+nome+'"'+(aba?', aba "'+aba+'"':'')+'. Texto que aparece na tela agora:\n'+textoVisivel(k)}};
+function comVendas(cb){const f=frame('vendas');const ok=()=>{try{return !!f.contentWindow.abrirChat}catch(e){return false}};
+  if(f.pronto&&ok())return cb(f);let n=0;const t=setInterval(()=>{if((f.pronto&&ok())||++n>150){clearInterval(t);if(ok())cb(f)}},100)}
+window.mariaIA=function(pergunta){const fab=document.getElementById('iaFab');
+  if(est.app==='vendas'){comVendas(f=>f.contentWindow.abrirChat(pergunta||''));return}
+  const ctx=mariaContexto();fab.classList.add('carregando');
+  comVendas(f=>{fab.classList.remove('carregando');f.classList.add('sobre');try{f.contentWindow.modoSobre(true,ctx);f.contentWindow.abrirChat(pergunta||'')}catch(e){f.classList.remove('sobre');console.warn(e)}})};
+window.mariaGaveta=function(on){document.body.classList.toggle('vendas-gaveta',!!on)};
+window.mariaFimSobre=function(){const f=frames.vendas;if(f)f.classList.remove('sobre')};
+window.mariaIr=function(pg){const f=frames.vendas;if(f){f.classList.remove('sobre');try{f.contentWindow.SOBRE&&f.contentWindow.modoSobre(false)}catch(e){}}
+  if(IR_G[pg])abrir(IR_G[pg]);else abrir('vendas',pg)};
+document.getElementById('iaFab').onclick=()=>mariaIA();
+setInterval(()=>document.body.classList.toggle('app-vendas',est.app==='vendas'),300);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&frames.vendas&&frames.vendas.classList.contains('sobre')){try{const w=frames.vendas.contentWindow;w.fecharChat&&w.fecharChat()}catch(x){}}});
+})();
 </script>
 </body>
 </html>

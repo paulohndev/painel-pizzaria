@@ -532,6 +532,12 @@ class Painel(BaseHTTPRequestHandler):
                 return self._json(E.resumo(db, E.carregar_regras()))
             finally:
                 db.close()
+        elif u.path == "/api/listas":
+            db = conectar()
+            try:
+                return self._json({"listas": E.listas(db)})
+            finally:
+                db.close()
         elif u.path == "/api/lembretes":
             db = conectar()
             try:
@@ -611,7 +617,12 @@ class Painel(BaseHTTPRequestHandler):
             if u.path == "/api/lembretes":
                 if not E.lembrete_acao(db, dado):
                     return self._json({"erro": "acao"}, 400)
-                return self._json({"lembretes": E.lembretes(db)})
+                return self._json({"lembretes": E.lembretes(db, bool(dado.get("todos")))})
+            if u.path == "/api/listas":
+                lid = E.lista_acao(db, dado)
+                if not lid:
+                    return self._json({"erro": "acao"}, 400)
+                return self._json({"id": lid, "listas": E.listas(db)})
             if u.path.startswith("/api/envios/"):
                 return self._json(*envios_post(db, u.path, dado))
             if u.path == "/api/promocoes_casa":
@@ -828,7 +839,9 @@ class Despachante(threading.Thread):
             ia = ESTADO.get("ia")
             if usar_ia and ia is not None and ia.ativa and D is not None and cli is not None:
                 try:
-                    r = ia_painel.gerar_mensagem(ia, D, cli, perfil_cliente(chave), "campanha: %s" % (camp or "-"), texto, "")
+                    hist, notas = contexto_mensagem(D, cli)
+                    r = ia_painel.gerar_mensagem(ia, D, cli, perfil_cliente(chave), "campanha: %s" % (camp or "-"), texto, "",
+                                                 historico=hist, notas=notas)
                     if (r.get("texto") or "").strip():
                         texto = r["texto"].strip()
                 except Exception as e:
@@ -910,9 +923,10 @@ def ia_post(caminho, dado):
             if cli is None:
                 return {"erro": "Cliente não encontrado."}, 200
             perfil = perfil_cliente(chave)
+            hist, notas = contexto_mensagem(D, cli)
             r = ia_painel.gerar_mensagem(ia, D, cli, perfil, str(dado.get("motivo") or "")[:600],
                                          str(dado.get("referencia") or "")[:800], str(dado.get("tipo") or ""),
-                                         str(dado.get("rascunho") or ""))
+                                         str(dado.get("rascunho") or ""), str(dado.get("instrucao") or "")[:1500], hist, notas)
             return r, 200
         if caminho in ("/api/ia/pergunta", "/api/ia/dica"):
             db = conectar()
@@ -939,7 +953,7 @@ def ia_post(caminho, dado):
                         cache = {}
                     if cache.get("data") == hoje and not dado.get("novo"):
                         return cache, 200
-                    r = ia_painel.dica_pagina(ia, D, aba, str(dado.get("tela") or "")[:2500], liberar, ESTADO.get("api_ia"))
+                    r = ia_painel.dica_pagina(ia, D, aba, str(dado.get("tela") or "")[:3500], liberar, ESTADO.get("api_ia"))
                     cache = {"data": hoje, "em": datetime.now().strftime("%H:%M"), "resposta": r["resposta"], "acoes": r["acoes"]}
                     P.meta_set(db, chave_cache, json.dumps(cache, ensure_ascii=False))
                     db.commit()
@@ -948,20 +962,37 @@ def ia_post(caminho, dado):
             finally:
                 db.close()
 
-            def fazer_lembrete(ids, texto, quando):
+            def fazer_lembrete(ids, texto, quando, titulo="", notas=None):
                 dbl = conectar()
                 try:
-                    n = 0
+                    itens = []
                     for i in ids:
                         c = D["clientes"][i]
-                        E.lembrete_acao(dbl, {"acao": "salvar", "cliente_id": c.get("id"), "chave": c.get("chave"), "nome": c.get("nome"),
-                                              "texto": texto, "quando": quando})
-                        n += 1
-                    return n
+                        nota = (notas or {}).get(str(i)) or ""
+                        itens.append({"cliente_id": c.get("id"), "chave": c.get("chave"), "nome": c.get("nome"),
+                                      "texto": (texto + (" — " + nota if nota else ""))[:1000]})
+                    E.lembrete_acao(dbl, {"acao": "salvar_varios", "itens": itens, "texto": texto, "quando": quando,
+                                          "grupo_titulo": titulo or texto})
+                    return len(itens)
                 finally:
                     dbl.close()
+
+            def salvar_lista(titulo, descricao, itens):
+                dbl = conectar()
+                try:
+                    return E.lista_acao(dbl, {"acao": "salvar", "titulo": titulo, "descricao": descricao, "origem": "ia", "itens": itens})
+                finally:
+                    dbl.close()
+
+            def escrever(cli, instrucao):
+                c = D["clientes"][cli]
+                hist, notas = contexto_mensagem(D, cli)
+                r = ia_painel.gerar_mensagem(ia, D, cli, perfil_cliente(c.get("chave")), "pedido do dono no chat", "", "", "",
+                                             instrucao, hist, notas)
+                return (r.get("texto") or "").strip()
             r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [], api=ESTADO.get("api_ia"), liberar=liberar,
-                                    tela=str(dado.get("tela") or "")[:2500], fazer_lembrete=fazer_lembrete)
+                                    tela=str(dado.get("tela") or "")[:3500], fazer_lembrete=fazer_lembrete,
+                                    salvar_lista=salvar_lista, escrever=escrever)
             log("IA: pergunta respondida (%d consulta(s), %d ação(ões))" % (r["consultas"], len(r["acoes"])))
             return r, 200
         return {"erro": "não encontrado"}, 404
@@ -978,6 +1009,21 @@ STATUS_PT = {"closed": "Concluído", "canceled": "Cancelado", "confirmed": "Em p
              "pending_payment": "Pagamento pendente", "pending_online_payment": "Pagamento pendente", "waiting_to_catch": "Aguardando retirada"}
 PAGTO_PT = {"money": "Dinheiro", "pix": "Pix", "credit_card": "Crédito", "debit_card": "Débito", "online_credit_card": "Crédito online",
             "voucher": "Vale-refeição", "meal_voucher": "Vale-refeição", "online_pix": "Pix online"}
+
+
+def contexto_mensagem(D, cli):
+    """Mensagens que o cliente já recebeu e anotações do dono sobre ele (para a IA não repetir e levar em conta)."""
+    c = D["clientes"][cli]
+    db = conectar()
+    try:
+        hist = E.historico_cliente(db, c.get("id"), c.get("chave")).get("mensagens") or []
+        notas = [r[0] for r in db.execute("SELECT texto FROM lembretes WHERE chave=? AND feito IS NULL AND texto <> '' ORDER BY criado DESC LIMIT 5",
+                                          (c.get("chave"),))]
+        return hist, notas
+    except Exception:
+        return [], []
+    finally:
+        db.close()
 
 
 def perfil_cliente(chave):
