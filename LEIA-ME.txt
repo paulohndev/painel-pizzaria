@@ -181,7 +181,7 @@ Para desligar de vez (e não ligar mais sozinho): "Desligar vigia (Windows).bat"
 
 VERSÕES NOVAS DO PROGRAMA
 -------------------------
-O programa se atualiza sozinho: confere de hora em hora se tem versão nova
+O programa se atualiza sozinho: confere a cada meia hora se tem versão nova
 no repositório do GitHub (config.ini, seção [atualizacao]) e baixa só os
 arquivos do programa, e se reinicia sozinho. O config.ini, a pasta "dados" e a
 pasta Database nunca são mexidos.

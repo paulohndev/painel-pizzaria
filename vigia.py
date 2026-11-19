@@ -139,7 +139,7 @@ class Vigia:
         self.nome_loja = P.meta_get(self.db, "nome_loja") or ""
         self.mudou = True
         self.prox = {"polling": 0, "recalculo": 0, "avaliacoes": time.time() + 120, "backlog": time.time() + 30,
-                     "diario": time.time() + 60, "versao": time.time() + 600, "loja": time.time() + 90}
+                     "diario": time.time() + 60, "versao": time.time() + 300, "loja": time.time() + 90}
         self.ultimo_toast = 0
         self.toasts_prio2_hoje = (datetime.now().date(), 0)
 
@@ -348,6 +348,13 @@ class Vigia:
         return {"ligado": lig, "ini": ini, "fim": fim}
 
     # ---------- versão nova do programa
+    def versao_no_disco(self):
+        try:
+            with open(os.path.join(PASTA, "versao.json"), encoding="utf-8") as f:
+                return str(json.load(f).get("versao") or "")
+        except (OSError, ValueError):
+            return ""
+
     def checar_versao(self):
         try:
             import atualizador
@@ -387,9 +394,19 @@ class Vigia:
                     self.prox["recalculo"] = agora + INTERVALO_RECALCULO
                     self.recalcular()
                 if agora >= self.prox["versao"]:
-                    self.prox["versao"] = agora + 3600
+                    self.prox["versao"] = agora + 1800
                     if self.checar_versao():
                         log("programa atualizado: reiniciando o vigia")
+                        reiniciar()
+                if agora >= self.prox.get("disco", 0):
+                    # arquivos do programa trocados direto na pasta (sem passar pelo GitHub): reinicia para usar a versão nova
+                    self.prox["disco"] = agora + 60
+                    vd = self.versao_no_disco()
+                    if not hasattr(self, "versao_carregada"):
+                        self.versao_carregada = vd
+                    elif vd and vd != self.versao_carregada:
+                        log("programa trocado na pasta (%s -> %s): reiniciando o vigia" % (self.versao_carregada, vd))
+                        time.sleep(5)  # dá tempo de terminar de copiar todos os arquivos
                         reiniciar()
             except P.ErroAPI as e:
                 log("API: %s" % e)
