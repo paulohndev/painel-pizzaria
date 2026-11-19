@@ -591,7 +591,7 @@ montarMenu();aplicarFixo();
 window.addEventListener('hashchange',()=>{const b=location.hash.slice(1);if(!/^(alerta|envios$|lembretes$)/.test(b))return;VENDAS_HASH='#'+b;abrir('vendas');const f=frames.vendas;try{if(f&&f.pronto)f.contentWindow.location.hash=b}catch(e){}});
 </script>
 
-<button id="iaFab" title="Perguntar à IA sobre esta página (ela vê o que está na tela)">✨ Perguntar à IA</button>
+<button id="iaFab" title="Perguntar à Zoe sobre esta página (ela vê o que está na tela)">✨ Perguntar à Zoe</button>
 <script>
 /* IA em qualquer página: o chat do painel de vendas abre por cima do app que estiver aberto, sabendo o que está na tela. */
 (function(){

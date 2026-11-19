@@ -126,9 +126,10 @@ Atenção: Z-API e Evolution API não são a API oficial do WhatsApp. Envios
 em excesso para quem não espera receber podem levar o WhatsApp a restringir
 o número. Comece com pouco volume.
 
-IA EM TODO O SISTEMA, LISTAS E LEMBRETES
+ZOE (A IA DO SISTEMA), LISTAS E LEMBRETES
 ------------------------------------------------------------
-- Botão "✨ Perguntar à IA" em qualquer página (também no Gestão): ela vê o
+A assistente de IA se chama Zoe.
+- Botão "✨ Perguntar à Zoe" em qualquer página (também no Gestão): ela vê o
   que está na tela e responde sobre aquilo.
 - Quando a IA mostra clientes, ela separa em grupos pelo motivo. Clique em
   "📄 Abrir como página" para virar uma Lista (página Listas), onde dá para

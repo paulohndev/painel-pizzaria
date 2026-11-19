@@ -560,7 +560,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
     <div class="filters">
       <span class="flabel">Turno</span><div class="seg" id="fTurno"></div>
       <span class="flabel">Canal</span><div class="seg" id="fCanal"></div>
-      <button id="perguntar" title="Pergunte qualquer coisa sobre suas vendas" class="hidden">✨ Perguntar</button>
+      <button id="perguntar" title="Pergunte à Zoe, a assistente da Mariá: vendas, clientes, despesas, mensagens…" class="hidden">✨ Zoe</button>
       <button id="lembBtn" title="Lembretes: clientes que você salvou para depois">📌<span class="n" id="lembN"></span></button>
       <button id="sino" title="Alertas"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="n" id="sinoN"></span></button>
     </div>
@@ -754,7 +754,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
           </div></div></div>
         <div class="ev-passo"><div class="ev-num">2</div><div class="ev-corpo"><b>Mensagem</b>
           <div class="toolbar" style="margin-top:8px"><select id="evMsg"></select>
-            <label class="muted" style="font-size:13px" id="evIaLbl"><input type="checkbox" id="evIa"> ✨ IA reescreve cada mensagem na hora do envio, mantendo a oferta</label></div>
+            <label class="muted" style="font-size:13px" id="evIaLbl"><input type="checkbox" id="evIa"> ✨ A Zoe reescreve cada mensagem na hora do envio, mantendo a oferta</label></div>
           <textarea id="evTexto" class="ev-texto"></textarea>
           <div class="muted" style="font-size:12px;margin-top:4px">Variáveis: {nome}, {favorito} (vira "aquela pizza de calabresa"), {oferta}, {sugestao}, {sabor_promo}, {pontos}, {bairro}. Mudar o texto aqui vale só para este envio.</div>
         </div></div>
@@ -775,7 +775,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <section id="t-listas" class="hidden">
     <div class="ls-wrap">
       <div class="card ls-lado"><h2>Listas <span class="cont" id="lsN">0</span></h2>
-        <p class="desc">Clientes separados pela IA (ou por você) para trabalhar com calma. No chat, clique em "📄 Abrir como página" ou peça "salva isso numa lista".</p>
+        <p class="desc">Clientes separados pela Zoe (ou por você) para trabalhar com calma. No chat, clique em "📄 Abrir como página" ou peça "salva isso numa lista".</p>
         <input type="search" id="lsBusca" placeholder="Buscar lista">
         <div id="lsListas"></div>
       </div>
@@ -785,7 +785,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <section id="t-lembretes" class="hidden">
     <div class="card">
       <div class="lp-topo"><div><h2 style="margin:0">Lembretes <span class="cont" id="lpN">0</span></h2>
-        <p class="desc" style="margin:4px 0 0">Clientes que você (ou a IA) separou para fazer algo depois, agrupados pelo motivo.</p></div>
+        <p class="desc" style="margin:4px 0 0">Clientes que você (ou a Zoe) separou para fazer algo depois, agrupados pelo motivo.</p></div>
         <div class="lp-ac"><input type="search" id="lpBusca" placeholder="Buscar cliente ou texto"><input type="search" id="lpNovo" placeholder="+ Novo: digite o nome do cliente"><div class="lb-res hidden" id="lpRes"></div></div></div>
       <div class="seg" id="lpFiltro" style="margin:14px 0 4px"><button data-f="pend" class="on">Pendentes</button><button data-f="hoje">Hoje e atrasados</button><button data-f="prox">Próximos dias</button><button data-f="sem">Sem data</button><button data-f="feito">Feitos</button></div>
     </div>
@@ -812,7 +812,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div class="ia-cab"><h3 id="iaTitulo">Mensagem</h3><button id="iaFechar" title="Fechar">✕</button></div>
   <div class="ia-freq hidden" id="iaFreq"></div>
   <div class="ia-pts hidden" id="iaPts"></div>
-  <div class="ia-instr" id="iaInstrBox"><input id="iaInstr" placeholder="Diga à IA o que você quer dizer (ex.: fala da Quinta do Clone, bem descontraído, sem emoji)"><button id="iaInstrBtn">✨ Escrever</button></div>
+  <div class="ia-instr" id="iaInstrBox"><input id="iaInstr" placeholder="Diga à Zoe o que você quer dizer (ex.: fala da Quinta do Clone, bem descontraído, sem emoji)"><button id="iaInstrBtn">✨ Escrever</button></div>
   <div class="ia-chips" id="iaChips"><button>Mais curta</button><button>Mais descontraída</button><button>Mais carinhosa</button><button>Sem emoji</button><button>Falar da promoção de hoje</button><button>Lembrar dos pontos</button><button>Convidar para pedir pelo app</button></div>
   <div class="ia-status" id="iaStatus"></div>
   <textarea id="iaTxt"></textarea>
@@ -841,8 +841,8 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div class="lb-chips" id="lbQuando"></div>
   <div class="ia-acoes"><button class="btn principal" id="lbSalvar" style="background:var(--sun);color:var(--ink)">Salvar lembrete</button><span class="muted" id="lbMsg" style="font-size:13px;align-self:center"></span></div>
 </div></div>
-<aside id="chat" aria-label="Pergunte ao painel">
-  <div class="gv-topo"><h3>✨ Pergunte à IA</h3><button id="chFechar" title="Fechar">✕</button></div>
+<aside id="chat" aria-label="Pergunte à Zoe">
+  <div class="gv-topo"><h3>✨ Pergunte à Zoe</h3><button id="chFechar" title="Fechar">✕</button></div>
   <div class="ch-lista" id="chLista"></div>
   <div class="ch-sug" id="chSug"></div>
   <div class="ch-entrada"><textarea id="chTxt" placeholder="Ex.: quanto vendi de calabresa no iFood em outubro?"></textarea><button id="chEnviar">Enviar</button></div>
@@ -1677,16 +1677,16 @@ function iaGerar(nova, instr){
   const rasc=nova&&iaEditado()?$('#iaTxt').value.trim():'';
   const k=IA_CTX.chave+'|'+IA_CTX.ref+'|'+IA_CTX.tipo; const st=$('#iaStatus');
   if(!nova && !instr && IA_CACHE[k]) return iaMostrar(IA_CACHE[k]);
-  st.className='ia-status'; st.innerHTML=instr?'<span class="gira"></span> A IA está escrevendo do jeito que você pediu…':rasc?'<span class="gira"></span> A IA está reescrevendo a partir do que você escreveu…':'<span class="gira"></span> A IA está escrevendo uma mensagem para este cliente…'; $('#iaOutra').disabled=true;
+  st.className='ia-status'; st.innerHTML=instr?'<span class="gira"></span> A Zoe está escrevendo do jeito que você pediu…':rasc?'<span class="gira"></span> A Zoe está reescrevendo a partir do que você escreveu…':'<span class="gira"></span> A Zoe está escrevendo uma mensagem para este cliente…'; $('#iaOutra').disabled=true;
   const ctx=IA_CTX;
   api('/api/ia/mensagem',{chave:ctx.chave, motivo:ctx.motivo, referencia:ctx.ref, tipo:ctx.tipo, rascunho:rasc, instrucao:instr}).then(r=>{
     if(IA_CTX!==ctx) return; $('#iaOutra').disabled=false;
     if(r.erro){ st.className='ia-status erro'; st.textContent=r.erro+(rasc?' Seu texto continua abaixo.':' A mensagem padrão está abaixo.'); iaBotaoOutra(); return; }
     if(!rasc&&!instr) IA_CACHE[k]=r; iaMostrar(r, rasc||instr);
-  }).catch(()=>{ $('#iaOutra').disabled=false; iaBotaoOutra(); st.className='ia-status erro'; st.textContent='Não consegui falar com a IA agora.'+(rasc?' Seu texto continua abaixo.':' A mensagem padrão está abaixo.'); });
+  }).catch(()=>{ $('#iaOutra').disabled=false; iaBotaoOutra(); st.className='ia-status erro'; st.textContent='Não consegui falar com a Zoe agora.'+(rasc?' Seu texto continua abaixo.':' A mensagem padrão está abaixo.'); });
 }
 function iaMostrar(r, rasc){
-  $('#iaStatus').className='ia-status'; $('#iaStatus').textContent=rasc?'✨ Escrita pela IA seguindo o que você pediu. Pode ajustar o pedido acima ou editar o texto.':'✨ Escrita pela IA ('+(D.ia.nome||'IA')+') para este cliente. Escreva sua ideia por cima e clique em "Escrever outra" para a IA seguir o que você escreveu.';
+  $('#iaStatus').className='ia-status'; $('#iaStatus').textContent=rasc?'✨ Escrita pela Zoe seguindo o que você pediu. Pode ajustar o pedido acima ou editar o texto.':'✨ Escrita pela Zoe ('+(D.ia.nome||'IA')+') para este cliente. Escreva sua ideia por cima e clique em "Escrever outra" para a Zoe seguir o que você escreveu.';
   $('#iaTxt').value=r.texto||IA_CTX.ref; IA_CTX.gerado=$('#iaTxt').value; iaBotaoOutra();
   const pub=!!r.resposta_publica; $('#iaPub').classList.toggle('hidden',!pub); $('#iaCopiarPub').classList.toggle('hidden',!pub); if(pub) $('#iaPubTxt').value=r.resposta_publica;
 }
@@ -1722,9 +1722,9 @@ const SUGESTOES=['Como foram as vendas desta semana comparando com a passada?','
   'Que promoção você sugere para quarta-feira, que é dia fraco?','Quanto do meu faturamento vem do iFood e do 99 nos últimos 30 dias?','Quem são meus 10 melhores clientes do almoço?'];
 function chatRender(){
   const L=$('#chLista');
-  if(!IA_ON){ L.innerHTML=`<div class="ch-vazio"><b>A IA ainda não está ligada.</b><br>1. Crie uma chave de API em <b>platform.openai.com</b> (ChatGPT) ou <b>platform.claude.com</b> (Claude) e coloque um pouco de crédito.<br>2. Abra o arquivo <b>config.ini</b> na pasta do painel e, na seção <b>[ia]</b>, preencha <b>provedor = chatgpt</b> (ou claude) e cole a chave em <b>chave =</b>.<br>3. Rode "Desligar vigia" e depois "Ligar vigia e alertas".</div>`; $('#chSug').innerHTML=''; return; }
+  if(!IA_ON){ L.innerHTML=`<div class="ch-vazio"><b>A Zoe ainda não está ligada.</b><br>1. Crie uma chave de API em <b>platform.openai.com</b> (ChatGPT) ou <b>platform.claude.com</b> (Claude) e coloque um pouco de crédito.<br>2. Abra o arquivo <b>config.ini</b> na pasta do painel e, na seção <b>[ia]</b>, preencha <b>provedor = chatgpt</b> (ou claude) e cole a chave em <b>chave =</b>.<br>3. Rode "Desligar vigia" e depois "Ligar vigia e alertas".</div>`; $('#chSug').innerHTML=''; return; }
   L.innerHTML=CHAT.length?CHAT.map((m,mi)=>`<div class="ch-msg ${m.role==='user'?'eu':'ia'} ${m.erro?'erro':''}">${m.role==='user'?esc(m.content):mdSimples(m.content)}${m.meta?`<span class="meta">${esc(m.meta)}</span>`:''}</div>${(m.acoes||[]).map((a,ai)=>acaoHTML(a,mi+'_'+ai)).join('')}`).join('')
-    :'<div class="ch-vazio">Pergunte qualquer coisa sobre vendas, clientes, produtos, canais, bairros ou promoções. A IA consulta os seus dados e responde.</div>';
+    :'<div class="ch-vazio"><b>Oi! Eu sou a Zoe</b>, a assistente da Mariá. Pode me perguntar sobre vendas, clientes, produtos, despesas e fichas, me pedir para separar clientes, criar lembretes, montar listas ou escrever mensagens. Eu consulto os seus dados antes de responder.</div>';
   if(CHAT.pendente) L.innerHTML+='<div class="ch-msg ia"><span class="gira"></span> Consultando os dados…</div>';
   ligarAcoes(L, CHAT);
   if(DICA_CHAT&&(SOBRE||!CHAT.length)) L.insertAdjacentHTML(SOBRE?'beforeend':'afterbegin',`<div class="ia-dica" style="margin:0 0 10px"><div class="cab">✨ Sobre esta página</div><div class="tx">${DICA_CHAT.carregando?'<span class="gira"></span> Olhando os números desta página…':mdSimples(DICA_CHAT.resposta||DICA_CHAT.erro||'')}</div></div>`);
@@ -1742,7 +1742,7 @@ function chatEnviar(){
       CHAT.push({role:'assistant',content:r.resposta||'Pronto.',acoes:ac,meta:[r.consultas?`consultou os dados ${r.consultas} ${r.consultas===1?'vez':'vezes'}`:'',...fx].filter(Boolean).join(' · ')});
       if(ac.some(a=>a.tipo==='lembretes')) lembCarregar(); const pf=ac.find(a=>a.tipo==='perfil'); if(pf){ fecharChat(); abrirPerfil({i:pf.id}); } }
     chatRender();
-  }).catch(()=>{ CHAT.pendente=false; CHAT.push({role:'assistant',content:'Não consegui falar com a IA agora.',erro:true}); chatRender(); });
+  }).catch(()=>{ CHAT.pendente=false; CHAT.push({role:'assistant',content:'Não consegui falar com a Zoe agora.',erro:true}); chatRender(); });
 }
 function abrirChat(pergunta){ if(typeof pergunta!=='string') pergunta=''; chatRender(); if(SOBRE&&window.__paginaExterna) dicaNoChat(window.__paginaExterna); if(pergunta){ $('#chTxt').value=pergunta; setTimeout(chatEnviar,50); } $('#chat').classList.add('aberta'); $('#veu').classList.add('on'); setTimeout(()=>$('#chTxt').focus(),300); }
 function fecharChat(){ $('#chat').classList.remove('aberta'); if(!$('#gaveta').classList.contains('aberta')&&!$('#perfil').classList.contains('aberto')) $('#veu').classList.remove('on'); }
@@ -1785,7 +1785,7 @@ function marcarPeloBotao(cli, a){ const c=D.clientes[cli]; if(!c) return; const 
   if(cb) return; const i=cInfo(c.id); if(i&&diasEntre(i.d,new Date())===0) return; marcar(c.id,'whatsapp',true); }
 
 
-// janela ao clicar em WhatsApp: IA e/ou envio automático direto para o cliente
+// janela ao clicar em WhatsApp: Zoe e/ou envio automático direto para o cliente
 const MODAL_WA = AO_VIVO && (IA_ON || ENVCFG.ativo);
 if(MODAL_WA) document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.button) return;
   if(iaAbrir(a)){ e.preventDefault(); e.stopPropagation(); } },true);
@@ -1941,7 +1941,7 @@ function renderEvStatus(r){
   const NOME_C=k=>{ if(!k) return ''; if(CAMP[k]) return CAMP[k].nome; if(k.startsWith('promo_')){ const p=PROMOS.find(x=>'promo_'+x.id===k); return p?p.nome:k; } return {livre:'Texto livre',whatsapp:'Botão WhatsApp',envio:'Envio'}[k]||k; };
   const fila=(r&&r.fila)||[]; $('#evFilaN').textContent=r?fmtN(r.fila_total):'0';
   $('#qEnv').style.display=r&&r.fila_total?'':'none'; $('#qEnv').textContent=r?r.fila_total:'';
-  $('#evFila').innerHTML=fila.length?fila.slice(0,60).map(x=>`<div class="ev-linha"><span class="q">${dtCurta(x.quando)}</span><span class="n">${esc(x.nome||'')}<span class="sub">${esc(NOME_C(x.campanha))}${x.ia?' · ✨ IA':''}</span></span><button title="Cancelar esta" data-evx="${x.id}">✕</button></div>`).join('')+(fila.length>60?`<div class="muted" style="font-size:12px;padding-top:8px">e mais ${fmtN(r.fila_total-60)}…</div>`:'')
+  $('#evFila').innerHTML=fila.length?fila.slice(0,60).map(x=>`<div class="ev-linha"><span class="q">${dtCurta(x.quando)}</span><span class="n">${esc(x.nome||'')}<span class="sub">${esc(NOME_C(x.campanha))}${x.ia?' · ✨ Zoe':''}</span></span><button title="Cancelar esta" data-evx="${x.id}">✕</button></div>`).join('')+(fila.length>60?`<div class="muted" style="font-size:12px;padding-top:8px">e mais ${fmtN(r.fila_total-60)}…</div>`:'')
     :'<div class="muted" style="font-size:13px">Nada na fila.</div>';
   $('#evFila').querySelectorAll('[data-evx]').forEach(b=>b.onclick=()=>api('/api/envios/acao',{acao:'cancelar',id:+b.dataset.evx}).then(x=>{ EV.estado=x; renderEvStatus(x); }));
   const rec=(r&&r.recentes)||[];
@@ -2111,7 +2111,7 @@ function ligarAcoes(box, lista){
     else if(t==='envio'){ const ids=g?g.ids:gs.flatMap(x=>x.ids); irParaEnvioIA(ids,'Oi {nome}! ',g?g.titulo:a.titulo); }
     else if(t==='revisar') irParaEnvioIA(a.ids,a.texto,a.titulo);
     else if(t==='pin') lembrarGrupos(g?[g]:gs, b);
-    else if(t==='pagina'){ b.disabled=true; b.textContent='Salvando…'; salvarComoLista(a.titulo||'Lista da IA','',gs).then(id=>{ fecharChat(); abrirLista(id); }).catch(()=>{ b.disabled=false; b.textContent='Não consegui salvar'; }); }
+    else if(t==='pagina'){ b.disabled=true; b.textContent='Salvando…'; salvarComoLista(a.titulo||'Lista da Zoe','',gs).then(id=>{ fecharChat(); abrirLista(id); }).catch(()=>{ b.disabled=false; b.textContent='Não consegui salvar'; }); }
     else if(t==='abrirlista'){ fecharChat(); abrirLista(a.id); }
     else if(t==='rel') abrirRelatorio(a);
     else if(t==='perfil'){ fecharChat(); abrirPerfil({i:a.id}); }
@@ -2130,10 +2130,10 @@ function lembrarGrupos(gs, b){
 function abrirMensagemPronta(cli, texto){ const c=D.clientes[cli]; const w=c&&waLink(c,texto); if(!w){ alert('Este cliente não tem telefone cadastrado.'); return; }
   const a=document.createElement('a'); a.href=w; const ref=new URL(w).searchParams.get('text')||''; IA_CACHE[c.chave+'|'+ref+'|']={texto:ref}; iaAbrir(a); }
 function irParaEnvioIA(ids, texto, titulo){
-  EV.listaIA={ids:ids.slice(), titulo:titulo||'Lista da IA'}; EV.livre=texto;
+  EV.listaIA={ids:ids.slice(), titulo:titulo||'Lista da Zoe'}; EV.livre=texto;
   fecharChat(); irPara('envios');
   const f=$('#evFonte'); if(![...f.options].some(o=>o.value==='ia')) f.insertAdjacentHTML('afterbegin','<option value="ia"></option>');
-  f.querySelector('option[value=ia]').textContent='IA · '+EV.listaIA.titulo+' ('+ids.length+')'; f.value='ia';
+  f.querySelector('option[value=ia]').textContent='Zoe · '+EV.listaIA.titulo+' ('+ids.length+')'; f.value='ia';
   $('#evMsg').value='livre'; $('#evTexto').value=texto; EV.textos={}; EV.marcados=new Set(); EV.desmarcados=new Set();
   ['#evPerfil','#evCanal','#evTurno','#evBairro','#evPts'].forEach(x=>$(x).value=''); ['#evDiasMin','#evDiasMax','#evPedMin','#evFav'].forEach(x=>$(x).value='');
   renderEvLista(); $('#t-envios').scrollIntoView({behavior:'smooth'});
@@ -2179,10 +2179,10 @@ function renderListas(){
   if(!AO_VIVO){ $('#lsListas').innerHTML=''; M.innerHTML='<div class="ch-vazio">As listas ficam salvas no sistema. Abra pelo atalho <b>Mariá Gestão</b>.</div>'; return; }
   const q=semAc(($('#lsBusca').value||'').trim()); $('#lsN').textContent=LISTAS.length;
   if(LS.sel&&!LISTAS.some(l=>l.id===LS.sel)) LS.sel=null; if(!LS.sel&&LISTAS.length) LS.sel=LISTAS[0].id;
-  $('#lsListas').innerHTML=LISTAS.filter(l=>!q||semAc(l.titulo+' '+(l.descricao||'')).includes(q)).map(l=>`<div class="ls-it ${l.id===LS.sel?'on':''}" data-ls="${l.id}"><b>${esc(l.titulo)}</b><span>${fmtN(l.itens.length)} cliente${l.itens.length===1?'':'s'} · ${l.origem==='ia'?'✨ IA · ':''}${esc(dtCurta(l.atualizado||l.criado))}</span></div>`).join('')||'<div class="muted" style="padding:10px 2px">Nenhuma lista ainda.</div>';
+  $('#lsListas').innerHTML=LISTAS.filter(l=>!q||semAc(l.titulo+' '+(l.descricao||'')).includes(q)).map(l=>`<div class="ls-it ${l.id===LS.sel?'on':''}" data-ls="${l.id}"><b>${esc(l.titulo)}</b><span>${fmtN(l.itens.length)} cliente${l.itens.length===1?'':'s'} · ${l.origem==='ia'?'✨ Zoe · ':''}${esc(dtCurta(l.atualizado||l.criado))}</span></div>`).join('')||'<div class="muted" style="padding:10px 2px">Nenhuma lista ainda.</div>';
   $('#lsListas').querySelectorAll('[data-ls]').forEach(d=>d.onclick=()=>{ LS.sel=+d.dataset.ls; LS.g=''; LS.busca=''; LS.marc=new Set(); renderListas(); });
   const l=LISTAS.find(x=>x.id===LS.sel);
-  if(!l){ M.innerHTML='<div class="ch-vazio"><b>Nenhuma lista ainda.</b><br>Peça à IA no "Perguntar", por exemplo: <i>"separa os clientes fiéis que sumiram por motivo e salva numa lista"</i>. Ou, quando ela mostrar clientes no chat, clique em <b>📄 Abrir como página</b>.</div>'; return; }
+  if(!l){ M.innerHTML='<div class="ch-vazio"><b>Nenhuma lista ainda.</b><br>Peça à Zoe, por exemplo: <i>"separa os clientes fiéis que sumiram por motivo e salva numa lista"</i>. Ou, quando ela mostrar clientes no chat, clique em <b>📄 Abrir como página</b>.</div>'; return; }
   const pc=pcMemo(); const it=l.itens.map(x=>{ const cli=IDX_CHAVE[x.chave]; return Object.assign({},x,{cli:cli!=null?cli:null, p:cli!=null?pc.get(cli):null}); });
   const grupos=[...new Set(it.map(x=>x.grupo||''))]; if(LS.g&&!grupos.includes(LS.g)) LS.g='';
   const fq=semAc(LS.busca||'');
@@ -2206,8 +2206,8 @@ function renderListas(){
       corpo+=`<tr class="ls-gr"><td class="ck"><input type="checkbox" data-lsg="${gi}" title="Marcar o grupo"></td><td colspan="7"><b>${esc(g||'Sem grupo')}</b> <span class="muted">${fmtN(gv.length)}</span></td><td class="ls-ac"><button class="mini" data-lsga="envio" data-gi="${gi}">📨 Mensagem</button><button class="mini" data-lsga="pin" data-gi="${gi}">📌</button><button class="mini" data-lsga="ia" data-gi="${gi}">✨</button></td></tr>`+gv.map(linha).join(''); });
   } else corpo=vis.map(linha).join('');
   const sel=LS.marc.size;
-  M.innerHTML=`<div class="ls-cab"><div><h2 class="ls-tit" id="lsTit" title="Clique para renomear">${esc(l.titulo)} <span class="ed">✎</span></h2><div class="muted" style="font-size:12.5px">${l.origem==='ia'?'✨ Montada pela IA · ':''}criada em ${esc(dtCurta(l.criado))} · ${fmtN(it.length)} cliente${it.length===1?'':'s'}${grupos.length>1?' em '+grupos.length+' grupos':''}</div>${l.descricao?`<p class="desc" style="margin:6px 0 0">${esc(l.descricao)}</p>`:''}</div>
-      <div class="bts">${IA_ON?'<button class="btn" data-lsa="ia">✨ Perguntar à IA sobre a lista</button>':''}<button class="btn" data-lsa="envio">📨 Mensagem para todos</button><button class="btn" data-lsa="csv">⬇ Planilha</button><button class="btn" data-lsa="apagar">🗑 Apagar lista</button></div></div>
+  M.innerHTML=`<div class="ls-cab"><div><h2 class="ls-tit" id="lsTit" title="Clique para renomear">${esc(l.titulo)} <span class="ed">✎</span></h2><div class="muted" style="font-size:12.5px">${l.origem==='ia'?'✨ Montada pela Zoe · ':''}criada em ${esc(dtCurta(l.criado))} · ${fmtN(it.length)} cliente${it.length===1?'':'s'}${grupos.length>1?' em '+grupos.length+' grupos':''}</div>${l.descricao?`<p class="desc" style="margin:6px 0 0">${esc(l.descricao)}</p>`:''}</div>
+      <div class="bts">${IA_ON?'<button class="btn" data-lsa="ia">✨ Perguntar à Zoe sobre a lista</button>':''}<button class="btn" data-lsa="envio">📨 Mensagem para todos</button><button class="btn" data-lsa="csv">⬇ Planilha</button><button class="btn" data-lsa="apagar">🗑 Apagar lista</button></div></div>
     <div class="ls-ferr"><input type="search" id="lsFiltroQ" placeholder="Filtrar nesta lista" value="${esc(LS.busca||'')}"><select id="lsOrd">${Object.entries(LS_ORD).map(([k,v])=>`<option value="${k}" ${LS.ord===k?'selected':''}>${v}</option>`).join('')}</select>
       ${grupos.length>1?`<div class="seg" id="lsGr"><button data-g="" class="${!LS.g?'on':''}">Todos · ${fmtN(it.length)}</button>${grupos.map(g=>`<button data-g="${esc(g)}" class="${LS.g===g?'on':''}">${esc(g||'Sem grupo')} · ${fmtN(it.filter(x=>(x.grupo||'')===g).length)}</button>`).join('')}</div>`:''}</div>
     <div class="ls-sel ${sel?'on':''}">${sel?`<b>${fmtN(sel)} marcado${sel===1?'':'s'}:</b> <button data-lsa="envio_sel">📨 Mandar mensagem</button><button data-lsa="pin_sel">📌 Criar lembrete</button><button data-lsa="mover">Mover para grupo…</button><button data-lsa="tirar">Tirar da lista</button><button data-lsa="limpar">Desmarcar</button>`:'Marque clientes para mandar mensagem, criar lembrete, mudar de grupo ou tirar da lista.'}</div>
@@ -2266,9 +2266,9 @@ function renderLembPag(){
     return `<div class="card lp-g" data-gk="${esc(g.k)}"><div class="lp-gcab"><div class="lp-gt"><h3 ${g.grupo?'data-ren="1" title="Clique para renomear"':''}>${esc(g.titulo)}${g.grupo?' <span class="ed">✎</span>':''}</h3>
         <div class="muted" style="font-size:12.5px">${fmtN(g.itens.length)} ${LP.f==='feito'?'feito'+(g.itens.length===1?'':'s'):'pendente'+(g.itens.length===1?'':'s')}${g.grupo&&feitos&&LP.f!=='feito'?' · '+feitos+' feito'+(feitos===1?'':'s'):''}${qd?' · '+esc(quandoLabel(qd)):''}</div>
         ${g.grupo&&todos.length>1?`<div class="lp-bar"><i style="width:${pct}%"></i></div>`:''}</div>
-      <div class="bts">${pend.length?`<button data-lg="msg">📨 Mensagem para ${pend.length===1?'ele':'o grupo'}</button>`:''}${g.grupo?`<button data-lg="lista">📄 Abrir como lista</button>${pend.length?`<label class="lp-data" title="Data do grupo">📅 <input type="date" data-lg="data" value="${qd||''}"></label><button data-lg="feito">✓ Tudo feito</button>`:'<button data-lg="reabrir">Reabrir</button>'}${IA_ON?'<button data-lg="ia" title="Perguntar à IA sobre este grupo">✨</button>':''}<button data-lg="apagar" title="Apagar o grupo">🗑</button>`:''}</div></div>
+      <div class="bts">${pend.length?`<button data-lg="msg">📨 Mensagem para ${pend.length===1?'ele':'o grupo'}</button>`:''}${g.grupo?`<button data-lg="lista">📄 Abrir como lista</button>${pend.length?`<label class="lp-data" title="Data do grupo">📅 <input type="date" data-lg="data" value="${qd||''}"></label><button data-lg="feito">✓ Tudo feito</button>`:'<button data-lg="reabrir">Reabrir</button>'}${IA_ON?'<button data-lg="ia" title="Perguntar à Zoe sobre este grupo">✨</button>':''}<button data-lg="apagar" title="Apagar o grupo">🗑</button>`:''}</div></div>
       <div class="lp-itens">${g.itens.map(item).join('')}</div></div>`; }).join('')
-    ||`<div class="card"><div class="ch-vazio">${LP.f==='feito'?'Nada feito por aqui ainda.':'<b>Nenhum lembrete '+(LP.f==='pend'?'':'neste filtro')+'.</b><br>Clique no 📌 ao lado de um cliente, use a busca acima, ou peça à IA: <i>"marca os clientes que sumiram para eu mandar mensagem na sexta"</i>.'}</div></div>`;
+    ||`<div class="card"><div class="ch-vazio">${LP.f==='feito'?'Nada feito por aqui ainda.':'<b>Nenhum lembrete '+(LP.f==='pend'?'':'neste filtro')+'.</b><br>Clique no 📌 ao lado de um cliente, use a busca acima, ou peça à Zoe: <i>"marca os clientes que sumiram para eu mandar mensagem na sexta"</i>.'}</div></div>`;
   box.querySelectorAll('[data-lp]').forEach(b=>b.onclick=()=>{ if(b.dataset.lp==='apagar'&&!confirm('Apagar este lembrete?')) return; lembAcao({acao:b.dataset.lp, id:+b.dataset.id}); });
   box.querySelectorAll('[data-lped]').forEach(b=>b.onclick=()=>{ const l=LEMB.find(x=>x.id===+b.dataset.lped); if(l) abrirLembrete(IDX_CHAVE[l.chave], l); });
   box.querySelectorAll('.lp-g').forEach(card=>{ const g=gs.find(x=>x.k===card.dataset.gk); if(!g) return;
@@ -2337,8 +2337,8 @@ function renderDica(a){
   if(!IA_ON||dicaOculta(a)){ if(box) box.remove(); return; }
   if(!box){ box=document.createElement('div'); box.className='ia-dica'; box.id='dica-'+a; sec.prepend(box); }
   const d=DICAS[a];
-  box.innerHTML=`<div class="cab">✨ Dica da IA para esta página ${d&&d.em?`<small>· gerada às ${esc(d.em)}</small>`:''}<span class="esp"></span><button data-dn="1" title="Gerar de novo">↻</button><button data-dx="1" title="Esconder hoje">✕</button></div>`+
-    (!d?'<div class="tx muted"><span class="gira"></span> A IA está olhando os números desta página…</div>':d.erro?`<div class="tx muted">${esc(d.erro)}</div>`:`<div class="tx">${mdSimples(d.resposta||'')}</div>${(d.acoes||[]).map((x,i)=>acaoHTML(x,'0_'+i,5)).join('')}`);
+  box.innerHTML=`<div class="cab">✨ Dica da Zoe para esta página ${d&&d.em?`<small>· gerada às ${esc(d.em)}</small>`:''}<span class="esp"></span><button data-dn="1" title="Gerar de novo">↻</button><button data-dx="1" title="Esconder hoje">✕</button></div>`+
+    (!d?'<div class="tx muted"><span class="gira"></span> A Zoe está olhando os números desta página…</div>':d.erro?`<div class="tx muted">${esc(d.erro)}</div>`:`<div class="tx">${mdSimples(d.resposta||'')}</div>${(d.acoes||[]).map((x,i)=>acaoHTML(x,'0_'+i,5)).join('')}`);
   box.querySelector('[data-dn]').onclick=()=>pedirDica(a,true);
   box.querySelector('[data-dx]').onclick=()=>{ store('dica_off_'+a,hojeStr()); box.remove(); };
   if(d&&d.acoes) ligarAcoes(box,[{acoes:d.acoes}]);
@@ -2348,7 +2348,7 @@ function pedirDica(a, novo){
   if(!IA_ON||!DICA_ABAS.includes(a)||dicaOculta(a)) return;
   if(DICA_PEDIDA[a]&&!novo){ renderDica(a); return; } DICA_PEDIDA[a]=true; if(novo) DICAS[a]=null; renderDica(a);
   api('/api/ia/dica',{aba:a, tela:telaContexto(), novo:!!novo}).then(r=>{ DICAS[a]=r.erro?{erro:r.erro}:r; renderDica(a); })
-    .catch(()=>{ DICAS[a]={erro:'Não consegui falar com a IA agora.'}; renderDica(a); });
+    .catch(()=>{ DICAS[a]={erro:'Não consegui falar com a Zoe agora.'}; renderDica(a); });
 }
 
 // ------------------------------------------------------------ CARTÃO AO PASSAR O MOUSE NO CLIENTE
