@@ -315,8 +315,9 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .pc-dias button.on{background:var(--sun);border-color:var(--sun);font-weight:600}
 @media(max-width:700px){.pc-form{grid-template-columns:1fr}}
 /* ---------- IA ---------- */
-#perguntar{border:0;background:linear-gradient(135deg,#4a0c06,#6e0000);color:#fff;height:42px;padding:0 16px;border-radius:14px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 8px 20px -10px rgba(110,0,0,.7)}
-#perguntar:hover{transform:translateY(-1px)}
+#perguntar{position:fixed;right:18px;bottom:18px;z-index:30;border:0;display:flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:999px;background:#FFB21E;color:#2A1B17;cursor:pointer;font:inherit;font-size:14px;font-weight:700;box-shadow:0 12px 28px -10px rgba(140,90,0,.55);transition:transform .2s,box-shadow .2s}
+#perguntar:hover{transform:translateY(-2px);box-shadow:0 16px 32px -10px rgba(140,90,0,.7)}
+#perguntar.hidden,html.embutido #perguntar,body.gaveta-on #perguntar{display:none!important}
 .ia-modal{position:fixed;inset:0;z-index:70;background:rgba(42,27,23,.35);display:flex;align-items:center;justify-content:center;padding:16px}
 .ia-modal.hidden{display:none}
 .ia-box{background:var(--bg);border-radius:24px;width:min(560px,100%);max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(42,27,23,.35);padding:22px 24px;animation:pop .3s var(--ease) both}
@@ -560,7 +561,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
     <div class="filters">
       <span class="flabel">Turno</span><div class="seg" id="fTurno"></div>
       <span class="flabel">Canal</span><div class="seg" id="fCanal"></div>
-      <button id="perguntar" title="Pergunte à Zoe, a assistente da Mariá: vendas, clientes, despesas, mensagens…" class="hidden">✨ Zoe</button>
+      <button id="perguntar" title="Pergunte à Zoe, a assistente da Mariá: vendas, clientes, despesas, mensagens…" class="hidden">✨ Perguntar à Zoe</button>
       <button id="lembBtn" title="Lembretes: clientes que você salvou para depois">📌<span class="n" id="lembN"></span></button>
       <button id="sino" title="Alertas"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><span class="n" id="sinoN"></span></button>
     </div>
@@ -1748,6 +1749,7 @@ function abrirChat(pergunta){ if(typeof pergunta!=='string') pergunta=''; chatRe
 function fecharChat(){ $('#chat').classList.remove('aberta'); if(!$('#gaveta').classList.contains('aberta')&&!$('#perfil').classList.contains('aberto')) $('#veu').classList.remove('on'); }
 $('#chFechar').onclick=fecharChat; $('#chEnviar').onclick=chatEnviar;
 $('#chTxt').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); chatEnviar(); } });
+document.body.appendChild($('#perguntar')); // fora do cabeçalho, para flutuar no canto da tela
 if(AO_VIVO){ $('#perguntar').classList.remove('hidden'); $('#perguntar').onclick=()=>{ if(EMBUTIDO&&parent.mariaIA) parent.mariaIA(); else abrirChat(); }; }
 if(AO_VIVO) setTimeout(()=>iaResumo(false),800);
 
@@ -2292,6 +2294,7 @@ $('#lpNovo').oninput=()=>{ const q=semAc($('#lpNovo').value.trim()); const R=$('
   R.innerHTML=out.map(i=>`<div data-lpc="${i}">${esc(D.clientes[i].nome||'(sem nome)')}<span class="muted" style="font-size:12px"> ${esc(fmtTel(D.clientes[i].tel||''))}</span>${ptsTag(D.clientes[i])}</div>`).join('')||'<div class="muted">Ninguém encontrado</div>';
   R.classList.remove('hidden'); R.querySelectorAll('[data-lpc]').forEach(d=>d.onclick=()=>{ R.classList.add('hidden'); $('#lpNovo').value=''; abrirLembrete(+d.dataset.lpc); }); };
 if(AO_VIVO) listasCarregar();
+setInterval(()=>document.body.classList.toggle('gaveta-on',algoAberto()),300);
 if(EMBUTIDO){ let ultG=null; setInterval(()=>{ const g=algoAberto(); if(g!==ultG){ ultG=g; try{ parent.mariaGaveta&&parent.mariaGaveta(g); }catch(e){} } },300); }
 // relatório
 let REL=null;
