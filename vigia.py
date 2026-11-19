@@ -549,6 +549,14 @@ class Painel(BaseHTTPRequestHandler):
                 return self._json(E.resumo(db, E.carregar_regras()))
             finally:
                 db.close()
+        elif u.path == "/api/reservas":
+            q = urllib.parse.parse_qs(u.query)
+            db = conectar()
+            try:
+                return self._json({"reservas": E.reservas(db, (q.get("de") or [None])[0], (q.get("ate") or [None])[0],
+                                                          (q.get("todas") or [""])[0] == "1")})
+            finally:
+                db.close()
         elif u.path == "/api/listas":
             db = conectar()
             try:
@@ -635,6 +643,14 @@ class Painel(BaseHTTPRequestHandler):
                 if not E.lembrete_acao(db, dado):
                     return self._json({"erro": "acao"}, 400)
                 return self._json({"lembretes": E.lembretes(db, bool(dado.get("todos")))})
+            if u.path == "/api/reservas":
+                with ESTADO["trava"]:
+                    Dr = ESTADO["D"]
+                try:
+                    r = E.reserva_acao(db, ligar_cliente_reserva(Dr, dict(dado)))
+                except (ValueError, TypeError) as e:
+                    return self._json({"erro": "Reserva: %s" % e}, 400)
+                return self._json({"reserva": r})
             if u.path == "/api/listas":
                 lid = E.lista_acao(db, dado)
                 if not lid:
@@ -1001,6 +1017,21 @@ def ia_post(caminho, dado):
                 finally:
                     dbl.close()
 
+            def reservas_zoe(nome, args):
+                dbr = conectar()
+                try:
+                    if nome == "listar_reservas":
+                        return E.reservas(dbr, args.get("de"), args.get("ate"))
+                    d = dict(args)
+                    if nome == "criar_reserva":
+                        d.pop("id", None)
+                        d["origem"] = "zoe"
+                    r = E.reserva_acao(dbr, ligar_cliente_reserva(D, d))
+                    log("reserva %s pela Zoe: %s %s %s" % ("anotada" if nome == "criar_reserva" else "alterada", r["data"], r["hora"], r["nome"]))
+                    return r
+                finally:
+                    dbr.close()
+
             def escrever(cli, instrucao):
                 c = D["clientes"][cli]
                 hist, notas = contexto_mensagem(D, cli)
@@ -1009,7 +1040,7 @@ def ia_post(caminho, dado):
                 return (r.get("texto") or "").strip()
             r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [], api=ESTADO.get("api_ia"), liberar=liberar,
                                     tela=str(dado.get("tela") or "")[:3500], fazer_lembrete=fazer_lembrete,
-                                    salvar_lista=salvar_lista, escrever=escrever)
+                                    salvar_lista=salvar_lista, escrever=escrever, reservas=reservas_zoe)
             log("IA: pergunta respondida (%d consulta(s), %d ação(ões))" % (r["consultas"], len(r["acoes"])))
             return r, 200
         return {"erro": "não encontrado"}, 404
@@ -1026,6 +1057,33 @@ STATUS_PT = {"closed": "Concluído", "canceled": "Cancelado", "confirmed": "Em p
              "pending_payment": "Pagamento pendente", "pending_online_payment": "Pagamento pendente", "waiting_to_catch": "Aguardando retirada"}
 PAGTO_PT = {"money": "Dinheiro", "pix": "Pix", "credit_card": "Crédito", "debit_card": "Débito", "online_credit_card": "Crédito online",
             "voucher": "Vale-refeição", "meal_voucher": "Vale-refeição", "online_pix": "Pix online"}
+
+
+def ligar_cliente_reserva(D, d):
+    """Liga a reserva a um cliente da base: pelo id do painel (cliente_id vindo da Zoe), pela chave ou pelo telefone."""
+    if D is None:
+        return d
+    cli = None
+    ci = d.pop("cliente_id", None)
+    if isinstance(ci, int) and 0 <= ci < len(D["clientes"]):
+        cli = ci
+    elif d.get("chave"):
+        with ESTADO["trava"]:
+            cli = ESTADO["por_chave"].get(d.get("chave"))
+    tel = "".join(ch for ch in str(d.get("telefone") or "") if ch.isdigit())
+    if cli is None and len(tel) >= 8:
+        for i, c in enumerate(D["clientes"]):
+            t = str(c.get("tel") or "")
+            if c.get("uniu_em") is None and len(t) >= 8 and t[-8:] == tel[-8:]:
+                cli = i
+                break
+    if cli is not None:
+        c = D["clientes"][cli]
+        d["chave"] = c.get("chave")
+        d["cliente_id"] = str(c.get("id") or "")
+        if not tel and c.get("tel"):
+            d["telefone"] = c.get("tel")
+    return d
 
 
 def contexto_mensagem(D, cli):

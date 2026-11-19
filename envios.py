@@ -2,6 +2,7 @@
 import json
 import os
 import random
+import re
 import uuid
 from datetime import datetime, timedelta
 from statistics import median
@@ -17,6 +18,9 @@ CREATE INDEX IF NOT EXISTS envios_fila ON envios(status, agendado);
 CREATE TABLE IF NOT EXISTS optout (cliente_id TEXT PRIMARY KEY, em TEXT, motivo TEXT);
 CREATE TABLE IF NOT EXISTS lembretes (id INTEGER PRIMARY KEY AUTOINCREMENT, cliente_id TEXT, chave TEXT, nome TEXT, texto TEXT,
   quando TEXT, criado TEXT, feito TEXT, avisado INTEGER DEFAULT 0);
+CREATE TABLE IF NOT EXISTS reservas (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, telefone TEXT, data TEXT, hora TEXT,
+  pessoas INTEGER, rodizio INTEGER, valor_pago REAL, forma_pagamento TEXT, observacao TEXT, status TEXT DEFAULT 'confirmada',
+  cliente_id TEXT, chave TEXT, origem TEXT, criado TEXT, atualizado TEXT);
 CREATE TABLE IF NOT EXISTS listas (id INTEGER PRIMARY KEY AUTOINCREMENT, titulo TEXT, descricao TEXT, origem TEXT,
   criado TEXT, atualizado TEXT, itens TEXT);
 """
@@ -500,3 +504,103 @@ def lista_acao(db, d):
         return 0
     db.commit()
     return lid or 1
+
+
+# ------------------------------------------------------------------ reservas
+
+STATUS_RESERVA = ("confirmada", "chegou", "nao_veio", "cancelada")
+CAMPOS_RESERVA = ("nome", "telefone", "data", "hora", "pessoas", "rodizio", "valor_pago", "forma_pagamento", "observacao", "status",
+                  "cliente_id", "chave")
+
+
+def _reserva_limpa(d, parcial=False):
+    """Confere e normaliza os campos de uma reserva. Levanta ValueError com a explicação se algo estiver errado."""
+    out = {}
+    for k in CAMPOS_RESERVA:
+        if k not in d or (parcial and d.get(k) is None):
+            continue
+        v = d.get(k)
+        if k == "data":
+            v = str(v or "").strip()[:10]
+            datetime.strptime(v, "%Y-%m-%d")
+        elif k == "hora":
+            v = str(v or "").strip().lower().replace("h", ":")
+            if v.endswith(":"):
+                v += "00"
+            if v and ":" not in v:
+                v += ":00"
+            hh, mm = (v.split(":") + ["0"])[:2]
+            v = "%02d:%02d" % (int(hh), int(mm or 0))
+            if not (0 <= int(hh) <= 23 and 0 <= int(mm or 0) <= 59):
+                raise ValueError("hora inválida")
+        elif k == "pessoas":
+            v = int(v) if v not in (None, "") else None
+            if v is not None and not 0 < v <= 500:
+                raise ValueError("número de pessoas inválido")
+        elif k == "rodizio":
+            v = None if v in (None, "") else (1 if v in (True, 1, "1", "sim", "true", "s") else 0)
+        elif k == "valor_pago":
+            v = float(str(v).replace("R$", "").replace(".", "").replace(",", ".")) if isinstance(v, str) and v.strip() else (float(v) if v not in (None, "") else None)
+        elif k == "status":
+            v = str(v or "confirmada")
+            if v not in STATUS_RESERVA:
+                raise ValueError("status inválido")
+        elif k == "telefone":
+            v = re.sub(r"\D", "", str(v or ""))[:15] or None
+        else:
+            v = (str(v).strip()[:1000] if v not in (None, "") else None)
+        out[k] = v
+    if not parcial:
+        for k in ("nome", "data", "hora"):
+            if not out.get(k):
+                raise ValueError("falta %s" % k)
+    return out
+
+
+def reservas(db, de=None, ate=None, todas=False):
+    q = ("SELECT id, nome, telefone, data, hora, pessoas, rodizio, valor_pago, forma_pagamento, observacao, status, cliente_id, chave, "
+         "origem, criado, atualizado FROM reservas")
+    args = []
+    if not todas:
+        de = de or datetime.now().strftime("%Y-%m-%d")
+        q += " WHERE data >= ?"
+        args.append(de)
+        if ate:
+            q += " AND data <= ?"
+            args.append(ate)
+    q += " ORDER BY data, hora, id"
+    cols = ("id", "nome", "telefone", "data", "hora", "pessoas", "rodizio", "valor_pago", "forma_pagamento", "observacao", "status",
+            "cliente_id", "chave", "origem", "criado", "atualizado")
+    return [dict(zip(cols, r)) for r in db.execute(q, args).fetchall()]
+
+
+def reserva_acao(db, d):
+    """Cria/edita/muda status/apaga. Retorna a reserva (dict) ou levanta ValueError."""
+    acao = d.get("acao") or "salvar"
+    rid = int(d.get("id") or 0)
+    if acao == "apagar":
+        db.execute("DELETE FROM reservas WHERE id=?", (rid,))
+        db.commit()
+        return {"id": rid, "apagada": True}
+    if acao == "status":
+        st = str(d.get("status") or "")
+        if st not in STATUS_RESERVA:
+            raise ValueError("status inválido")
+        db.execute("UPDATE reservas SET status=?, atualizado=? WHERE id=?", (st, agora_txt(), rid))
+    elif rid:
+        campos = _reserva_limpa(d, parcial=True)
+        if campos:
+            db.execute("UPDATE reservas SET %s, atualizado=? WHERE id=?" % ", ".join("%s=?" % k for k in campos),
+                       list(campos.values()) + [agora_txt(), rid])
+    else:
+        campos = _reserva_limpa(d)
+        campos.setdefault("status", "confirmada")
+        campos["origem"] = str(d.get("origem") or "manual")[:20]
+        campos["criado"] = campos["atualizado"] = agora_txt()
+        cur = db.execute("INSERT INTO reservas (%s) VALUES (%s)" % (", ".join(campos), ",".join("?" * len(campos))), list(campos.values()))
+        rid = cur.lastrowid
+    db.commit()
+    r = [x for x in reservas(db, todas=True) if x["id"] == rid]
+    if not r:
+        raise ValueError("reserva não encontrada")
+    return r[0]

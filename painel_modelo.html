@@ -460,6 +460,42 @@ button.pin.on{opacity:1;filter:none}
 #relCorpo h1,#relCorpo h2,#relCorpo h3{font-family:var(--display);margin:14px 0 6px}
 #relCorpo table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px}
 #relCorpo td,#relCorpo th{border-bottom:1px solid var(--line2);padding:5px 8px;text-align:left}
+.rs-cab{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.rs-zoe{display:flex;gap:8px;margin:14px 0 10px}
+.rs-zoe input{flex:1;border:1px solid var(--line);border-radius:999px;padding:10px 16px;font:inherit;font-size:14px;background:#FFFDF9}
+.rs-zoe button{border:0;border-radius:999px;padding:10px 16px;background:#FFB21E;color:#2A1B17;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.rs-nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rs-nav input{border:1px solid var(--line);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px}
+.rs-kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.rs-k{background:#FBF7F2;border-radius:14px;padding:8px 14px;display:flex;gap:6px;align-items:baseline}
+.rs-k b{font-family:var(--display);font-size:18px}
+.rs-k span{font-size:12.5px;color:var(--mut)}
+.rs-dia{margin-top:14px}
+.rs-dcab{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.rs-dcab h3{margin:0;font-family:var(--display);font-size:18px}
+.rs-dcab .muted{font-size:12.5px}
+.rs-it{display:grid;grid-template-columns:64px minmax(160px,1fr) minmax(220px,1.6fr) 100px 290px;gap:12px;align-items:center;padding:10px 4px;border-top:1px solid var(--line2);font-size:13.5px}
+.rs-h{font-family:var(--display);font-size:20px;font-weight:700}
+.rs-n .sub{display:block;font-size:11.5px;color:var(--soft)}
+.rs-zoe-tag{font-size:11px}
+.rs-tag{display:inline-block;font-size:12px;background:var(--line2);border-radius:999px;padding:2px 9px;margin:2px 4px 2px 0}
+.rs-tag.rod{background:#FFF4DE;color:#7a4a00}
+.rs-tag.pago{background:#E6F4EA;color:#1e6b3a}
+.rs-tag.nada{color:var(--soft)}
+.rs-obs{font-size:12.5px;color:var(--mut);margin-top:3px}
+.rs-st{font-size:12px;font-weight:600;color:var(--mut)}
+.rs-st.ok{color:#1e6b3a}.rs-st.ruim{color:#b42318}.rs-st.canc{color:var(--soft)}
+.rs-it.st-cancelada{opacity:.55}.rs-it.st-cancelada .rs-n b{text-decoration:line-through}
+.rs-ac{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.rs-ac button{border:0;background:var(--line2);border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
+.rs-ac a.wa{font-size:12px;padding:4px 10px}
+.rs-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;margin:6px 0 4px}
+.rs-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--mut)}
+.rs-form .w2{grid-column:span 2}.rs-form .w3{grid-column:span 3}
+.rs-form input,.rs-form select,.rs-form textarea{border:1px solid var(--line);border-radius:12px;padding:8px 10px;font:inherit;font-size:14px;color:var(--ink);font-weight:400;width:100%;box-sizing:border-box}
+.rs-form textarea{min-height:70px;resize:vertical}
+.rs-form .lb-res{position:absolute;top:100%;left:0;right:0;z-index:5}
+@media (max-width:900px){.rs-it{grid-template-columns:56px 1fr}.rs-d,.rs-st,.rs-ac{grid-column:2}.rs-form{grid-template-columns:1fr 1fr}.rs-form .w3{grid-column:span 2}}
 .ac-grupo{border-top:1px solid var(--line2);margin-top:6px;padding-top:4px}
 .ac-gcab{display:flex;gap:8px;align-items:center;padding:4px 0}
 .ac-gcab .bts{margin-left:auto;display:flex;gap:4px}
@@ -537,6 +573,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <nav id="tabs">
     <div class="grupo">Rotina</div>
     <button data-t="hoje" class="on" title="Hoje"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></span><span class="nm">Hoje</span><span class="qt" id="qtHoje"></span></button>
+    <button data-t="reservas" title="Reservas"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="m9 15 2 2 4-4"/></svg></span><span class="nm">Reservas</span><span class="qt" id="qRes" style="display:none"></span></button>
     <button data-t="promocoes" title="Promoções"><span class="ic"><svg viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span><span class="nm">Promoções</span></button>
     <button data-t="envios" title="Envios"><span class="ic"><svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></span><span class="nm">Envios</span><span class="qt" id="qEnv" style="display:none"></span></button>
     <button data-t="listas" title="Listas"><span class="ic"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.2"/><circle cx="3.5" cy="12" r="1.2"/><circle cx="3.5" cy="18" r="1.2"/></svg></span><span class="nm">Listas</span><span class="qt" id="qLis" style="display:none"></span></button>
@@ -773,6 +810,17 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
     </div>
     <div class="card" style="margin-top:16px" id="evRegras"></div>
   </section>
+  <section id="t-reservas" class="hidden">
+    <div class="card">
+      <div class="rs-cab"><div><h2 style="margin:0">Reservas</h2><p class="desc" style="margin:4px 0 0">Diga a reserva para a Zoe do jeito que vier (nome, número, horário, rodízio, se já pagou algo, observações) ou anote à mão.</p></div>
+        <button class="btn principal" id="rsNova" style="background:var(--sun);color:var(--ink)">+ Nova reserva</button></div>
+      <div class="rs-zoe"><input id="rsZoe" placeholder="Ex.: reserva pra Marcela amanhã às 20h, 6 pessoas, rodízio, deixou R$ 50 no pix, é aniversário, 81 99999-1234"><button id="rsZoeBtn">✨ Anotar com a Zoe</button></div>
+      <div class="rs-nav"><div class="seg" id="rsPer"><button data-p="hoje">Hoje</button><button data-p="amanha">Amanhã</button><button data-p="semana" class="on">Próximos 7 dias</button><button data-p="todas">Todas as próximas</button><button data-p="passadas">Passadas</button></div>
+        <input type="date" id="rsDia" title="Ver um dia específico"><input type="search" id="rsBusca" placeholder="Buscar nome, telefone ou observação"></div>
+      <div class="rs-kpis" id="rsKpis"></div>
+    </div>
+    <div id="rsDias"></div>
+  </section>
   <section id="t-listas" class="hidden">
     <div class="ls-wrap">
       <div class="card ls-lado"><h2>Listas <span class="cont" id="lsN">0</span></h2>
@@ -841,6 +889,21 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div style="font-size:12px;font-weight:600;color:var(--mut);margin-top:12px">Lembrar quando</div>
   <div class="lb-chips" id="lbQuando"></div>
   <div class="ia-acoes"><button class="btn principal" id="lbSalvar" style="background:var(--sun);color:var(--ink)">Salvar lembrete</button><span class="muted" id="lbMsg" style="font-size:13px;align-self:center"></span></div>
+</div></div>
+<div class="ia-modal hidden" id="rsModal"><div class="ia-box">
+  <div class="ia-cab"><h3 id="rsmTitulo">Nova reserva</h3><button id="rsmFechar" title="Fechar">✕</button></div>
+  <div class="rs-form">
+    <label class="w2">Nome<div style="position:relative"><input id="rsmNome" autocomplete="off" placeholder="Nome do cliente"><div class="lb-res hidden" id="rsmRes"></div></div></label>
+    <label>Telefone<input id="rsmTel" placeholder="(81) 9…"></label>
+    <label>Dia<input type="date" id="rsmData"></label>
+    <label>Hora<input type="time" id="rsmHora"></label>
+    <label>Pessoas<input type="number" id="rsmPes" min="1" placeholder="—"></label>
+    <label class="w2">Rodízio?<div class="seg" id="rsmRod"><button data-v="1">Sim, rodízio</button><button data-v="0">Não</button><button data-v="">Não informado</button></div></label>
+    <label>Já deixou pago (R$)<input id="rsmValor" inputmode="decimal" placeholder="0,00"></label>
+    <label>Forma<select id="rsmForma"><option value="">—</option><option>pix</option><option>dinheiro</option><option>cartão</option><option>transferência</option><option>outro</option></select></label>
+    <label class="w3">Observação<textarea id="rsmObs" placeholder="Aniversário, cadeirinha, mesa grande, restrição alimentar, quem indicou…"></textarea></label>
+  </div>
+  <div class="ia-acoes"><button class="btn principal" id="rsmSalvar" style="background:var(--sun);color:var(--ink)">Salvar reserva</button><button class="btn" id="rsmCancelar">Cancelar reserva</button><button class="btn" id="rsmApagar">Apagar</button><span class="muted" id="rsmMsg" style="font-size:13px;align-self:center"></span></div>
 </div></div>
 <aside id="chat" aria-label="Pergunte à Zoe">
   <div class="gv-topo"><h3>✨ Pergunte à Zoe</h3><button id="chFechar" title="Fechar">✕</button></div>
@@ -924,10 +987,10 @@ function marcarFiltros(){
   document.querySelectorAll('#fCanal button').forEach(b=>b.classList.toggle('on', F.canal===b.dataset.v));
 }
 let aba='hoje';
-const PAGINAS={listas:'Listas de clientes',lembretes:'Lembretes',envios:'Envios pelo WhatsApp',hoje:'Hoje',promocoes:'Promoções',resultados:'Resultados',geral:'Visão geral',clientes:'Clientes',produtos:'Produtos',bairros:'Bairros'};
+const PAGINAS={reservas:'Reservas',listas:'Listas de clientes',lembretes:'Lembretes',envios:'Envios pelo WhatsApp',hoje:'Hoje',promocoes:'Promoções',resultados:'Resultados',geral:'Visão geral',clientes:'Clientes',produtos:'Produtos',bairros:'Bairros'};
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{aba=b.dataset.t; $('#pgTitulo').textContent=PAGINAS[aba]||''; window.scrollTo({top:0}); if(EMBUTIDO){ try{ parent.mariaAba&&parent.mariaAba('vendas',aba); }catch(e){} }
   document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  ['hoje','geral','clientes','produtos','bairros','promocoes','resultados','envios','listas','lembretes'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
+  ['hoje','geral','clientes','produtos','bairros','promocoes','resultados','envios','listas','lembretes','reservas'].forEach(t=>$('#t-'+t).classList.toggle('hidden',t!==aba)); render();});
 
 // ------------------------------------------------------------ gráfico de linhas (SVG)
 function lineChart(el, cats, series, opt){
@@ -1739,7 +1802,7 @@ function chatEnviar(){
   api('/api/ia/pergunta',{mensagens:CHAT.filter(m=>!m.erro).map(m=>({role:m.role,content:m.content+idsDoHistorico(m)})), tela:telaContexto()}).then(r=>{
     CHAT.pendente=false; if(r.erro) CHAT.push({role:'assistant',content:r.erro,erro:true});
     else { const ac=r.acoes||[]; const fx=[]; ac.forEach(a=>{ if(a.tipo==='lembretes') fx.push('criou '+a.ids.length+' lembrete'+(a.ids.length===1?'':'s')); if(a.tipo==='lista') fx.push('salvou uma lista'); });
-      if(ac.some(a=>a.tipo==='lista')) listasCarregar(); const pg=ac.find(a=>a.tipo==='pagina'); if(pg) setTimeout(()=>{ fecharChat(); irPara(pg.pagina); },700);
+      if(ac.some(a=>a.tipo==='lista')) listasCarregar(); if(ac.some(a=>a.tipo==='reserva')) reservasCarregar(); const pg=ac.find(a=>a.tipo==='pagina'); if(pg) setTimeout(()=>{ fecharChat(); irPara(pg.pagina); },700);
       CHAT.push({role:'assistant',content:r.resposta||'Pronto.',acoes:ac,meta:[r.consultas?`consultou os dados ${r.consultas} ${r.consultas===1?'vez':'vezes'}`:'',...fx].filter(Boolean).join(' · ')});
       if(ac.some(a=>a.tipo==='lembretes')) lembCarregar(); const pf=ac.find(a=>a.tipo==='perfil'); if(pf){ fecharChat(); abrirPerfil({i:pf.id}); } }
     chatRender();
@@ -2079,7 +2142,8 @@ function idsDoHistorico(m){
   const p=[]; (m.acoes||[]).forEach(a=>{
     if(a.tipo==='clientes'||a.tipo==='lembretes') gruposDe(a).forEach(g=>p.push(`"${g.titulo}": ids ${(g.ids||[]).slice(0,150).join(', ')}`));
     else if(a.tipo==='lista') p.push(`lista salva id ${a.id} ("${a.titulo}")`);
-    else if(a.tipo==='mensagem') p.push(`mensagem escrita para o cliente id ${a.id}`); });
+    else if(a.tipo==='mensagem') p.push(`mensagem escrita para o cliente id ${a.id}`);
+    else if(a.tipo==='reserva') p.push(`reserva id ${(a.reserva||{}).id} ${a.acao}`); });
   return p.length?`\n[nesta resposta: ${p.join(' | ')}]`:''; }
 function cliLinha(cli, nota){ const c=D.clientes[cli]; if(!c) return ''; const x=pcMemo().get(cli); const w=waLink(c,'');
   return `<div class="ac-cli"><div class="n"><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${ptsTag(c)}${pinBtn(cli)}<span class="sub">${esc(nota||'')}${nota&&x?' · ':''}${x?fmtN(x.n)+' pedidos · último há '+diasEntre(x.ult,new Date())+' d · '+fmtR0(x.v):''}</span></div>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}</div>`; }
@@ -2099,6 +2163,7 @@ function acaoHTML(a, k, lim){
   if(a.tipo==='envio') return `<div class="ac-box"><div class="cab">📨 ${esc(a.titulo)} <span class="muted">${fmtN((a.ids||[]).length)} clientes · nada foi enviado ainda</span><span class="bts"><button class="p" data-ac="revisar" data-k="${k}">Revisar e agendar</button></span></div><div class="muted" style="font-size:12.5px;white-space:pre-line">${esc(a.texto)}</div></div>`;
   if(a.tipo==='relatorio') return `<div class="ac-box"><div class="cab">📄 ${esc(a.titulo)}<span class="bts"><button class="p" data-ac="rel" data-k="${k}">Abrir relatório</button></span></div></div>`;
   if(a.tipo==='perfil'){ const c=D.clientes[a.id]; return c?`<div class="ac-box"><div class="cab">👤 Perfil de ${esc(c.nome)} aberto<span class="bts"><button data-ac="perfil" data-k="${k}">Abrir de novo</button></span></div></div>`:''; }
+  if(a.tipo==='reserva'){ const r=a.reserva||{}; return `<div class="ac-box"><div class="cab">📅 Reserva ${a.acao==='criada'?'anotada':'atualizada'}: ${esc(rsDiaLabel(r.data||hojeStr()))} às ${esc(r.hora||'')}<span class="bts"><button class="p" data-ac="verres" data-k="${k}">Ver reservas</button></span></div><div class="ac-cli"><div class="n"><b>${esc(r.nome||'')}</b>${r.status==='cancelada'?' <span class="lb-gt">cancelada</span>':''}<span class="sub">${esc([r.telefone?fmtTel(r.telefone):'',rsResumo(r)].filter(Boolean).join(' · '))}${r.observacao?' · 📝 '+esc(r.observacao):''}</span></div></div></div>`; }
   if(a.tipo==='pagina') return `<div class="ac-box"><div class="cab">↪ Abri a página ${esc(nomePagina(a.pagina))}<span class="bts"><button data-ac="irpag" data-k="${k}">Ir de novo</button></span></div></div>`;
   return '';
 }
@@ -2120,7 +2185,8 @@ function ligarAcoes(box, lista){
     else if(t==='msgwa'){ const w=waLink(D.clientes[a.id],a.texto); if(w){ window.open(w,'_blank','noopener'); marcar(D.clientes[a.id].id,'whatsapp',true); } }
     else if(t==='msged') abrirMensagemPronta(a.id,a.texto);
     else if(t==='msgcp'){ try{ navigator.clipboard.writeText(a.texto); b.textContent='Copiada ✓'; }catch(e){} }
-    else if(t==='irpag'){ fecharChat(); irPara(a.pagina); } });
+    else if(t==='irpag'){ fecharChat(); irPara(a.pagina); }
+    else if(t==='verres'){ fecharChat(); const r=a.reserva||{}; RS.dia=r.data||''; irPara('reservas'); reservasCarregar(); } });
 }
 function lembrarGrupos(gs, b){
   if(!AO_VIVO) return; const n=gs.reduce((s,g)=>s+g.ids.length,0);
@@ -2163,6 +2229,7 @@ const SUG_PAG={
   lembretes:['Quais lembretes estão atrasados e por qual eu começo?','Escreve as mensagens dos lembretes de hoje'],
   clientes:['Quem são os clientes fiéis que estão sumindo? Separa por motivo','Quais clientes pedem pelo iFood e nunca pelo app próprio?'],
   hoje:['Com quem eu falo primeiro hoje e o que digo para cada um?'],
+  reservas:['Quantas reservas e pessoas tenho para o fim de semana?','Quem reservou e ainda não deixou nada pago?','Escreve uma confirmação para as reservas de hoje'],
   produtos:['Quais sabores estão caindo e quem costumava pedir eles?'],
   envios:['Monta uma mensagem para quem não pede há 30 dias, separando pelo prato favorito'] };
 function sugestoesPagina(){ const pg=(SOBRE&&window.__paginaExterna)||aba; return (SUG_PAG[pg]||[]).concat(SUGESTOES).slice(0,6); }
@@ -2294,6 +2361,82 @@ $('#lpNovo').oninput=()=>{ const q=semAc($('#lpNovo').value.trim()); const R=$('
   R.innerHTML=out.map(i=>`<div data-lpc="${i}">${esc(D.clientes[i].nome||'(sem nome)')}<span class="muted" style="font-size:12px"> ${esc(fmtTel(D.clientes[i].tel||''))}</span>${ptsTag(D.clientes[i])}</div>`).join('')||'<div class="muted">Ninguém encontrado</div>';
   R.classList.remove('hidden'); R.querySelectorAll('[data-lpc]').forEach(d=>d.onclick=()=>{ R.classList.add('hidden'); $('#lpNovo').value=''; abrirLembrete(+d.dataset.lpc); }); };
 if(AO_VIVO) listasCarregar();
+// ------------------------------------------------------------ PÁGINA: RESERVAS
+let RESERVAS=[]; const RS={p:'semana', dia:'', busca:''};
+const DIAS_SEM=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+function rsAdd(d,n){ const x=new Date(d+'T12:00'); x.setDate(x.getDate()+n); return hojeStr(x); }
+function rsPeriodo(){ const h=hojeStr();
+  if(RS.dia) return [RS.dia,RS.dia]; if(RS.p==='hoje') return [h,h]; if(RS.p==='amanha') return [rsAdd(h,1),rsAdd(h,1)];
+  if(RS.p==='semana') return [h,rsAdd(h,6)]; if(RS.p==='passadas') return [rsAdd(h,-90),rsAdd(h,-1)]; return [h,'']; }
+function rsDiaLabel(d){ const h=hojeStr(); const x=new Date(d+'T12:00'); const dm=x.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  if(d===h) return 'Hoje, '+DIAS_SEM[x.getDay()]+' '+dm; if(d===rsAdd(h,1)) return 'Amanhã, '+DIAS_SEM[x.getDay()]+' '+dm; return DIAS_SEM[x.getDay()].replace(/^./,m=>m.toUpperCase())+', '+dm; }
+function rsContador(){ const q=$('#qRes'); if(!q) return; const h=hojeStr(); const n=RESERVAS.filter(r=>r.data===h&&r.status==='confirmada').length; q.textContent=n; q.style.display=n?'':'none'; }
+function reservasCarregar(){ if(!AO_VIVO) return Promise.resolve(); const [de,ate]=rsPeriodo();
+  return Promise.all([api('/api/reservas?de='+de+(ate?'&ate='+ate:'')), api('/api/reservas?de='+hojeStr()+'&ate='+hojeStr())]).then(([r,rh])=>{
+    RESERVAS=r.reservas||[]; const q=$('#qRes'); if(q){ const n=(rh.reservas||[]).filter(x=>x.status==='confirmada').length; q.textContent=n; q.style.display=n?'':'none'; }
+    if(aba==='reservas') renderReservas(); }).catch(()=>{}); }
+function rsCliente(r){ if(!r.chave) return null; const c=IDX_CHAVE[r.chave]; return c!=null?c:null; }
+function rsWa(r, texto){ let t=(r.telefone||'').replace(/\D/g,''); const cli=rsCliente(r); if(!t&&cli!=null) t=(D.clientes[cli].tel||'');
+  if(t.length<10) return null; if(!(t.length>=12&&t.startsWith('55'))) t='55'+t; return 'https://wa.me/'+t+'?text='+encodeURIComponent(texto); }
+function rsMsgConfirma(r){ const nome=(r.nome||'').trim().split(/\s+/)[0]||''; const N=nome?nome.charAt(0).toUpperCase()+nome.slice(1).toLowerCase():'';
+  const h=hojeStr(); const x=new Date(r.data+'T12:00'); const q=r.data===h?'hoje':r.data===rsAdd(h,1)?'amanhã':(DIAS_SEM[x.getDay()]+', '+x.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}));
+  return `Oi${N?' '+N:''}! Passando para confirmar sua reserva na Pizzaria Mariá ${q} às ${r.hora.replace(':00','h').replace(':','h')}${r.pessoas?' para '+r.pessoas+' pessoa'+(r.pessoas>1?'s':''):''}${r.rodizio===1?', no rodízio':''}. Te esperamos! 😊`; }
+function rsResumo(r){ return [r.pessoas?r.pessoas+' pessoa'+(r.pessoas>1?'s':''):'', r.rodizio===1?'rodízio':r.rodizio===0?'sem rodízio':'', r.valor_pago?'pago '+fmtR(r.valor_pago)+(r.forma_pagamento?' ('+r.forma_pagamento+')':''):''].filter(Boolean).join(' · '); }
+const RS_ST={confirmada:['Confirmada',''],chegou:['Chegou ✓','ok'],nao_veio:['Não veio','ruim'],cancelada:['Cancelada','canc']};
+function renderReservas(){
+  const box=$('#rsDias'); if(!AO_VIVO){ box.innerHTML='<div class="card"><div class="ch-vazio">As reservas ficam salvas no sistema. Abra pelo atalho <b>Mariá Gestão</b>.</div></div>'; return; }
+  $('#rsPer').querySelectorAll('button').forEach(b=>b.classList.toggle('on',!RS.dia&&b.dataset.p===RS.p)); $('#rsDia').value=RS.dia||'';
+  const q=semAc(RS.busca||''); let ls=RESERVAS.filter(r=>!q||semAc([r.nome,r.telefone,r.observacao,r.forma_pagamento].join(' ')).includes(q));
+  if(RS.p==='passadas'&&!RS.dia) ls=ls.slice().reverse();
+  const ativas=ls.filter(r=>r.status!=='cancelada');
+  $('#rsKpis').innerHTML=[[ativas.length,'reserva'+(ativas.length===1?'':'s')],[ativas.reduce((s,r)=>s+(r.pessoas||0),0),'pessoas'],[ativas.filter(r=>r.rodizio===1).length,'no rodízio'],[fmtR(ativas.reduce((s,r)=>s+(r.valor_pago||0),0)),'já pago']]
+    .map(([n,t])=>`<div class="rs-k"><b>${typeof n==='number'?fmtN(n):n}</b><span>${t}</span></div>`).join('');
+  const dias=[...new Set(ls.map(r=>r.data))];
+  box.innerHTML=dias.map(d=>{ const rs=ls.filter(r=>r.data===d); const at=rs.filter(r=>r.status!=='cancelada');
+    return `<div class="card rs-dia"><div class="rs-dcab"><h3>${esc(rsDiaLabel(d))}</h3><span class="muted">${fmtN(at.length)} reserva${at.length===1?'':'s'} · ${fmtN(at.reduce((s,r)=>s+(r.pessoas||0),0))} pessoas${at.some(r=>r.rodizio===1)?' · '+at.filter(r=>r.rodizio===1).length+' no rodízio':''}${at.some(r=>r.valor_pago)?' · '+fmtR(at.reduce((s,r)=>s+(r.valor_pago||0),0))+' já pago':''}</span></div>
+      ${rs.map(r=>{ const cli=rsCliente(r); const st=RS_ST[r.status]||RS_ST.confirmada; const w=rsWa(r,rsMsgConfirma(r));
+        return `<div class="rs-it st-${r.status}"><div class="rs-h">${esc(r.hora)}</div>
+          <div class="rs-n">${cli!=null?`<a class="cli" data-i="${cli}"><b>${esc(r.nome)}</b></a>${ptsTag(D.clientes[cli])}`:`<b>${esc(r.nome)}</b>`}${r.origem==='zoe'?' <span class="rs-zoe-tag" title="Anotada pela Zoe">✨</span>':''}
+            <span class="sub">${esc(r.telefone?fmtTel(r.telefone):'sem telefone')}</span></div>
+          <div class="rs-d">${r.pessoas?`<span class="rs-tag">👥 ${r.pessoas}</span>`:''}${r.rodizio===1?'<span class="rs-tag rod">🍕 Rodízio</span>':r.rodizio===0?'<span class="rs-tag">À la carte</span>':''}${r.valor_pago?`<span class="rs-tag pago">💰 ${fmtR(r.valor_pago)}${r.forma_pagamento?' · '+esc(r.forma_pagamento):''}</span>`:'<span class="rs-tag nada">nada pago</span>'}
+            ${r.observacao?`<div class="rs-obs">📝 ${esc(r.observacao)}</div>`:''}</div>
+          <div class="rs-st ${st[1]}">${st[0]}</div>
+          <div class="rs-ac">${r.status==='confirmada'?`<button data-rs="chegou" data-id="${r.id}">✓ Chegou</button><button data-rs="nao_veio" data-id="${r.id}">Não veio</button>`:`<button data-rs="confirmada" data-id="${r.id}">Voltar</button>`}${w&&r.status==='confirmada'?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="Mandar confirmação pelo WhatsApp">Confirmar</a>`:''}<button data-rsed="${r.id}">Editar</button></div></div>`; }).join('')}</div>`; }).join('')
+    ||`<div class="card"><div class="ch-vazio"><b>Nenhuma reserva ${RS.dia?'neste dia':RS.p==='hoje'?'para hoje':RS.p==='amanha'?'para amanhã':RS.p==='passadas'?'nos últimos 90 dias':'por aqui'}.</b><br>Diga à Zoe no campo acima, por exemplo: <i>"reserva pra Marcela amanhã às 20h, 6 pessoas, rodízio, pagou 50 no pix, é aniversário"</i>.</div></div>`;
+  box.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>api('/api/reservas',{acao:'status', id:+b.dataset.id, status:b.dataset.rs}).then(reservasCarregar));
+  box.querySelectorAll('[data-rsed]').forEach(b=>b.onclick=()=>{ const r=RESERVAS.find(x=>x.id===+b.dataset.rsed); if(r) abrirReserva(r); });
+}
+// formulário
+let RS_ED=null;
+function abrirReserva(r){ RS_ED=r||null; $('#rsmTitulo').textContent=r?'Editar reserva':'Nova reserva';
+  $('#rsmNome').value=r?r.nome:''; $('#rsmTel').value=r&&r.telefone?fmtTel(r.telefone):''; $('#rsmData').value=r?r.data:(RS.dia||hojeStr()); $('#rsmHora').value=r?r.hora:'20:00';
+  $('#rsmPes').value=r&&r.pessoas?r.pessoas:''; $('#rsmValor').value=r&&r.valor_pago?String(r.valor_pago).replace('.',','):''; $('#rsmForma').value=r&&r.forma_pagamento?r.forma_pagamento:'';
+  $('#rsmObs').value=r&&r.observacao?r.observacao:''; RS_ED_ROD=r?r.rodizio:null; RS_ED_CH=r?r.chave:null; rsRod();
+  $('#rsmCancelar').classList.toggle('hidden',!r||r.status==='cancelada'); $('#rsmApagar').classList.toggle('hidden',!r); $('#rsmMsg').textContent=''; $('#rsmApagar').dataset.conf=''; $('#rsmApagar').textContent='Apagar';
+  $('#rsModal').classList.remove('hidden'); setTimeout(()=>$('#rsmNome').focus(),50); }
+let RS_ED_ROD=null, RS_ED_CH=null;
+function rsRod(){ $('#rsmRod').querySelectorAll('button').forEach(b=>b.classList.toggle('on',String(RS_ED_ROD)===b.dataset.v||(RS_ED_ROD==null&&b.dataset.v===''))); }
+$('#rsmRod').querySelectorAll('button').forEach(b=>b.onclick=()=>{ RS_ED_ROD=b.dataset.v===''?null:+b.dataset.v; rsRod(); });
+function fecharReserva(){ $('#rsModal').classList.add('hidden'); RS_ED=null; }
+$('#rsmFechar').onclick=fecharReserva; $('#rsModal').addEventListener('click',e=>{ if(e.target.id==='rsModal') fecharReserva(); });
+$('#rsmSalvar').onclick=()=>{ const d={acao:'salvar', id:RS_ED?RS_ED.id:0, nome:$('#rsmNome').value.trim(), telefone:$('#rsmTel').value, data:$('#rsmData').value, hora:$('#rsmHora').value,
+    pessoas:$('#rsmPes').value||null, rodizio:RS_ED_ROD==null?'':RS_ED_ROD, valor_pago:$('#rsmValor').value||null, forma_pagamento:$('#rsmForma').value, observacao:$('#rsmObs').value, chave:RS_ED_CH||undefined};
+  if(!d.nome||!d.data||!d.hora){ $('#rsmMsg').textContent='Preencha nome, dia e hora.'; return; }
+  $('#rsmMsg').textContent='Salvando…'; api('/api/reservas',d).then(r=>{ if(r.erro){ $('#rsmMsg').textContent=r.erro; return; } fecharReserva(); reservasCarregar(); }).catch(()=>{ $('#rsmMsg').textContent='Não consegui salvar.'; }); };
+$('#rsmCancelar').onclick=()=>{ if(!RS_ED) return; api('/api/reservas',{acao:'status', id:RS_ED.id, status:'cancelada'}).then(()=>{ fecharReserva(); reservasCarregar(); }); };
+$('#rsmApagar').onclick=()=>{ const b=$('#rsmApagar'); if(!RS_ED||!confirmar(b)) return; api('/api/reservas',{acao:'apagar', id:RS_ED.id}).then(()=>{ fecharReserva(); reservasCarregar(); }); };
+// sugere cliente da base ao digitar o nome
+$('#rsmNome').oninput=()=>{ RS_ED_CH=null; const q=semAc($('#rsmNome').value.trim()); const R=$('#rsmRes'); if(q.length<3){ R.classList.add('hidden'); return; }
+  const out=[]; for(let i=0;i<D.clientes.length&&out.length<6;i++){ const c=D.clientes[i]; if(c.uniu_em!=null||!c.nome) continue; if(semAc(c.nome).includes(q)) out.push(i); }
+  R.innerHTML=out.map(i=>`<div data-rsc="${i}">${esc(D.clientes[i].nome)}<span class="muted" style="font-size:12px"> ${esc(fmtTel(D.clientes[i].tel||''))}</span></div>`).join(''); R.classList.toggle('hidden',!out.length);
+  R.querySelectorAll('[data-rsc]').forEach(x=>x.onclick=()=>{ const c=D.clientes[+x.dataset.rsc]; $('#rsmNome').value=c.nome; if(c.tel) $('#rsmTel').value=fmtTel(c.tel); RS_ED_CH=c.chave; R.classList.add('hidden'); }); };
+$('#rsNova').onclick=()=>abrirReserva(null);
+$('#rsPer').querySelectorAll('button').forEach(b=>b.onclick=()=>{ RS.p=b.dataset.p; RS.dia=''; reservasCarregar(); });
+$('#rsDia').onchange=()=>{ RS.dia=$('#rsDia').value; reservasCarregar(); };
+$('#rsBusca').oninput=()=>{ RS.busca=$('#rsBusca').value; renderReservas(); };
+function rsZoe(){ const t=$('#rsZoe').value.trim(); if(!t) { $('#rsZoe').focus(); return; } $('#rsZoe').value=''; abrirChat(/reserva/i.test(t)?t:'Anota esta reserva: '+t); }
+$('#rsZoeBtn').onclick=rsZoe; $('#rsZoe').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); rsZoe(); } });
+if(AO_VIVO){ reservasCarregar(); setInterval(reservasCarregar,120000); }
 setInterval(()=>document.body.classList.toggle('gaveta-on',algoAberto()),300);
 if(EMBUTIDO){ let ultG=null; setInterval(()=>{ const g=algoAberto(); if(g!==ultG){ ultG=g; try{ parent.mariaGaveta&&parent.mariaGaveta(g); }catch(e){} } },300); }
 // relatório
@@ -2551,7 +2694,7 @@ document.addEventListener('click',e=>{ const a=e.target.closest('a.cli'); if(a){
 // ------------------------------------------------------------ início
 function render(){
   marcarFiltros(); prepararBuscas();
-  if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else if(aba==='envios') renderEnvios(); else if(aba==='listas') renderListas(); else if(aba==='lembretes') renderLembPag(); else renderResultados();
+  if(aba==='geral') renderGeral(); else if(aba==='clientes'){ renderClientes(); renderMultiCanal(); } else if(aba==='produtos') renderProdutos(); else if(aba==='bairros') renderBairros(); else if(aba==='promocoes') renderPromocoes(); else if(aba==='hoje') renderHoje(); else if(aba==='envios') renderEnvios(); else if(aba==='listas') renderListas(); else if(aba==='lembretes') renderLembPag(); else if(aba==='reservas') renderReservas(); else renderResultados();
   if(typeof pedirDica==='function'&&DICA_ABAS.includes(aba)) setTimeout(()=>pedirDica(aba),300);
 }
 (function init(){

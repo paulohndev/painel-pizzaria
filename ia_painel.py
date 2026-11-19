@@ -631,9 +631,32 @@ FERRAMENTAS_ACAO = [
     {"name": "abrir_perfil",
      "description": "Abre o perfil completo de um cliente na tela do dono.",
      "parameters": {"type": "object", "properties": {"id": {"type": "integer"}}, "required": ["id"]}},
+    {"name": "criar_reserva",
+     "description": "Anota uma reserva de mesa que o dono ditou. Obrigatórios: nome, data e hora. Converta 'hoje', 'amanhã', 'sexta' etc. "
+                    "para a data real (AAAA-MM-DD) a partir da data de hoje. Se o cliente já existir na base, passe cliente_id.",
+     "parameters": {"type": "object", "properties": {
+         "nome": {"type": "string"}, "telefone": {"type": "string"},
+         "data": {"type": "string", "description": "AAAA-MM-DD"}, "hora": {"type": "string", "description": "HH:MM"},
+         "pessoas": {"type": "integer"}, "rodizio": {"type": "boolean", "description": "true = rodízio; false = à la carte; omita se não foi dito"},
+         "valor_pago": {"type": "number", "description": "Quanto já deixou pago (sinal/antecipado), em reais"},
+         "forma_pagamento": {"type": "string", "description": "pix, dinheiro, cartão…"},
+         "observacao": {"type": "string", "description": "Aniversário, cadeirinha, mesa, restrição, quem indicou etc."},
+         "cliente_id": {"type": "integer"}},
+         "required": ["nome", "data", "hora"]}},
+    {"name": "editar_reserva",
+     "description": "Altera ou cancela uma reserva existente (use listar_reservas antes para achar o id). Passe só o que muda. "
+                    "status: confirmada, chegou, nao_veio ou cancelada.",
+     "parameters": {"type": "object", "properties": {
+         "id": {"type": "integer"}, "nome": {"type": "string"}, "telefone": {"type": "string"}, "data": {"type": "string"},
+         "hora": {"type": "string"}, "pessoas": {"type": "integer"}, "rodizio": {"type": "boolean"}, "valor_pago": {"type": "number"},
+         "forma_pagamento": {"type": "string"}, "observacao": {"type": "string"}, "status": {"type": "string"}},
+         "required": ["id"]}},
+    {"name": "listar_reservas",
+     "description": "Lista as reservas de um período (padrão: de hoje em diante). Use para responder sobre reservas ou achar o id de uma.",
+     "parameters": {"type": "object", "properties": {"de": {"type": "string", "description": "AAAA-MM-DD"}, "ate": {"type": "string"}}}},
     {"name": "abrir_pagina",
      "description": "Leva o dono para uma página do sistema. Vendas: hoje, promocoes, envios, resultados, geral, clientes, produtos, bairros, "
-                    "listas, lembretes. Gestão: g_painel, g_despesas, g_fichas, g_equipe.",
+                    "listas, lembretes, reservas. Gestão: g_painel, g_despesas, g_fichas, g_equipe.",
      "parameters": {"type": "object", "properties": {"pagina": {"type": "string"}}, "required": ["pagina"]}},
 ]
 
@@ -649,10 +672,16 @@ GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_cliente
               "- Pesquise de verdade antes de sugerir: confira os pedidos e itens dos clientes, não suponha.\n"
               "- Preste atenção no que o dono disse: valores, cupons, datas, tom e restrições dele valem mais que qualquer sugestão sua.\n"
               "- Se pedir relatório, use gerar_relatorio e na resposta só diga o que tem nele. Nunca diga que fez uma ação sem chamar a ferramenta.\n"
-              "- Use o histórico da conversa: 'esses clientes' são os da última lista que você mostrou (os ids aparecem no histórico).")
+              "- Use o histórico da conversa: 'esses clientes' são os da última lista que você mostrou (os ids aparecem no histórico).\n"
+              "- RESERVAS: quando o dono ditar uma reserva, use criar_reserva. Nome, data e hora são obrigatórios: se faltar algum, pergunte "
+              "antes de criar. Anote tudo que ele disser: telefone, número de pessoas, se é rodízio ou não, quanto já deixou pago e a forma, "
+              "e qualquer observação. Não invente o que não foi dito. Se o nome ou telefone bater com um cliente da base, passe o cliente_id. "
+              "Depois confirme em uma linha curta (dia da semana, data, hora, nome, pessoas, rodízio, pago). Para mudar ou cancelar, "
+              "use listar_reservas para achar a reserva e depois editar_reserva.")
 
 
-def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete=None, extra="", salvar_lista=None, escrever=None):
+def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete=None, extra="", salvar_lista=None, escrever=None,
+              reservas=None):
     msgs = [{"role": m.get("role"), "content": str(m.get("content") or "")[:6000]} for m in mensagens[-14:]
             if m.get("role") in ("user", "assistant") and m.get("content")]
     if not msgs or msgs[-1]["role"] != "user":
@@ -756,6 +785,27 @@ def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete
             if ids:
                 acoes.append({"tipo": "perfil", "id": ids[0]})
             return "Perfil aberto." if ids else "Cliente não encontrado."
+        if nome in ("criar_reserva", "editar_reserva", "listar_reservas"):
+            if reservas is None:
+                return "Reservas indisponíveis."
+            args = dict(args or {})
+            if args.get("cliente_id") is not None:
+                ids = ids_ok([args.get("cliente_id")])
+                args["cliente_id"] = ids[0] if ids else None
+            try:
+                r = reservas(nome, args)
+            except ValueError as e:
+                return "Não consegui: %s. Confira com o dono." % e
+            if nome == "listar_reservas":
+                if not r:
+                    return "Nenhuma reserva no período."
+                return "\n".join("id %d | %s %s | %s | %s pessoas | %s | pago %s %s | %s | status %s" % (
+                    x["id"], x["data"], x["hora"], x["nome"], x["pessoas"] or "?",
+                    {1: "rodízio", 0: "sem rodízio"}.get(x["rodizio"], "rodízio não informado"),
+                    ("R$ %.2f" % x["valor_pago"]) if x["valor_pago"] else "nada", x["forma_pagamento"] or "",
+                    x["observacao"] or "-", x["status"]) for x in r[:200])
+            acoes.append({"tipo": "reserva", "acao": "criada" if nome == "criar_reserva" else "alterada", "reserva": r})
+            return "Reserva %s (id %d): %s" % ("anotada" if nome == "criar_reserva" else "atualizada", r["id"], json.dumps(r, ensure_ascii=False))
         if nome == "abrir_pagina":
             pg = str(args.get("pagina") or "").strip().lower()
             if pg not in PAGINAS and pg not in PAGINAS_GESTAO:
@@ -789,6 +839,7 @@ PAGINAS = {
     "bairros": "as vendas por bairro",
     "listas": "as listas de clientes salvas (muitas montadas pela IA)",
     "lembretes": "os lembretes de clientes para agir depois",
+    "reservas": "as reservas de mesa (próximos dias, pessoas, rodízio, valores já pagos)",
 }
 
 PAGINAS_GESTAO = {

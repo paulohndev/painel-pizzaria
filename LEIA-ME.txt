@@ -143,6 +143,16 @@ A assistente de IA se chama Zoe.
   quer dizer: a IA segue o seu pedido e usa o histórico do cliente (últimos
   pedidos, mensagens que já recebeu, suas anotações).
 
+RESERVAS
+------------------------------------------------------------
+Página "Reservas" (menu Vendas e clientes). Diga a reserva para a Zoe do
+jeito que vier, no campo da página ou no chat: "reserva pra Marcela amanhã
+às 20h, 6 pessoas, rodízio, deixou 50 no pix, é aniversário". Ela anota
+nome, telefone, dia, hora, pessoas, rodízio, valor pago, forma e observação,
+e pergunta se faltar nome, dia ou hora. Também dá para anotar à mão
+(+ Nova reserva), marcar "Chegou" / "Não veio", cancelar e mandar a
+confirmação pelo WhatsApp. Para mudar: "a reserva da Marcela passou para 21h".
+
 MARIÁ GESTÃO JUNTO COM O PAINEL
 ------------------------------------------------------------
 Agora tudo abre num lugar só: http://127.0.0.1:8766 (atalho "Mariá Gestão"
