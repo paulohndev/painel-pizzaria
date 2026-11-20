@@ -134,7 +134,12 @@ tr.click{cursor:pointer}tr.click:hover td{background:#fff8e1}tr.sel td{backgroun
 .ct-sec{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:12px;background:#fff}
 .ct-sec.venc{border-color:#efb7ad}.ct-sec.venc .ct-h{background:#fdecea;color:#8f0d0a}.ct-sec.hj .ct-h{background:#fff3d6}
 .ct-h{display:flex;justify-content:space-between;padding:9px 14px;background:#faf6f0;font-weight:700;border-bottom:1px solid var(--line)}
-.ct-grp{cursor:pointer;gap:10px;flex-wrap:wrap}.ct-grp:hover{background:#fff3d6}
+.ct-grp{cursor:pointer;gap:10px;flex-wrap:wrap}
+#fpAviso{position:fixed;right:22px;top:22px;z-index:9999;max-width:430px;background:#fff;border-radius:16px;box-shadow:0 18px 48px -12px rgba(42,18,18,.35);border-left:6px solid #e0a100;padding:16px 18px;transform:translateY(-12px);opacity:0;pointer-events:none;transition:all .22s}
+#fpAviso.on{transform:none;opacity:1;pointer-events:auto}#fpAviso.forte{border-left-color:#c4342a}#fpAviso.barato{border-left-color:#3b6fd9}
+
+.fp-live{background:#fff3d6;border-radius:10px;padding:7px 10px;margin-bottom:6px;color:#6b4a00}.fp-live.forte{background:#fdecea;color:#8f0d0a}.fp-live.barato{background:#e8effc;color:#1f3f86}
+#fpAviso .fp-t{font-weight:800;font-size:16px;margin-bottom:6px}#fpAviso ul{margin:0 0 8px;padding-left:18px;font-size:14px;line-height:1.5}#fpAviso .fp-s{font-size:13px;color:#6b5a52;margin-bottom:10px}#fpAviso .fp-b{display:flex;gap:8px;flex-wrap:wrap}.ct-grp:hover{background:#fff3d6}
 .ct-row{display:grid;grid-template-columns:96px minmax(0,1fr) 120px 260px;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid #f1e9df}
 .ct-row .dl-a{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:2px;white-space:normal}.ct-itens a{color:var(--red);font-weight:600;text-decoration:none}
 .ct-row:last-child{border-bottom:0}.ct-row.venc .ct-d b{color:var(--bad)}.ct-itens{grid-column:1/-1;background:#fffaf0;border-radius:10px;padding:6px 10px}
@@ -1225,8 +1230,41 @@ async function salvarNota(){
   db.despesas=db.despesas.filter(x=>x.notaId!==id||usados.has(x.id));
   if(arq){const prim=db.despesas.find(x=>x.notaId===id);const velho=db.despesas.find(x=>x.notaId===id&&x.anexo);if(velho&&velho.id!==prim.id){delete velho.anexo;anexos.del(velho.id).catch(()=>{})}
     try{await anexos.put(prim.id,arq);prim.anexo=arq.nome;salvarAnexoPasta(prim.id,arq)}catch(e){toast('Não foi possível guardar o comprovante')}}
-  salvar();toast(notaEdit?'Nota atualizada':`Nota salva com ${rows.length} item(ns)`);fecharNota();render()}
+  salvar();toast(notaEdit?'Nota atualizada':`Nota salva com ${rows.length} item(ns)`);const nid=id;fecharNota();render();setTimeout(()=>avisoForaPadrao(db.despesas.filter(x=>x.notaId===nid)),350)}
 
+
+/* ---------- compra fora do padrão: compara com o histórico na hora de lançar ---------- */
+const mediana=a=>{const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length?(b.length%2?b[m]:(b[m-1]+b[m])/2):NaN};
+function foraDoPadrao(x){
+  if(!x||x.jurosDe)return null;
+  if(x.itemId&&x.precoUnit>0){const it=db.itens.find(i=>i.id===x.itemId);if(!it)return null;const un=x.unidade||'un';
+    const hs=comprasItem(it.id).filter(y=>y.id!==x.id&&(y.data<x.data||(y.data===x.data&&(y.criadoEm||0)<(x.criadoEm||0)))).slice(-12)
+      .map(y=>({y,pu:convPU(y.precoUnit,y.unidade||'un',un)})).filter(o=>isFinite(o.pu)&&o.pu>0);
+    if(hs.length<2)return null;const ref=mediana(hs.map(o=>o.pu)),d=x.precoUnit/ref-1;
+    if(Math.abs(d)<0.2&&!(x.precoUnit>Math.max(...hs.map(o=>o.pu))*1.12))return null;if(d>-0.35&&d<0.2)return null;
+    const min=hs.reduce((a,b)=>b.pu<a.pu?b:a),lc=min.y.localId&&localDe(min.y.localId);
+    return{tipo:d>0?'caro':'barato',grau:Math.abs(d)>=0.5?2:1,nome:it.nome,un,pu:x.precoUnit,ref,d,n:hs.length,min:min.pu,minOnde:lc?lc.nome:'',minData:min.y.data,x}}
+  const k=normTxt(x.descricao);if(!k||!(x.valor>0))return null;
+  const hs=db.despesas.filter(y=>y.id!==x.id&&!y.notaId&&!y.qtd&&normTxt(y.descricao)===k&&y.valor>0&&y.data<=x.data).sort((a,b)=>a.data.localeCompare(b.data)).slice(-12);
+  if(hs.length<3)return null;const ref=mediana(hs.map(y=>y.valor)),d=x.valor/ref-1;
+  if(d<0.3&&d>-0.5)return null;
+  return{tipo:d>0?'caro':'barato',grau:Math.abs(d)>=0.6?2:1,nome:x.descricao,conta:true,valor:x.valor,ref,d,n:hs.length,x}}
+function avisoForaPadrao(xs){const as=xs.map(foraDoPadrao).filter(Boolean);if(!as.length)return;
+  const pct=d=>(Math.abs(d)*100).toFixed(0)+'%';
+  const linha=a=>a.conta
+    ?`<li><b>${esc(a.nome)}</b>: ${R(a.valor)}, <b class="${a.tipo==='caro'?'up':'down'}">${pct(a.d)} ${a.tipo==='caro'?'acima':'abaixo'}</b> do normal (${R(a.ref)}, pelos últimos ${a.n} lançamentos).</li>`
+    :`<li><b>${esc(a.nome)}</b>: R$ ${fmtPU(a.pu)}/${unTxt(a.un)}, <b class="${a.tipo==='caro'?'up':'down'}">${pct(a.d)} ${a.tipo==='caro'?'mais caro':'mais barato'}</b> que o normal (R$ ${fmtPU(Math.round(a.ref*100)/100)}/${unTxt(a.un)} nas últimas ${a.n} compras).${a.tipo==='caro'?` O menor foi R$ ${fmtPU(Math.round(a.min*100)/100)}${a.minOnde?' no '+esc(a.minOnde):''} em ${fmtD(a.minData)}.`:''}</li>`;
+  const caro=as.some(a=>a.tipo==='caro'),forte=as.some(a=>a.grau>1);
+  let el=$('fpAviso');if(!el){el=document.createElement('div');el.id='fpAviso';document.body.appendChild(el)}
+  el.className=caro?(forte?'forte':''):'barato';
+  el.innerHTML=`<div class="fp-t">${caro?'⚠️ Compra fora do padrão':'🔎 Preço bem abaixo do normal'}</div><ul>${as.map(linha).join('')}</ul>
+   <div class="fp-s">${caro?'Vale conferir se o preço está certo, ou se compensa comprar em outro lugar da próxima vez.':'Confira se o valor ou a quantidade foram digitados certo.'}</div>
+   <div class="fp-b"><button class="btn sm" onclick="fecharFP()">Está certo</button>${as.length===1&&!as[0].x.notaId?`<button class="btn sm sec" onclick="fecharFP();editar('${as[0].x.id}')">Corrigir</button>`:as[0].x.notaId?`<button class="btn sm sec" onclick="fecharFP();abrirNota('${as[0].x.notaId}')">Corrigir a nota</button>`:''}${window.parent&&parent!==window&&parent.mariaIA?`<button class="btn sm sec" onclick="perguntarFP()">✨ Perguntar à Zoe</button>`:''}</div>`;
+  el._as=as;requestAnimationFrame(()=>el.classList.add('on'))}
+function fecharFP(){const el=$('fpAviso');if(el)el.classList.remove('on')}
+function perguntarFP(){const el=$('fpAviso');const as=(el&&el._as)||[];fecharFP();
+  const t=as.map(a=>a.conta?`${a.nome}: R$ ${fmt2(a.valor)} (normal R$ ${fmt2(a.ref)})`:`${a.nome}: R$ ${fmtPU(a.pu)}/${a.un} (normal R$ ${fmtPU(Math.round(a.ref*100)/100)}/${a.un}, menor R$ ${fmtPU(Math.round(a.min*100)/100)}${a.minOnde?' no '+a.minOnde:''})`).join('; ');
+  try{parent.mariaIA(`Acabei de lançar uma compra fora do padrão: ${t}. Olhando o histórico de compras e as fichas técnicas, o que isso muda no custo das pizzas e o que você sugere?`)}catch(e){}}
 const difDias=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5);
 function contaSimples(){irAba('lanc');cancelarEdicao();$('iSit').value='ap';$('vencLbl').classList.remove('hidden');voltarContas=true;$('iDesc').focus()}
 /* ---------- PAGAMENTO, JUROS E PONTUALIDADE ---------- */
@@ -1306,6 +1344,9 @@ function dicaPreco(){
     if(mesma&&pu>0){const d=pu/u.precoUnit-1;comp=` · <b class="${d>0.005?'up':d<-0.005?'down':''}">${d>0?'+':''}${(d*100).toFixed(1).replace('.',',')}%</b> ${d>0.005?'mais caro':d<-0.005?'mais barato':'igual'}`}
     s+=(s?' &nbsp;·&nbsp; ':'')+`Última compra: ${R(u.precoUnit)}/${unTxt(u.unidade)} em ${fmtD(u.data)}${u.localId&&localDe(u.localId)||nomeMarca(u)?' ('+[nomeMarca(u),u.localId&&localDe(u.localId)?localDe(u.localId).nome:''].filter(Boolean).map(esc).join(', ')+')':''}${comp}`;
     const it=itemPorNome($('iDesc').value);if(it){const st=statsItem(it);if(st.n>1&&st.min&&st.min.x.id!==u.id)s+=` &nbsp;·&nbsp; Menor preço: R$ ${fmtPU(st.min.pu)}/${unTxt(st.un)}${st.min.x.localId&&localDe(st.min.x.localId)?' no '+esc(localDe(st.min.x.localId).nome):''} em ${fmtD(st.min.x.data)}`}}
+  {const it=itemPorNome($('iDesc').value);if(it&&q>0&&pu>0){const st=statsItem(it);if(st.n>=2){const ref=mediana(st.cs.slice(-12).map(o=>o.pu)),puu=convPU(pu,un||'un',st.un),d=puu/ref-1;
+    if(isFinite(d)&&d>=0.2)s=`<div class="fp-live ${d>=0.5?'forte':''}">⚠️ <b>${(d*100).toFixed(0)}% acima do normal</b> para ${esc(it.nome)} (normal: R$ ${fmtPU(Math.round(ref*100)/100)}/${unTxt(st.un)}). Confira antes de salvar.</div>`+s;
+    else if(isFinite(d)&&d<=-0.35)s=`<div class="fp-live barato">🔎 <b>${(-d*100).toFixed(0)}% abaixo do normal</b> (R$ ${fmtPU(Math.round(ref*100)/100)}/${unTxt(st.un)}). Confira a quantidade e o valor.</div>`+s}}}
   $('qtdDica').innerHTML=s;
 }
 const N2=v=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:3}).format(v);
@@ -1354,7 +1395,7 @@ $('form').addEventListener('submit',async e=>{
     if(arq){await anexos.put(x.id,arq);x.anexo=arq.nome;salvarAnexoPasta(x.id,arq)}
     else if(editId&&removerAnexo){await anexos.del(x.id);delete x.anexo;apagarAnexoPasta(x.id)}
   }catch(err){toast('Não foi possível guardar o comprovante')}
-  salvar();
+  salvar();setTimeout(()=>avisoForaPadrao([x]),350);
   if(editId){toast('Despesa atualizada');cancelarEdicao()}
   else{if(voltarContas&&apagar){voltarContas=false;toast('Conta a pagar salva');['iDesc','iValor','iObs','iVenc'].forEach(id=>$(id).value='');limparQtd();$('iSit').value='pg';$('vencLbl').classList.add('hidden');render();irAba('contas');return}toast('Despesa salva');['iDesc','iValor','iObs','iVenc','iMarca'].forEach(id=>$(id).value='');limparQtd();/* local fica para a próxima compra */infoLocal();$('iAnexo').value='';$('iSit').value='pg';$('vencLbl').classList.add('hidden');$('iDesc').focus()}
   render();

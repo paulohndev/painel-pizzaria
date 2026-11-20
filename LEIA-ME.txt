@@ -229,6 +229,21 @@ Em Despesas > Contas a pagar:
     tem vencida e o próximo vencimento; clicando nele aparecem os lançamentos.
   - "Categoria": mostra só as contas daquela categoria.
 
+COMPRA FORA DO PADRÃO (versão 2.10)
+------------------------------------------------------------
+Ao lançar uma despesa (ou uma nota com vários itens), o sistema compara com o
+histórico na hora:
+  - itens com quantidade (ex.: queijo por kg): compara o preço por unidade com
+    o normal das últimas compras (mediana das últimas 12). Já enquanto você
+    digita aparece "X% acima do normal"; ao salvar, se passar de 20% acima,
+    aparece o aviso "Compra fora do padrão", com o menor preço já pago e onde.
+  - contas sem quantidade que se repetem (energia, gás, aluguel...): avisa se
+    vier 30% acima do normal dos últimos lançamentos com o mesmo nome.
+  - preço muito abaixo do normal também avisa, para conferir se foi digitado certo.
+No aviso: "Está certo", "Corrigir" ou "Perguntar à Zoe" (ela olha o histórico
+e as fichas técnicas e diz o que isso muda no custo das pizzas).
+Precisa de pelo menos 2 compras anteriores do item (3 para contas) para comparar.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".
