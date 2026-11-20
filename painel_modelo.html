@@ -525,6 +525,34 @@ button.pin.on{opacity:1;filter:none}
 tr.mp-tr{cursor:pointer}
 tr.mp-tr:hover td{background:#FFF8EE}
 @media (max-width:900px){.mp-wrap{grid-template-columns:1fr;height:auto}#mapa{height:420px}.mp-lado{max-height:360px}}
+#hojeUrg{display:none!important}
+.hj-nums{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.hj-num{background:rgba(255,255,255,.09);border-radius:16px;padding:10px 16px;min-width:150px}
+.hj-num small{display:block;font-size:12px;color:#F6DCCB}
+.hj-num b{display:block;font-family:var(--display);font-size:24px;line-height:1.2}
+.hj-num span{font-size:12px;color:#FFD27A}
+.hj-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:16px}
+.hj-card{background:#fff;border-radius:22px;box-shadow:var(--sh);padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.hj-card h3{margin:0;font-size:15px}
+.hj-card p{margin:0;font-size:13px;line-height:1.5}
+.hj-cab{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.hj-cab .muted{font-size:12.5px}
+.hj-res{display:flex;gap:10px;align-items:center;font-size:13.5px}
+.hj-res b{font-family:var(--display);font-size:16px;width:48px;flex:none}
+.hj-res span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hj-res i,.hj-tag{font-style:normal;font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--line2);white-space:nowrap}
+.hj-res i.rod{background:#FFF4DE;color:#7a4a00}.hj-res i.pg,.hj-res i.ok{background:#E6F4EA;color:#1e6b3a}
+.hj-tag.red{background:#FDE8E6;color:#9f1c12}
+.hj-al{font-size:13.5px;line-height:1.4}
+.hj-al b{display:block}
+.hj-al span{display:block;font-size:12.5px;color:var(--mut)}
+.hj-link{margin-top:auto;align-self:flex-start;border:0;background:none;padding:4px 0;font:inherit;font-size:12.5px;font-weight:600;color:#6e0000;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.hj-promo{background:#FFF4DE}
+.hj-promo small{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a4b00}
+.hj-promo h3{font-family:var(--display);font-size:19px}
+.hj-tit{font-family:var(--display);font-size:22px;margin:22px 0 0}
+@media (max-width:1100px){.hj-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.hj-cards{grid-template-columns:1fr}}
 .ac-grupo{border-top:1px solid var(--line2);margin-top:6px;padding-top:4px}
 .ac-gcab{display:flex;gap:8px;align-items:center;padding:4px 0}
 .ac-gcab .bts{margin-left:auto;display:flex;gap:4px}
@@ -639,10 +667,12 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
 
   <section id="t-hoje">
     <div class="hero"><i class="b1"></i><i class="b2"></i><i class="b3"></i>
-      <div class="tx"><small id="hojeData"></small><h2 id="hojeTitulo">Lista do dia</h2><p id="hojeDesc"></p><button class="urgentes hidden" id="hojeUrg"></button></div>
+      <div class="tx"><small id="hojeData"></small><h2 id="hojeTitulo">Lista do dia</h2><p id="hojeDesc"></p><div class="hj-nums" id="hojeNums"></div><button class="urgentes hidden" id="hojeUrg"></button></div>
     </div>
+    <div class="hj-cards" id="hojeCards"></div>
     <div class="ia-resumo hidden" id="iaResumo"><h3>✨ Resumo do dia <small id="iaResumoEm"></small> <button id="iaResumoNovo" title="Gerar de novo">↻ Atualizar</button></h3><div class="tx" id="iaResumoTx"></div></div>
-    <div class="kpis" id="hojeResumo" style="margin-top:16px"></div>
+    <h2 class="hj-tit">Quem chamar hoje</h2>
+    <div class="kpis" id="hojeResumo" style="margin-top:8px"></div>
     <div class="toolbar" id="hojeFiltros">
       <input type="search" id="hBusca" placeholder="Buscar nome, bairro ou motivo" style="min-width:230px">
       <select id="hMotivo"></select>
@@ -1461,11 +1491,13 @@ function listaDoDia(){
 }
 function renderHoje(){
   const L=listaDoDia(); const hoje=new Date();
-  const hr=hoje.getHours(); const sauda=hr<12?'Bom dia':hr<18?'Boa tarde':'Boa noite';
+  const hr=hoje.getHours(); const sauda=hr<5?'Boa noite':hr<12?'Bom dia':hr<18?'Boa tarde':'Boa noite';
   $('#hojeData').textContent=hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
   const idade=Math.round((hoje-REF)/36e5);
   const BL=blocosDia(); const tot=BL.reduce((s,b)=>s+L[b.id].length,0);
-  $('#hojeTitulo').textContent=tot?`${sauda}! ${tot} ${tot===1?'pessoa':'pessoas'} para chamar hoje`:`${sauda}! Ninguém pendente hoje`;
+  const nRes=(RES_HOJE||[]).filter(r=>r.status==='confirmada').length, nAl=alertasAtivos().filter(a=>a.prio===1).length;
+  const partes=[nRes?`${nRes} reserva${nRes===1?'':'s'}`:'', nAl?`${nAl} alerta${nAl===1?'':'s'} urgente${nAl===1?'':'s'}`:'', tot?`${tot} ${tot===1?'cliente':'clientes'} para chamar`:''].filter(Boolean);
+  $('#hojeTitulo').textContent=partes.length?`${sauda}! ${partes.length>1?partes.slice(0,-1).join(', ')+' e '+partes[partes.length-1]:partes[0]}`:`${sauda}! Nada pendente hoje`;
   $('#hojeDesc').innerHTML=(tot?'Clique em <b>WhatsApp</b>, envie a mensagem que já vai pronta e marque como contatado. Quem você já chamou não volta para a lista.':'Todo mundo que precisava de contato já foi chamado. Volte amanhã!')+
     (idade>30?`<br><b>Atenção:</b> os dados são de ${REF.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}. Rode "Atualizar painel".`:'');
   $('#qtHoje').dataset.base=tot; $('#qtHoje').textContent=tot||'';
@@ -1474,9 +1506,10 @@ function renderHoje(){
   $('#hojeResumo').classList.toggle('filtrando',!!HF.bloco);
   $('#hojeResumo').querySelectorAll('.kpi.filtro').forEach(k=>k.onclick=()=>{ HF.bloco=HF.bloco===k.dataset.b?null:k.dataset.b; renderHoje(); });
   HOJE_L=L; setTimeout(()=>{ const bu=$('#hojeUrg'); if(bu) bu.onclick=()=>abrirGaveta(); renderAlertas(); },0);
+  renderHojeNums(); renderHojeCards(L);
   renderHojeBlocos();
 }
-let HF={bloco:null}, HOJE_L=null;
+let HF={bloco:null}, HOJE_L=null, RES_HOJE=null;
 const semAc=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const BAIRRO_CLI={}; function bairroCli(cli){ if(cli in BAIRRO_CLI) return BAIRRO_CLI[cli]; const m={}; P.forEach(p=>{ if(p.cli===cli&&p.b>=0) m[p.b]=(m[p.b]||0)+1; }); const k=Object.keys(m).sort((a,b)=>m[b]-m[a])[0]; return BAIRRO_CLI[cli]=k!=null?D.bairros[k]:''; }
 function motivosItem(bid,it){
@@ -2107,7 +2140,7 @@ function pinBtn(cli){ const c=D.clientes[cli]; if(!c||!AO_VIVO) return ''; const
   return `<button class="pin ${n.length?'on':''}" data-pin="${cli}" title="${n.length?esc('Lembrete: '+n.map(l=>l.texto).join(' / ')):'Salvar para lembrar depois'}">📌</button>`; }
 document.addEventListener('click',e=>{ const b=e.target.closest('button[data-pin]'); if(!b) return; e.preventDefault(); e.stopPropagation(); abrirLembrete(+b.dataset.pin); });
 function hojeStr(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function lembCarregar(){ if(!AO_VIVO) return Promise.resolve(); return api('/api/lembretes'+(LP.f==='feito'?'?todos=1':'')).then(r=>{ const prim=!lembCarregar.ok; lembCarregar.ok=true; LEMB=r.lembretes||[]; lembContador(); if(prim&&LEMB.length&&typeof render==='function') render(); if($('#lemb').classList.contains('aberta')) lembRender(); if(aba==='lembretes') renderLembPag(); }).catch(()=>{}); }
+function lembCarregar(){ if(!AO_VIVO) return Promise.resolve(); return api('/api/lembretes'+(LP.f==='feito'?'?todos=1':'')).then(r=>{ const prim=!lembCarregar.ok; lembCarregar.ok=true; LEMB=r.lembretes||[]; lembContador(); if(prim&&LEMB.length&&typeof render==='function') render(); if($('#lemb').classList.contains('aberta')) lembRender(); if(aba==='lembretes') renderLembPag(); if(aba==='hoje') renderHojeCards(HOJE_L||listaDoDia()); }).catch(()=>{}); }
 function lembContador(){ const ab=LEMB.filter(l=>!l.feito); const hoje=hojeStr(); const venc=ab.filter(l=>l.quando&&l.quando<=hoje).length;
   const n=$('#lembN'); n.textContent=ab.length||''; n.classList.toggle('hoje',venc>0); const q=$('#qLem'); if(q){ q.textContent=ab.length; q.style.display=ab.length?'':'none'; } $('#lembBtn').title=venc?`${venc} lembrete(s) para hoje`:'Lembretes: clientes que você salvou para depois'; }
 function lembAcao(d){ if(LP.f==='feito') d.todos=1; return api('/api/lembretes',d).then(r=>{ LEMB=r.lembretes||[]; lembContador(); lembRender(); if(typeof render==='function') render(); }); }
@@ -2483,6 +2516,49 @@ document.addEventListener('click',e=>{ const b=e.target.closest('[data-mpperf]')
 $('#mpBairro').onchange=()=>{ MP.bairro=$('#mpBairro').value; MP.seg=''; MP.modo='cli'; MP.ajustado=false; renderMapa(); };
 $('#mpModo').querySelectorAll('button').forEach(b=>b.onclick=()=>{ MP.modo=b.dataset.m; if(MP.modo==='bai'){ MP.bairro=''; MP.seg=''; } renderMapa(); });
 if(AO_VIVO) listasCarregar();
+
+// ------------------------------------------------------------ HOJE: números do dia e cartões (reservas, alertas, lembretes, promoção)
+function diaOper(d){ const x=new Date(d); if(x.getHours()<5) x.setDate(x.getDate()-1); return hojeStr(x); }
+function renderHojeNums(){
+  const box=$('#hojeNums'); if(!box) return; const agora=new Date(); const hj=diaOper(agora); const minAgora=(agora.getHours()<5?agora.getHours()+24:agora.getHours())*60+agora.getMinutes();
+  let v=0,n=0,prop=0; const dias={}; const alvo=new Set(); for(let k=1;k<=8;k++){ const x=new Date(agora); x.setDate(x.getDate()-7*k); alvo.add(diaOper(x)); }
+  P.forEach(p=>{ if(p.cancel||!p.d) return; const d=diaOper(p.d);
+    if(d===hj){ v+=p.v||0; n++; if(GRUPO_CANAL[p.c]==='proprio') prop+=p.v||0; return; }
+    if(alvo.has(d)){ const m=(p.d.getHours()<5?p.d.getHours()+24:p.d.getHours())*60+p.d.getMinutes(); if(m<=minAgora){ dias[d]=(dias[d]||0)+(p.v||0); } } });
+  const base=[...alvo].filter(d=>d in dias).map(d=>dias[d]); const media=base.length?base.reduce((a,b)=>a+b,0)/base.length:0;
+  const nomeDia=['domingo','segunda','terça','quarta','quinta','sexta','sábado'][new Date(hj+'T12:00').getDay()];
+  let cmp=''; if(media>0&&v>0){ const pc=Math.round((v/media-1)*100); cmp=pc>=5?`${pc}% acima de ${nomeDia==='sábado'||nomeDia==='domingo'?'um':'uma'} ${nomeDia} normal até esta hora`:pc<=-5?`${-pc}% abaixo de ${nomeDia==='sábado'||nomeDia==='domingo'?'um':'uma'} ${nomeDia} normal até esta hora`:`igual a ${nomeDia==='sábado'||nomeDia==='domingo'?'um':'uma'} ${nomeDia} normal até esta hora`; }
+  else if(media>0) cmp=`até esta hora, ${nomeDia==='sábado'||nomeDia==='domingo'?'um':'uma'} ${nomeDia} normal tem ${fmtR0(media)}`;
+  box.innerHTML=`<div class="hj-num"><small>Vendido hoje</small><b>${fmtR0(v)}</b><span>${fmtN(n)} pedido${n===1?'':'s'}${cmp?' · '+esc(cmp):''}</span></div>`+
+    (v?`<div class="hj-num"><small>Pelo canal próprio</small><b>${Math.round(prop/v*100)}%</b><span>do vendido hoje</span></div>`:'');
+}
+function renderHojeCards(L){
+  const box=$('#hojeCards'); if(!box) return; const hj=hojeStr(); const out=[];
+  // reservas
+  if(AO_VIVO){ const rs=(RES_HOJE||[]).filter(r=>r.status!=='cancelada'); const pes=rs.reduce((s,r)=>s+(r.pessoas||0),0);
+    out.push(`<section class="hj-card"><div class="hj-cab"><h3>Reservas de hoje</h3><span class="muted">${rs.length?fmtN(pes)+' pessoas':''}</span></div>
+      ${rs.length?rs.slice(0,4).map(r=>`<div class="hj-res"><b>${esc(r.hora)}</b><span>${esc(r.nome)}${r.pessoas?' · '+r.pessoas:''}</span>${r.status==='chegou'?'<i class="ok">chegou</i>':r.rodizio===1?'<i class="rod">rodízio</i>':r.valor_pago?'<i class="pg">'+esc(fmtR0(r.valor_pago))+' pago</i>':''}</div>`).join(''):'<p class="muted">Nenhuma reserva para hoje.</p>'}
+      <button class="hj-link" data-hj="reservas">${rs.length>4?'Ver as '+rs.length+' reservas':'Abrir reservas'}</button></section>`); }
+  // alertas
+  const ATV=alertasAtivos(); const urg=ATV.filter(a=>a.prio===1);
+  out.push(`<section class="hj-card"><div class="hj-cab"><h3>Alertas</h3>${urg.length?`<span class="hj-tag red">${urg.length} urgente${urg.length===1?'':'s'}</span>`:''}</div>
+    ${(urg.length?urg:ATV).slice(0,2).map(a=>`<div class="hj-al"><b>${esc((ICONE[a.tipo]||'')+' '+(a.titulo||'Alerta'))}</b><span>${esc(String(a.texto||a.desc||'').slice(0,90))}</span></div>`).join('')||'<p class="muted">Nenhum alerta agora.</p>'}
+    <button class="hj-link" data-hj="alertas">${ATV.length?'Ver os '+ATV.length+' alertas':'Abrir alertas'}</button></section>`);
+  // lembretes que vencem
+  if(AO_VIVO){ const lb=LEMB.filter(l=>!l.feito&&l.quando&&l.quando<=hj); const G=new Map(); lb.forEach(l=>{ const k=l.grupo||('i'+l.id); if(!G.has(k)) G.set(k,{t:l.grupo?l.grupo_titulo:l.nome, tx:l.texto, n:0, atr:false}); const g=G.get(k); g.n++; if(l.quando<hj) g.atr=true; });
+    out.push(`<section class="hj-card"><div class="hj-cab"><h3>Lembretes de hoje</h3><span class="muted">${lb.length||''}</span></div>
+      ${[...G.values()].slice(0,3).map(g=>`<div class="hj-al"><b>${esc(g.t||'Lembrete')}${g.atr?' <i class="hj-tag red">atrasado</i>':''}</b><span>${g.n>1?g.n+' clientes · ':''}${esc(String(g.tx||'').slice(0,80))}</span></div>`).join('')||'<p class="muted">Nada vencendo hoje.</p>'}
+      <button class="hj-link" data-hj="lembretes">Ver todos os lembretes</button></section>`); }
+  // promoção do dia
+  const ph=promosHoje()[0];
+  if(ph){ const lista=(L['promo_'+ph.k]||[]); out.push(`<section class="hj-card hj-promo"><small>Promoção de hoje</small><h3>${esc(ph.p.nome)}</h3><p>${esc(ph.p.oferta||'')}${lista.length?`. ${fmtN(lista.length)} cliente${lista.length===1?'':'s'} com o perfil certo já estão na lista de quem chamar.`:''}</p>
+    ${lista.length?`<button class="hj-link" data-hj="promo" data-k="promo_${ph.k}">Ver os ${fmtN(lista.length)}</button>`:''}</section>`); }
+  else out.push(`<section class="hj-card hj-promo"><small>Promoção de hoje</small><h3>Sem promoção da casa</h3><p>Hoje vale lembrar os combos, que saem todos os dias.</p></section>`);
+  box.innerHTML=out.join('');
+  box.querySelectorAll('[data-hj]').forEach(b=>b.onclick=()=>{ const t=b.dataset.hj;
+    if(t==='alertas') abrirGaveta(); else if(t==='promo'){ HF.bloco=b.dataset.k; renderHoje(); $('#hojeResumo').scrollIntoView({behavior:'smooth'}); } else irPara(t); });
+}
+
 // ------------------------------------------------------------ PÁGINA: RESERVAS
 let RESERVAS=[]; const RS={p:'semana', dia:'', busca:''};
 const DIAS_SEM=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
@@ -2495,7 +2571,7 @@ function rsDiaLabel(d){ const h=hojeStr(); const x=new Date(d+'T12:00'); const d
 function rsContador(){ const q=$('#qRes'); if(!q) return; const h=hojeStr(); const n=RESERVAS.filter(r=>r.data===h&&r.status==='confirmada').length; q.textContent=n; q.style.display=n?'':'none'; }
 function reservasCarregar(){ if(!AO_VIVO) return Promise.resolve(); const [de,ate]=rsPeriodo();
   return Promise.all([api('/api/reservas?de='+de+(ate?'&ate='+ate:'')), api('/api/reservas?de='+hojeStr()+'&ate='+hojeStr())]).then(([r,rh])=>{
-    RESERVAS=r.reservas||[]; const q=$('#qRes'); if(q){ const n=(rh.reservas||[]).filter(x=>x.status==='confirmada').length; q.textContent=n; q.style.display=n?'':'none'; }
+    RESERVAS=r.reservas||[]; RES_HOJE=rh.reservas||[]; if(aba==='hoje') renderHoje(); const q=$('#qRes'); if(q){ const n=(rh.reservas||[]).filter(x=>x.status==='confirmada').length; q.textContent=n; q.style.display=n?'':'none'; }
     if(aba==='reservas') renderReservas(); }).catch(()=>{}); }
 function rsCliente(r){ if(!r.chave) return null; const c=IDX_CHAVE[r.chave]; return c!=null?c:null; }
 function rsWa(r, texto){ let t=(r.telefone||'').replace(/\D/g,''); const cli=rsCliente(r); if(!t&&cli!=null) t=(D.clientes[cli].tel||'');

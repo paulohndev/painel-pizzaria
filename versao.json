@@ -1,6 +1,6 @@
 {
- "versao": "2.5.1",
- "notas": "Mapa de clientes; o menu duplicado não pisca mais ao abrir",
+ "versao": "2.6.0",
+ "notas": "Nova tela Hoje: vendas do dia, reservas, alertas, lembretes e promoção numa tela só",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
@@ -19,7 +19,7 @@
   "ia.py": "5f2c9eee71ec081abcd40e795c4446eb6df4acdb1a22fc6f46d380370aca7d47",
   "ia_painel.py": "26aa6a9f6eb835fad15fdca8e2a25c6064213dc2e6cba8de233088bbf0854203",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "f3244aab9e62feffa0f1d83c46a9f2b9db59b9ec95c8d8984941fb2b10eb51f5",
+  "painel_modelo.html": "123e6978387a55e7ec58a954fc67b1733cbade5e9d2d20bea7e025b1fc71e9f3",
   "pizzaria.py": "c847c3ca1f9bb6a047940d09ae5ac96fd48021f46da1352930917797e0b0a38d",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
   "vigia.py": "1b871ab424f16dd0f6026d3fdd4584eeb2bebf72fd919309b5d7480463a15e17",
