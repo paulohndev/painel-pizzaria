@@ -496,6 +496,33 @@ button.pin.on{opacity:1;filter:none}
 .rs-form textarea{min-height:70px;resize:vertical}
 .rs-form .lb-res{position:absolute;top:100%;left:0;right:0;z-index:5}
 @media (max-width:900px){.rs-it{grid-template-columns:56px 1fr}.rs-d,.rs-st,.rs-ac{grid-column:2}.rs-form{grid-template-columns:1fr 1fr}.rs-form .w3{grid-column:span 2}}
+.mp-cab{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}
+.mp-ferr{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mp-ferr select{border:1px solid var(--line);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;background:#fff}
+.mp-seg{flex-wrap:wrap;margin-bottom:10px}
+.mp-bola{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;flex:none}
+.mp-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;height:540px}
+#mapa{position:relative;isolation:isolate;border-radius:16px;overflow:hidden;background:#EEE9E2;z-index:0;min-height:300px}
+.mp-lado{overflow:auto;border-radius:16px;background:#FBF7F2;padding:10px 12px}
+.mp-lcab{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+.mp-lcab .muted{font-size:12px}
+.mp-x{border:0;background:#fff;border-radius:999px;width:28px;height:28px;cursor:pointer}
+.mp-bai{padding:7px 8px;border-radius:10px;cursor:pointer;font-size:13px}
+.mp-bai span{display:block;font-size:11.5px;color:var(--soft)}
+.mp-bai:hover{background:#fff}
+.mp-acoes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.mp-acoes button{border:0;background:#fff;border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+.mp-cli{display:flex;gap:6px;align-items:center;padding:6px 2px;border-top:1px solid var(--line2);font-size:13px}
+.mp-cli .n{flex:1;min-width:0}
+.mp-cli .sub{display:block;font-size:11.5px;color:var(--soft)}
+.mp-ir{border:0;background:none;cursor:pointer;font-size:14px}
+.mp-pop{font:13px/1.45 var(--sans,inherit);min-width:200px}
+.mp-pop a.cli{cursor:pointer;color:var(--ink)}
+.mp-pbts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mp-pbts button,.mp-pbts a{border:0;background:var(--line2);border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink)!important;text-decoration:none}
+tr.mp-tr{cursor:pointer}
+tr.mp-tr:hover td{background:#FFF8EE}
+@media (max-width:900px){.mp-wrap{grid-template-columns:1fr;height:auto}#mapa{height:420px}.mp-lado{max-height:360px}}
 .ac-grupo{border-top:1px solid var(--line2);margin-top:6px;padding-top:4px}
 .ac-gcab{display:flex;gap:8px;align-items:center;padding:4px 0}
 .ac-gcab .bts{margin-left:auto;display:flex;gap:4px}
@@ -841,6 +868,13 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
     <div id="lpGrupos"></div>
   </section>
   <section id="t-bairros" class="hidden">
+    <div class="card mp-card">
+      <div class="mp-cab"><div><h2 style="margin:0">Mapa de clientes</h2><p class="desc" style="margin:4px 0 0">Cada ponto é um cliente, no endereço da última entrega, com a cor do grupo dele. Escolha um bairro (no mapa, na lista ao lado ou na tabela abaixo) para ver só os clientes de lá.</p></div>
+        <div class="mp-ferr"><select id="mpBairro"><option value="">Todos os bairros</option></select><div class="seg" id="mpModo"><button data-m="cli" class="on">Clientes</button><button data-m="bai">Bairros</button></div></div></div>
+      <div class="seg mp-seg" id="mpSeg"></div>
+      <div class="mp-wrap"><div id="mapa"></div><div class="mp-lado" id="mpLado"></div></div>
+      <div class="muted" id="mpNota" style="font-size:12px;margin-top:8px"></div>
+    </div>
     <div class="card">
       <h2>Bairros</h2>
       <p class="desc">Pedidos de entrega concluídos, com os filtros de turno e canal aplicados.</p>
@@ -1216,9 +1250,11 @@ function renderBairros(){
   const acc={}; P.forEach(p=>{ if(p.cancel||!ok(p)||p.b<0) return; const a=acc[p.b]=acc[p.b]||{n:0,v:0,cl:new Set(),tx:0}; a.n++; a.v+=p.v||0; a.tx+=p.taxa||0; if(p.cli>=0)a.cl.add(p.cli); });
   const L=Object.entries(acc).map(([b,a])=>({nome:D.bairros[b],...a})).sort((a,b)=>b.v-a.v); const tv=L.reduce((s,l)=>s+l.v,0)||1, mx=Math.max(1,...L.map(l=>l.v));
   let h='<tr><th>Bairro</th><th class="num">Pedidos</th><th class="num">Clientes</th><th class="num">Faturamento</th><th class="num">%</th><th class="num">Ticket</th><th class="num">Taxa média</th><th style="width:20%"></th></tr>';
-  L.forEach(l=>{h+=`<tr><td>${esc(l.nome)}</td><td class="num">${fmtN(l.n)}</td><td class="num">${fmtN(l.cl.size)}</td><td class="num">${fmtR0(l.v)}</td><td class="num">${fmtP(l.v/tv)}</td><td class="num">${fmtR(l.v/l.n)}</td><td class="num">${fmtR(l.tx/l.n)}</td><td><div class="bar" style="width:${l.v/mx*100}%"></div></td></tr>`;});
+  L.forEach(l=>{h+=`<tr data-bai="${esc(l.nome)}" class="mp-tr" title="Ver no mapa"><td>${esc(l.nome)}</td><td class="num">${fmtN(l.n)}</td><td class="num">${fmtN(l.cl.size)}</td><td class="num">${fmtR0(l.v)}</td><td class="num">${fmtP(l.v/tv)}</td><td class="num">${fmtR(l.v/l.n)}</td><td class="num">${fmtR(l.tx/l.n)}</td><td><div class="bar" style="width:${l.v/mx*100}%"></div></td></tr>`;});
   if(!L.length) h+='<tr><td colspan="8" class="muted" style="padding:20px">Sem pedidos de entrega para esses filtros.</td></tr>';
   $('#tbBai').innerHTML=h;
+  $('#tbBai').querySelectorAll('tr[data-bai]').forEach(tr=>tr.onclick=()=>{ MP.bairro=tr.dataset.bai; MP.seg=''; MP.modo='cli'; renderMapa(); $('#t-bairros .mp-card').scrollIntoView({behavior:'smooth'}); });
+  renderMapa();
 }
 
 
@@ -2360,6 +2396,90 @@ $('#lpNovo').oninput=()=>{ const q=semAc($('#lpNovo').value.trim()); const R=$('
   const dig=q.replace(/\D/g,''); const out=[]; for(let i=0;i<D.clientes.length&&out.length<8;i++){ const c=D.clientes[i]; if(c.uniu_em!=null) continue; if(semAc(c.nome).includes(q)||(dig.length>=4&&(c.tel||'').includes(dig))) out.push(i); }
   R.innerHTML=out.map(i=>`<div data-lpc="${i}">${esc(D.clientes[i].nome||'(sem nome)')}<span class="muted" style="font-size:12px"> ${esc(fmtTel(D.clientes[i].tel||''))}</span>${ptsTag(D.clientes[i])}</div>`).join('')||'<div class="muted">Ninguém encontrado</div>';
   R.classList.remove('hidden'); R.querySelectorAll('[data-lpc]').forEach(d=>d.onclick=()=>{ R.classList.add('hidden'); $('#lpNovo').value=''; abrirLembrete(+d.dataset.lpc); }); };
+// ------------------------------------------------------------ MAPA DE CLIENTES (página Bairros)
+const MP={bairro:'', seg:'', modo:'cli', mapa:null, camada:null, pronto:false, carregando:false, erro:false, geo:null};
+const MP_COR={fa:'#1e8e4a', fs:'#e8590c', rr:'#2f6fdb', no:'#8b5cf6', es:'#d4a017', pe:'#9aa0a6'};
+function carregarLeaflet(){
+  if(window.L&&window.L.map) return Promise.resolve();
+  return new Promise((ok,falha)=>{ const c=document.createElement('link'); c.rel='stylesheet'; c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(c);
+    const s=document.createElement('script'); s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.onload=()=>ok(); s.onerror=()=>falha(); document.head.appendChild(s); }); }
+const MP_SEM_BAIRRO=/^(n[aã]o informado|sem bairro|-|\.|n\/a)?$/i;
+function mpGeo(){ // posição de cada cliente: a da última entrega; quem não tem, perto do centro do bairro
+  if(MP.geo) return MP.geo; const g={};
+  D.clientes.forEach((c,i)=>{ if(!c.g) return; const t=c.uniu_em!=null?c.uniu_em:i; if(!g[t]) g[t]=c.g; });
+  const soma={}; Object.entries(g).forEach(([i,p])=>{ const b=bairroCli(+i); if(!b||MP_SEM_BAIRRO.test(b.trim())) return; const s=soma[b]=soma[b]||[0,0,0]; s[0]+=p[0]; s[1]+=p[1]; s[2]++; });
+  const centro={}; Object.entries(soma).forEach(([b,s])=>{ if(s[2]>=2) centro[b]=[s[0]/s[2], s[1]/s[2]]; });
+  const aprox={};
+  D.clientes.forEach((c,i)=>{ if(c.uniu_em!=null||g[i]) return; const b=bairroCli(i); const ce=b&&centro[b]; if(!ce) return;
+    const r1=((i*9301+49297)%233280)/233280, r2=((i*7919+12345)%233280)/233280; aprox[i]=[ce[0]+(r1-.5)*.006, ce[1]+(r2-.5)*.006]; });
+  return MP.geo={exato:g, aprox, centro}; }
+function mpSegDe(x){ if(!x) return null; const d=diasEntre(x.ult,REF); const s=SEGS.find(s=>s.f(x.n,d)); return s?s.id:null; }
+function mpDados(){ const G=mpGeo(); const pc=porCliente(); const out=[]; let sem=0;
+  D.clientes.forEach((c,i)=>{ if(c.uniu_em!=null) return; const x=pc.get(i); if(!x) return; const pos=G.exato[i]||G.aprox[i]; if(!pos){ sem++; return; }
+    const b=bairroCli(i)||''; out.push({i, pos, aprox:!G.exato[i], x, seg:mpSegDe(x), b:MP_SEM_BAIRRO.test(b.trim())?'':b}); });
+  out.sem=sem; return out; }
+function renderMapa(){
+  const box=$('#mapa'); if(!box) return;
+  if(MP.erro){ box.innerHTML='<div class="ch-vazio" style="padding:40px">Não consegui carregar o mapa (precisa de internet). A tabela de bairros abaixo continua funcionando.</div>'; return; }
+  if(!window.L||!window.L.map){ if(!MP.carregando){ MP.carregando=true; box.innerHTML='<div class="ch-vazio" style="padding:40px"><span class="gira"></span> Carregando o mapa…</div>';
+      carregarLeaflet().then(()=>{ MP.carregando=false; box.innerHTML=''; renderMapa(); }).catch(()=>{ MP.carregando=false; MP.erro=true; renderMapa(); }); } return; }
+  if(!MP.mapa){ MP.mapa=L.map(box,{preferCanvas:true, zoomControl:true, scrollWheelZoom:true}).setView([-8.03,-34.9],12);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'© OpenStreetMap'}).addTo(MP.mapa); MP.camada=L.layerGroup().addTo(MP.mapa);
+    // o Leaflet não deixa o clique sair da janelinha do ponto: os botões dela são ligados aqui
+    MP.mapa.on('popupopen',e=>{ const el=e.popup.getElement(); if(!el) return;
+      el.querySelectorAll('[data-mpperf],a.cli').forEach(b=>b.onclick=ev=>{ ev.preventDefault(); abrirPerfil({i:+(b.dataset.mpperf||b.dataset.i)}); });
+      el.querySelectorAll('a.wa').forEach(a=>a.onclick=ev=>{ if(typeof MODAL_WA!=='undefined'&&MODAL_WA){ ev.preventDefault(); iaAbrir(a); } }); }); }
+  setTimeout(()=>MP.mapa.invalidateSize(),60);
+  const todos=mpDados(); const doBairro=MP.bairro?todos.filter(d=>d.b===MP.bairro):todos; const vis=doBairro.filter(d=>!MP.seg||d.seg===MP.seg);
+  MP.camada.clearLayers();
+  if(MP.modo==='bai'&&!MP.bairro){
+    const ag={}; todos.forEach(d=>{ if(!d.b) return; const a=ag[d.b]=ag[d.b]||{n:0,v:0,la:0,lo:0,k:0}; a.n++; a.v+=d.x.v; if(!d.aprox){ a.la+=d.pos[0]; a.lo+=d.pos[1]; a.k++; } });
+    const mx=Math.max(1,...Object.values(ag).map(a=>a.v));
+    Object.entries(ag).forEach(([b,a])=>{ if(!a.k) return; const m=L.circleMarker([a.la/a.k,a.lo/a.k],{radius:6+28*Math.sqrt(a.v/mx), color:'#8a5a00', weight:1, fillColor:'#FFB21E', fillOpacity:.55});
+      m.bindTooltip(`<b>${esc(b)}</b><br>${fmtN(a.n)} clientes · ${fmtR0(a.v)}`); m.on('click',()=>{ MP.bairro=b; MP.modo='cli'; renderMapa(); }); m.addTo(MP.camada); });
+  } else {
+    vis.forEach(d=>{ const cor=MP_COR[d.seg]||'#666'; const m=L.circleMarker(d.pos,{radius:d.x.n>=10?7:d.x.n>=3?5.5:4.5, color:d.aprox?cor:'#fff', weight:d.aprox?1.5:1, dashArray:d.aprox?'2 2':null, fillColor:cor, fillOpacity:d.aprox?.25:.85});
+      m.on('click',()=>{ m.bindPopup(mpPopup(d),{maxWidth:280}).openPopup(); }); m.bindTooltip(esc(D.clientes[d.i].nome||'(sem nome)'),{direction:'top'}); m.addTo(MP.camada); });
+  }
+  if(MP.bairro&&vis.length){ const pts=vis.map(d=>d.pos); MP.mapa.fitBounds(L.latLngBounds(pts).pad(.15),{maxZoom:16}); }
+  else if(!MP.bairro&&!MP.ajustado&&todos.length){ const pts=todos.filter(d=>!d.aprox).map(d=>d.pos); if(pts.length){ MP.mapa.fitBounds(L.latLngBounds(pts).pad(.02),{maxZoom:13}); MP.ajustado=true; } }
+  // filtros e legenda
+  const sel=$('#mpBairro'); const bs=[...new Set(todos.map(d=>d.b).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  sel.innerHTML='<option value="">Todos os bairros</option>'+bs.map(b=>`<option ${b===MP.bairro?'selected':''}>${esc(b)}</option>`).join('');
+  const cont={}; doBairro.forEach(d=>{ cont[d.seg]=(cont[d.seg]||0)+1; });
+  $('#mpSeg').innerHTML=`<button data-s="" class="${!MP.seg?'on':''}">Todos · ${fmtN(doBairro.length)}</button>`+SEGS.map(s=>cont[s.id]?`<button data-s="${s.id}" class="${MP.seg===s.id?'on':''}"><i class="mp-bola" style="background:${MP_COR[s.id]}"></i>${esc(s.nome)} · ${fmtN(cont[s.id])}</button>`:'').join('');
+  $('#mpSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{ MP.seg=b.dataset.s; renderMapa(); });
+  $('#mpModo').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===MP.modo));
+  const semPos=todos.sem||0;
+  $('#mpNota').textContent=`${fmtN(todos.filter(d=>!d.aprox).length)} clientes no endereço da última entrega · ${fmtN(todos.filter(d=>d.aprox).length)} em posição aproximada (contorno tracejado, só sabemos o bairro)${semPos?' · '+fmtN(semPos)+' sem endereço (retirada/salão)':''}.`;
+  mpLado(vis, doBairro);
+}
+function mpPopup(d){ const c=D.clientes[d.i]; const pf=PERF[d.i]||[]; const s=SEGS.find(x=>x.id===d.seg); const w=waLink(c,'');
+  return `<div class="mp-pop"><a class="cli" data-i="${d.i}"><b>${esc(c.nome||'(sem nome)')}</b></a>${ptsTag(c)}<div class="muted">${esc([s?s.nome:'',d.b].filter(Boolean).join(' · '))}</div>
+    <div>${fmtN(d.x.n)} pedidos · ${fmtR0(d.x.v)} · último há ${diasEntre(d.x.ult,new Date())} dias</div>${pf[0]?`<div>Favorito: ${esc(limparNome(pf[0]))}</div>`:''}
+    ${d.aprox?'<div class="muted" style="font-size:11.5px">Posição aproximada (centro do bairro)</div>':''}
+    <div class="mp-pbts"><button data-mpperf="${d.i}">Perfil</button>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}${d.aprox?'':`<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${d.pos[0]},${d.pos[1]}">Google Maps</a>`}</div></div>`; }
+function mpLado(vis, doBairro){
+  const L2=$('#mpLado');
+  if(!MP.bairro){ const ag={}; doBairro.forEach(d=>{ if(!d.b) return; const a=ag[d.b]=ag[d.b]||{n:0,v:0,fs:0}; a.n++; a.v+=d.x.v; if(d.seg==='fs') a.fs++; });
+    const top=Object.entries(ag).sort((a,b)=>b[1].v-a[1].v).slice(0,40);
+    L2.innerHTML=`<div class="mp-lcab"><b>Bairros</b><span class="muted">clique para ver os clientes</span></div>`+top.map(([b,a])=>`<div class="mp-bai" data-mpb="${esc(b)}"><b>${esc(b)}</b><span>${fmtN(a.n)} clientes · ${fmtR0(a.v)}${a.fs?` · <span style="color:${MP_COR.fs}">${a.fs} fiéis sumindo</span>`:''}</span></div>`).join('');
+    L2.querySelectorAll('[data-mpb]').forEach(x=>x.onclick=()=>{ MP.bairro=x.dataset.mpb; MP.modo='cli'; renderMapa(); }); return; }
+  const ls=vis.slice().sort((a,b)=>b.x.v-a.x.v); const tv=ls.reduce((s,d)=>s+d.x.v,0);
+  L2.innerHTML=`<div class="mp-lcab"><div><b>${esc(MP.bairro)}</b><div class="muted" style="font-size:12px">${fmtN(ls.length)} clientes · ${fmtR0(tv)}</div></div><button class="mp-x" id="mpLimpar" title="Ver todos os bairros">✕</button></div>
+    <div class="mp-acoes">${AO_VIVO?'<button data-mpa="lista">📄 Salvar lista</button>':''}<button data-mpa="envio">📨 Mensagem</button>${IA_ON&&AO_VIVO?'<button data-mpa="ia">✨ Zoe</button>':''}</div>`+
+    ls.slice(0,300).map(d=>{ const c=D.clientes[d.i]; return `<div class="mp-cli"><i class="mp-bola" style="background:${MP_COR[d.seg]||'#999'}"></i><div class="n"><a class="cli" data-i="${d.i}">${esc(c.nome||'(sem nome)')}</a>${ptsTag(c)}<span class="sub">${fmtN(d.x.n)} pedidos · ${fmtR0(d.x.v)} · há ${diasEntre(d.x.ult,new Date())} d</span></div><button class="mp-ir" data-mpgo="${d.i}" title="Mostrar no mapa">📍</button></div>`; }).join('')+(ls.length>300?`<div class="muted" style="padding:8px">+ ${fmtN(ls.length-300)} clientes</div>`:'');
+  $('#mpLimpar').onclick=()=>{ MP.bairro=''; MP.seg=''; MP.ajustado=false; renderMapa(); };
+  L2.querySelectorAll('[data-mpgo]').forEach(b=>b.onclick=()=>{ const d=vis.find(x=>x.i===+b.dataset.mpgo); if(!d) return; MP.mapa.setView(d.pos,17); L.popup({maxWidth:280}).setLatLng(d.pos).setContent(mpPopup(d)).openOn(MP.mapa); });
+  const ids=ls.map(d=>d.i); const tit='Clientes do '+MP.bairro+(MP.seg?' · '+(SEGS.find(s=>s.id===MP.seg)||{}).nome:'');
+  L2.querySelectorAll('[data-mpa]').forEach(b=>b.onclick=()=>{ const t=b.dataset.mpa;
+    if(t==='lista') salvarComoLista(tit,'Clientes do bairro '+MP.bairro+', separados pelo grupo',SEGS.map(s=>({titulo:s.nome, ids:ls.filter(d=>d.seg===s.id).map(d=>d.i), notas:{}})).filter(g=>g.ids.length)).then(abrirLista);
+    else if(t==='envio') irParaEnvioIA(ids,'Oi {nome}! ',tit);
+    else abrirChat(`Me fala sobre os clientes do bairro ${MP.bairro}${MP.seg?' ('+(SEGS.find(s=>s.id===MP.seg)||{}).nome+')':''}: quem são os mais importantes, quem está sumindo e o que você recomenda fazer com eles.`); });
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-mpperf]'); if(b){ e.preventDefault(); abrirPerfil({i:+b.dataset.mpperf}); } });
+$('#mpBairro').onchange=()=>{ MP.bairro=$('#mpBairro').value; MP.seg=''; MP.modo='cli'; MP.ajustado=false; renderMapa(); };
+$('#mpModo').querySelectorAll('button').forEach(b=>b.onclick=()=>{ MP.modo=b.dataset.m; if(MP.modo==='bai'){ MP.bairro=''; MP.seg=''; } renderMapa(); });
 if(AO_VIVO) listasCarregar();
 // ------------------------------------------------------------ PÁGINA: RESERVAS
 let RESERVAS=[]; const RS={p:'semana', dia:'', busca:''};

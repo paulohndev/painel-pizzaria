@@ -143,6 +143,16 @@ A assistente de IA se chama Zoe.
   quer dizer: a IA segue o seu pedido e usa o histórico do cliente (últimos
   pedidos, mensagens que já recebeu, suas anotações).
 
+MAPA DE CLIENTES (página Bairros)
+------------------------------------------------------------
+Cada cliente aparece no mapa no endereço da última entrega (vem do Cardápio
+Web), com a cor do grupo dele (fiel ativo, fiel sumindo, novo...). Escolha um
+bairro no mapa, na lista ao lado ou clicando na tabela, para ver só os
+clientes de lá, salvar como lista, mandar mensagem ou perguntar à Zoe.
+Quem não tem endereço com localização (ex.: 99Food) aparece com contorno
+tracejado perto do centro do bairro. O mapa usa o OpenStreetMap (gratuito)
+e precisa de internet; em cada cliente há o botão "Google Maps".
+
 RESERVAS
 ------------------------------------------------------------
 Página "Reservas" (menu Vendas e clientes). Diga a reserva para a Zoe do

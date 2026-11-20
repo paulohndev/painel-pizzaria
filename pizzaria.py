@@ -613,6 +613,14 @@ def montar_dados(db, cfg, nome_loja):
                 ne = norm_endereco(end)
                 if ne:
                     inf["ends"].add(ne)
+                # posição no mapa: a do endereço de entrega mais recente (só coordenadas de verdade, na região)
+                try:
+                    la, lo = float(end.get("latitude") or 0), float(end.get("longitude") or 0)
+                except (TypeError, ValueError):
+                    la = lo = 0
+                if -8.6 < la < -7.5 and -35.4 < lo < -34.7 and len(str(end.get("latitude"))) > 5 and (inf.get("gdt") is None or dt >= inf["gdt"]):
+                    inf["gdt"] = dt
+                    lista_cli[cli_i]["g"] = [round(la, 4), round(lo, 4)]
             bairro = (end.get("neighborhood") or "").strip().title()
             if bairro:
                 bai_i = idx(idx_bairro, lista_bairro, bairro)
