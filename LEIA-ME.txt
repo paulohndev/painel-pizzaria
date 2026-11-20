@@ -183,6 +183,22 @@ Os dois lados conversam:
   - A IA do "Perguntar" enxerga despesas, fichas técnicas, insumos, equipe e
     folha (sem CPF, telefone ou PIX). Ex.: "quanto sobrou em outubro?".
 
+MENU NOVO, POR ASSUNTO (versão 2.7)
+------------------------------------------------------------
+A barra da esquerda agora é organizada pelo que você quer fazer, e não por app:
+  Hoje · Painel geral · Anotações e metas · Clientes · Reservas · Mensagens
+  · Números · Despesas · Cardápio · Equipe · Ajustes
+As páginas são as mesmas de antes; só mudaram de lugar. O Painel geral
+continua exatamente como era.
+  - Mensagens: Enviar, Promoções e campanhas, Resultados. Em Clientes, o botão
+    "Mandar mensagem para este grupo" leva para Mensagens com o grupo escolhido;
+    em Promoções, "Enviar esta campanha" faz o mesmo com a campanha.
+  - Clientes: grupos, mapa e bairros, listas e lembretes.
+  - Números: vendas, gastos e resultado, faturamento por dia, comparar períodos.
+  - Cardápio: mais vendidos, margens, preços, fichas, insumos, compras, combos.
+Para voltar ao menu antigo (por app): botão "Voltar ao menu antigo", no pé da
+barra. O mesmo botão liga o menu novo de novo. Nenhum dado muda com a troca.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

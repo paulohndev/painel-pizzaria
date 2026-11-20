@@ -621,6 +621,7 @@ html.sobre #lado,html.sobre #area{visibility:hidden!important}
 .heat th.r{text-align:right;padding-right:8px}
 .heat tr:hover td{background:none}
 html.embutido #lado{display:none}
+html:not(.org-nova) .org-env,html.org-nova .org-velho{display:none!important}
 html.embutido #area,html.embutido body.fixo #area{margin-left:0}
 </style>
 </head>
@@ -757,7 +758,11 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
       <span style="margin-left:auto"></span>
       <button class="btn" id="btnCsv">Baixar lista (CSV)</button>
     </div>
-    <div class="card" style="margin-bottom:12px;padding:12px 14px">
+    <div class="card org-env" id="cliEnviar" style="margin-bottom:12px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <div style="flex:1;min-width:220px;font-size:13px;color:var(--text-2)" id="cliEnvTx">Para mandar mensagem, escolha um grupo acima.</div>
+      <button class="btn primary" id="cliEnvBt">📨 Mandar mensagem para este grupo</button>
+    </div>
+    <div class="card org-velho" style="margin-bottom:12px;padding:12px 14px">
       <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">Mensagem do WhatsApp (<b>{nome}</b> vira o primeiro nome do cliente, <b>{pontos}</b> o saldo de pontos):</div>
       <textarea id="msg"></textarea>
     </div>
@@ -803,7 +808,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
     </div>
     <div class="grid two" style="margin-top:16px">
       <div class="card">
-        <h2 id="cpTitulo"></h2>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between"><h2 id="cpTitulo" style="margin:0"></h2><button class="btn primary" id="cpEnviar">📨 Enviar esta campanha</button></div>
         <p class="desc" id="cpDica"></p>
         <div style="font-size:12px;color:var(--text-2);margin:8px 0 4px">Oferta desta campanha</div>
         <input id="cpOferta" style="width:100%;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px">
@@ -979,6 +984,8 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
 </aside>
 
 <script>
+window.mariaAplicarOrg=function(){ let nova=false; try{ nova=window.top!==window.self && parent.mariaOrg && parent.mariaOrg()==='nova'; }catch(e){} document.documentElement.classList.toggle('org-nova',nova); };
+mariaAplicarOrg();
 const EMBUTIDO=(()=>{try{return window.top!==window.self}catch(e){return true}})(); if(EMBUTIDO) document.documentElement.classList.add('embutido');
 const D = /*__DADOS__*/null;
 
@@ -1228,6 +1235,7 @@ function renderClientes(){
   const k=ordCli.k, dir=ordCli.dir;
   F2.sort((a,b)=>{const x=a[k],y=b[k]; return (x>y?1:x<y?-1:0)*dir;});
   ultimaLista=F2;
+  { const sg=SEGS.find(x=>x.id===segSel); $('#cliEnvTx').innerHTML=sg?`As mensagens saem pela página <b>Mensagens</b>, com o texto, os filtros e as regras de frequência num lugar só. O grupo <b>${esc(sg.nome)}</b> já vai escolhido.`:'Escolha um grupo acima para mandar mensagem para ele pela página <b>Mensagens</b>.'; $('#cliEnvBt').disabled=!sg; }
   const nPag=Math.max(1,Math.ceil(F2.length/PAG)); if(pag>=nPag)pag=nPag-1;
   const cols=[['nome','Cliente'],['wa','',0],['ok','Feito',0],['seg','Grupo'],['dias','Sem pedir',1],['n','Pedidos',1],['pontos','Pontos',1],['gasto','Total gasto',1]];
   let h='<tr>'+cols.map(c=>`<th class="${c[2]?'num ':''}${c[2]===0?'':'sort'}" data-k="${c[0]}">${c[1]}${ordCli.k===c[0]?(ordCli.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
@@ -1392,6 +1400,8 @@ function renderPromocoes(){
 }
 let ultimaPromo=[];
 $('#cpOferta').oninput=()=>{ store('camp_'+campSel+'_oferta',$('#cpOferta').value); renderPromocoes(); };
+$('#cpEnviar').onclick=()=>{ if(campSel) irParaEnvio('campf:'+campSel); };
+$('#cliEnvBt').onclick=()=>{ if(segSel) irParaEnvio('seg:'+segSel); };
 $('#cpMsg').oninput=()=>{ store('camp_'+campSel+'_msg',$('#cpMsg').value); renderPromocoes(); };
 $('#cpReset').onclick=()=>{ try{localStorage.removeItem('camp_'+campSel+'_oferta'); localStorage.removeItem('camp_'+campSel+'_msg');}catch(e){} $('#cpOferta').value=CAMP[campSel].oferta; $('#cpMsg').value=CAMP[campSel].msg; renderPromocoes(); };
 ['#pBusca','#pContato','#pSoWhats','#pPts'].forEach(s=>$(s).addEventListener(s==='#pBusca'?'input':'change',()=>{pPag=0;renderPromocoes();}));
@@ -1966,6 +1976,7 @@ function fontesEnvio(){
   const L=listaDoDia(); const pc=porCliente(); const ops=[];
   blocosDia().forEach(b=>{ if(b.id!=='avaliacao'&&L[b.id].length) ops.push(['hoje:'+b.id,'Hoje · '+b.nome+' ('+L[b.id].length+')']); });
   SEGS.forEach(sg=>{ let n=0; pc.forEach((x,cli)=>{ if(sg.f(x.n,diasEntre(x.ult,REF))) n++; }); ops.push(['seg:'+sg.id,'Grupo · '+sg.nome+' ('+fmtN(n)+')']); });
+  Object.keys(CAMP).forEach(k=>{ const n=PR.filter(r=>r.recs[0]&&r.recs[0].tipo===k).length; if(n) ops.push(['campf:'+k,'Campanha · '+CAMP[k].nome+' ('+fmtN(n)+')']); });
   ops.push(['mig','Migraram para iFood/99']); ops.push(['todos','Todos os clientes com telefone']);
   return ops;
 }
@@ -1975,7 +1986,7 @@ function opcoesMsg(){
   o.push(['livre','Texto livre']); return o;
 }
 function tplDe(op){ if(op.startsWith('camp:')) return cpTexto(op.slice(5),'msg'); if(op.startsWith('casa:')) return (PROMOS[+op.slice(5)]||{}).msg||''; return EV.livre||'Oi {nome}! '; }
-function msgPadraoFonte(f){ if(f.startsWith('hoje:')){ const b=blocosDia().find(x=>'hoje:'+x.id===f); if(b){ if(b.promo!=null) return 'casa:'+b.promo; if(b.camp&&CAMP[b.camp]) return 'camp:'+b.camp; } }
+function msgPadraoFonte(f){ if(f.startsWith('campf:')) return 'camp:'+f.slice(6); if(f.startsWith('hoje:')){ const b=blocosDia().find(x=>'hoje:'+x.id===f); if(b){ if(b.promo!=null) return 'casa:'+b.promo; if(b.camp&&CAMP[b.camp]) return 'camp:'+b.camp; } }
   if(f==='mig') return 'camp:canal_proprio'; if(f==='seg:fs'||f==='seg:es'||f==='seg:pe') return 'camp:reativar'; if(f==='seg:no') return 'camp:segundo'; return ''; }
 function irParaEnvio(fonte){ document.querySelector('#tabs button[data-t=envios]').click(); $('#evFonte').value=fonte; EV.fonte=fonte; const m=msgPadraoFonte(fonte); if(m){ $('#evMsg').value=m; $('#evTexto').value=tplDe(m); }
   EV.textos={}; EV.desmarcados=new Set(); EV.marcados=new Set(); renderEvLista(); $('#t-envios').scrollIntoView({behavior:'smooth'}); }
@@ -1993,6 +2004,7 @@ function publicoEnvio(){
   const f=$('#evFonte').value; const pc=porCliente(); let clis=[];
   if(f.startsWith('hoje:')){ const L=listaDoDia(); clis=(L[f.slice(5)]||[]).map(it=>it.cli); }
   else if(f.startsWith('seg:')){ const sg=SEGS.find(x=>'seg:'+x.id===f); pc.forEach((x,cli)=>{ if(sg&&sg.f(x.n,diasEntre(x.ult,REF))) clis.push(cli); }); }
+  else if(f.startsWith('campf:')){ const k=f.slice(6); clis=PR.filter(r=>r.recs[0]&&r.recs[0].tipo===k).map(r=>r.cli); }
   else if(f==='ia'){ clis=(EV.listaIA&&EV.listaIA.ids)||[]; }
   else if(f==='mig'){ Object.keys(CLI_CAN).forEach(k=>{ const st=situacaoCanal(+k); if(st&&st.tipo==='migrou') clis.push(+k); }); }
   else pc.forEach((x,cli)=>clis.push(cli));
