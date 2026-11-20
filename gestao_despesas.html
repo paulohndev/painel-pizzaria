@@ -134,6 +134,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:#fff8e1}tr.sel td{backgroun
 .ct-sec{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:12px;background:#fff}
 .ct-sec.venc{border-color:#efb7ad}.ct-sec.venc .ct-h{background:#fdecea;color:#8f0d0a}.ct-sec.hj .ct-h{background:#fff3d6}
 .ct-h{display:flex;justify-content:space-between;padding:9px 14px;background:#faf6f0;font-weight:700;border-bottom:1px solid var(--line)}
+.ct-grp{cursor:pointer;gap:10px;flex-wrap:wrap}.ct-grp:hover{background:#fff3d6}
 .ct-row{display:grid;grid-template-columns:96px minmax(0,1fr) 120px 260px;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid #f1e9df}
 .ct-row .dl-a{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:2px;white-space:normal}.ct-itens a{color:var(--red);font-weight:600;text-decoration:none}
 .ct-row:last-child{border-bottom:0}.ct-row.venc .ct-d b{color:var(--bad)}.ct-itens{grid-column:1/-1;background:#fffaf0;border-radius:10px;padding:6px 10px}
@@ -494,7 +495,7 @@ rect.maria-x{transform-box:fill-box;transform-origin:0 50%;animation:cresceX .7s
       <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn sec" onclick="fecharNota()">Cancelar</button><button class="btn" onclick="salvarNota()">Salvar nota</button></div>
     </div>
     <div class="grid" style="grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);align-items:start">
-      <div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Contas</h2><div class="row"><button class="btn sm" onclick="novaNota()">+ Nota com itens</button><button class="btn sm sec" onclick="contaSimples()">+ Conta simples</button></div></div><div class="row" style="gap:8px;margin-top:10px;align-items:center"><span class="muted">Contas pagas:</span><select id="ctPer" onchange="renderContas()"><option value="30">Últimos 30 dias</option><option value="mes">Este mês</option><option value="mesant">Mês passado</option><option value="90">Últimos 90 dias</option><option value="ano">Este ano</option><option value="tudo">Todas</option></select></div><div id="ctLista" style="margin-top:12px"></div></div>
+      <div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Contas</h2><div class="row"><button class="btn sm" onclick="novaNota()">+ Nota com itens</button><button class="btn sm sec" onclick="contaSimples()">+ Conta simples</button></div></div><div class="row" style="gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap"><span class="muted">Ver por:</span><div class="seg" id="ctVer"><button data-v="pag">Forma de pagamento</button><button data-v="cat">Categoria</button><button data-v="venc">Vencimento</button></div><span class="muted" style="margin-left:6px">Categoria:</span><select id="ctCat" onchange="renderContas()"></select><span class="muted" style="margin-left:6px">Contas pagas:</span><select id="ctPer" onchange="renderContas()"><option value="30">Últimos 30 dias</option><option value="mes">Este mês</option><option value="mesant">Mês passado</option><option value="90">Últimos 90 dias</option><option value="ano">Este ano</option><option value="tudo">Todas</option></select></div><div id="ctLista" style="margin-top:12px"></div></div>
       <div><div class="card"><h2>Próximas 4 semanas</h2><div id="ctSemanas"></div><p class="muted" style="margin-bottom:0">Quanto vence em cada semana, para planejar o caixa.</p></div><div class="card" id="ctPont"></div></div>
     </div>
   </section>
@@ -1125,14 +1126,27 @@ function perPagas(){const v=($('ctPer')||{}).value||'30',d=new Date(),y=d.getFul
   if(v==='mes')return[isoDe(new Date(y,m,1)),hj,'este mês'];if(v==='mesant')return[isoDe(new Date(y,m-1,1)),isoDe(new Date(y,m,0)),'no mês passado'];
   if(v==='90')return[addDias(hj,-90),hj,'nos últimos 90 dias'];if(v==='ano')return[`${y}-01-01`,hj,'este ano'];if(v==='tudo')return['0000-01-01','9999-12-31','(todas)'];
   return[addDias(hj,-30),hj,'nos últimos 30 dias']}
-function renderContas(){const hj=hoje(),ab=contasAgrupadas(x=>!x.pago),[pIni,pFim,pTxt]=perPagas(),pg=contasAgrupadas(x=>x.pago&&x.pagoEm&&x.pagoEm>=pIni&&x.pagoEm<=pFim&&!x.jurosDe).sort((a,b)=>b.pagoEm.localeCompare(a.pagoEm));
+let ctVer=(()=>{try{return localStorage.getItem('desp_ct_ver')||'pag'}catch(e){return 'pag'}})(),ctGrpAb=new Set();
+function catConta(c){const n={};c.ls.forEach(y=>n[y.categoria||'Sem categoria']=(n[y.categoria||'Sem categoria']||0)+y.valor);return Object.keys(n).sort((a,b)=>n[b]-n[a])[0]||'Sem categoria'}
+function togGrpCt(k){ctGrpAb.has(k)?ctGrpAb.delete(k):ctGrpAb.add(k);renderContas()}
+function renderContas(){const cf=($('ctCat')||{}).value||'',okC=c=>!cf||c.ls.some(y=>(y.categoria||'Sem categoria')===cf);
+  {const cats=[...new Set(db.despesas.filter(x=>!x.pago||x.pagoEm).map(x=>x.categoria||'Sem categoria'))].sort((a,b)=>a.localeCompare(b,'pt-BR'));$('ctCat').innerHTML='<option value="">Todas</option>'+cats.map(c=>`<option ${c===cf?'selected':''}>${esc(c)}</option>`).join('')}
+  document.querySelectorAll('#ctVer button').forEach(b=>{b.classList.toggle('on',b.dataset.v===ctVer);b.onclick=()=>{ctVer=b.dataset.v;try{localStorage.setItem('desp_ct_ver',ctVer)}catch(e){}renderContas()}});
+  const hj=hoje(),ab=contasAgrupadas(x=>!x.pago).filter(okC),[pIni,pFim,pTxt]=perPagas(),pg=contasAgrupadas(x=>x.pago&&x.pagoEm&&x.pagoEm>=pIni&&x.pagoEm<=pFim&&!x.jurosDe).filter(okC).sort((a,b)=>b.pagoEm.localeCompare(a.pagoEm));
   const venc=ab.filter(contaVencida),hojeL=ab.filter(c=>c.venc===hj),sem=ab.filter(c=>c.venc>hj&&c.venc<=addDias(hj,7)),dep=ab.filter(c=>!c.venc||c.venc>addDias(hj,7));
   const sv=l=>l.reduce((a,c)=>a+c.valor,0);
   $('ctKpis').innerHTML=[['Vencidas',R(sv(venc)),`${venc.length} conta(s)`,venc.length?'neg':''],['Vencem hoje',R(sv(hojeL)),`${hojeL.length} conta(s)`,''],['Próximos 7 dias',R(sv(sem)),`${sem.length} conta(s)`,''],['Total em aberto',R(sv(ab)),`${ab.length} conta(s)`,'']]
     .map(([a,v,s,c])=>`<div class="kpi ${c}"><div class="l">${a}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
   const ord=l=>l.sort((a,b)=>(a.venc||'9').localeCompare(b.venc||'9'));
   const sec=(tit,l,cls)=>l.length?`<div class="ct-sec ${cls||''}"><div class="ct-h"><span>${tit}</span><span class="muted">${l.length} conta(s) · <b style="color:var(--ink)">${R(sv(l))}</b></span></div>${ord(l).map(linhaConta).join('')}</div>`:'';
-  $('ctLista').innerHTML=(ab.length?sec('Vencidas',venc,'venc')+sec('Vencem hoje',hojeL,'hj')+sec('Próximos 7 dias',sem)+sec('Mais para frente',dep):'<div class="empty">Nenhuma conta em aberto. 👍</div>')
+  const grupos=fn=>{const m=new Map();ab.forEach(c=>{const k=fn(c);if(!m.has(k))m.set(k,[]);m.get(k).push(c)});return [...m.entries()].sort((a,b)=>sv(b[1])-sv(a[1]))};
+  const grpHtml=(k,l)=>{const aberto=ctGrpAb.has(ctVer+':'+k),nv=l.filter(contaVencida),px=ord(l.slice()).find(c=>c.venc&&!contaVencida(c));
+    return `<div class="ct-sec ${nv.length?'venc':''}"><div class="ct-h ct-grp" onclick="togGrpCt('${esc((ctVer+':'+k).replace(/'/g,"\\'"))}')" title="Clique para ${aberto?'esconder':'ver'} os lançamentos"><span>${aberto?'▾':'▸'} ${esc(k)}</span><span class="muted">${l.length} conta(s)${nv.length?` · <b style="color:#8f0d0a">${nv.length} vencida(s)</b>`:''}${px?' · próxima '+fmtD(px.venc).slice(0,5):''} · <b style="color:var(--ink)">${R(sv(l))}</b></span></div>${aberto?ord(l).map(linhaConta).join(''):''}</div>`};
+  const corpo=!ab.length?'<div class="empty">Nenhuma conta em aberto'+(cf?' nessa categoria':'')+'. 👍</div>'
+    :ctVer==='pag'?grupos(c=>c.pag||'Sem forma de pagamento').map(([k,l])=>grpHtml(k,l)).join('')
+    :ctVer==='cat'?grupos(catConta).map(([k,l])=>grpHtml(k,l)).join('')
+    :sec('Vencidas',venc,'venc')+sec('Vencem hoje',hojeL,'hj')+sec('Próximos 7 dias',sem)+sec('Mais para frente',dep);
+  $('ctLista').innerHTML=corpo
     +(pg.length?`<details class="ct-pagas" ${ctPagasAb?'open':''} ontoggle="ctPagasAb=this.open"><summary>Pagas ${pTxt} (${pg.length} · ${R(sv(pg))})</summary>${pg.map(linhaConta).join('')}</details>`:'');
   const prox=[0,1,2,3].map(w=>{const a=addDias(hj,w*7),b=addDias(hj,w*7+6),l=ab.filter(c=>c.venc>=a&&c.venc<=b);return{a,b,v:sv(l),n:l.length}}),mx=Math.max(1,...prox.map(p=>p.v));
   renderPontualidade();

@@ -214,6 +214,21 @@ Em Despesas > Contas a pagar dá para ver as contas pagas por período.
 Despesas > Lançamentos, Dashboard e Desperdício já tinham o filtro de período
 (no quadro de filtros, no alto da página).
 
+DE ONDE VEIO CADA RESULTADO (versão 2.9)
+------------------------------------------------------------
+Em Mensagens > Resultados, clique em qualquer linha:
+  - campanha: quem foi contatado, quando, quem pediu depois (data, canal e
+    valor), quem ainda está no prazo de 7 dias e quem não pediu;
+  - promoção da casa ou cupom: cada pedido (quando, cliente, canal, valor; no
+    cupom também o desconto e quem fez o 1º pedido com ele).
+Clique no nome do cliente para abrir o perfil. Clique de novo na linha para fechar.
+
+Em Despesas > Contas a pagar:
+  - "Ver por": Forma de pagamento (cartão de crédito, boleto, pix...),
+    Categoria ou Vencimento. Cada grupo mostra quantas contas, quanto soma, se
+    tem vencida e o próximo vencimento; clicando nele aparecem os lançamentos.
+  - "Categoria": mostra só as contas daquela categoria.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

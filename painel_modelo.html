@@ -621,6 +621,8 @@ html.sobre #lado,html.sobre #area{visibility:hidden!important}
 .heat th.r{text-align:right;padding-right:8px}
 .heat tr:hover td{background:none}
 html.embutido #lado{display:none}
+tr.rd{cursor:pointer}tr.rd:hover td{background:#fff7e6}tr.rd .rd-sv{display:inline-block;color:var(--soft);font-size:12px;transition:transform .15s}tr.rd-on .rd-sv{transform:rotate(90deg);color:var(--red2)}tr.rd-on td{background:#fff7e6}
+tr.rd-det>td{background:#fffdf8;padding:12px 14px 16px!important}.rd-cab{font-size:13px;color:var(--text-2);margin:0 0 8px}
 .per-sel{height:38px;border-radius:999px;padding:0 14px;font-weight:600}.per-sel.ativo{box-shadow:inset 0 0 0 2px var(--sun);background:#fff7e6}.per-pers input{height:36px;padding:0 10px;border-radius:12px}.per-off{display:none!important}
 .per-aviso{font-size:12.5px;color:var(--text-2);background:#fff7e6;border-radius:10px;padding:6px 10px;display:inline-block;margin-top:6px}
 html:not(.org-nova) .org-env,html.org-nova .org-velho{display:none!important}
@@ -1634,6 +1636,22 @@ function prepararBuscas(){
 // ------------------------------------------------------------ RESULTADOS
 const NOME_CAMP = Object.assign({clientes:'Aba Clientes', avaliacao:'Avaliação ruim', seg_fa:'Clientes: fiéis ativos', seg_fs:'Clientes: fiéis sumindo', seg_rr:'Clientes: recorrentes', seg_no:'Clientes: novos', seg_es:'Clientes: esfriando', seg_pe:'Clientes: perdidos'},
   Object.fromEntries(Object.entries(CAMP).map(([k,v])=>[k,v.nome])), Object.fromEntries(PROMOS.map(p=>['promo_'+p.id,p.nome])));
+// ---------- detalhe dos resultados: clicar numa linha mostra de onde veio
+let RES_AB=null; const RES_LST={};
+const nomeCanalP=p=>(D.canais[p.c]||{}).nome||'—';
+const dtHr=d=>d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+function linhaCli(cli){ const c=D.clientes[cli]; return cli>=0&&c?`<a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>`:'<span class="muted">sem cadastro</span>'; }
+function tabPedidos(L,extra){ const tot=L.reduce((s,p)=>s+(p.v||0),0); const mx=300;
+  return `<div class="rd-cab">${fmtN(L.length)} pedido${L.length===1?'':'s'} · ${fmtR0(tot)} · ${fmtN(new Set(L.map(p=>p.cli).filter(c=>c>=0)).size)} clientes</div>
+  <div class="tablebox" style="max-height:380px"><table><tr><th>Quando</th><th>Cliente</th><th>Canal</th>${extra?'<th class="num">Desconto</th>':''}<th class="num">Valor</th></tr>${L.slice(0,mx).map(p=>`<tr><td class="nw">${dtHr(p.d)}</td><td>${linhaCli(p.cli)}${extra&&p._novo?' <span class="tag">1º pedido</span>':''}</td><td>${esc(nomeCanalP(p))}</td>${extra?`<td class="num">${p.desc?fmtR(p.desc):'—'}</td>`:''}<td class="num">${fmtR(p.v||0)}</td></tr>`).join('')}</table></div>${L.length>mx?`<p class="muted" style="font-size:12.5px">Mostrando os ${mx} mais recentes.</p>`:''}`; }
+function detContatos(lst){ const pd=lst.filter(x=>x.dep.length), cedo=lst.filter(x=>!x.dep.length&&x.cedo), nao=lst.filter(x=>!x.dep.length&&!x.cedo);
+  const linha=x=>{ const v=x.dep.reduce((s,p)=>s+(p.v||0),0); const p0=x.dep[0];
+    return `<tr><td>${linhaCli(x.cli)}</td><td class="nw">${x.d.toLocaleDateString('pt-BR')}</td><td>${p0?`${dtHr(p0.d)}<span class="sub">${esc(nomeCanalP(p0))}${x.dep.length>1?' · '+x.dep.length+' pedidos':''}</span>`:(x.cedo?'<span class="muted">ainda no prazo de 7 dias</span>':'<span class="muted">não pediu</span>')}</td><td class="num">${v?fmtR(v):'—'}</td></tr>`; };
+  const ord=[...pd.sort((a,b)=>b.dep[0].d-a.dep[0].d),...cedo,...nao];
+  return `<div class="rd-cab"><b>${fmtN(pd.length)}</b> pediram em até 7 dias · ${fmtN(cedo.length)} ainda no prazo · ${fmtN(nao.length)} não pediram</div>
+  <div class="tablebox" style="max-height:380px"><table><tr><th>Cliente</th><th>Contatado em</th><th>Pedido depois do contato</th><th class="num">Valor</th></tr>${ord.map(linha).join('')}</table></div>`; }
+function ligarRes(tb){ tb.querySelectorAll('tr[data-rd]').forEach(tr=>tr.onclick=e=>{ if(e.target.closest('a')) return; RES_AB=RES_AB===tr.dataset.rd?null:tr.dataset.rd; renderResultados(); });
+  if(RES_AB){ const tr=tb.querySelector(`tr[data-rd="${CSS.escape(RES_AB)}"]`); const f=RES_LST[RES_AB]; if(tr&&f){ tr.classList.add('rd-on'); tr.insertAdjacentHTML('afterend',`<tr class="rd-det"><td colspan="${tr.children.length}">${f()}</td></tr>`); } } }
 function renderPromoCasa(){
   const dias30=new Date(REF-30*864e5); const semanas=[0,1,2,3].map(i=>new Date(REF-(i+1)*7*864e5));
   let h='<tr><th>Promoção</th><th class="num">Pedidos em 30 dias</th><th class="num">Faturamento</th><th class="num">Ticket</th><th class="num">Clientes</th><th class="num" title="Dos pedidos feitos nos dias da promoção, quantos usaram a promoção">Nos dias da promo</th><th>Últimas 4 semanas</th></tr>';
@@ -1641,10 +1659,11 @@ function renderPromoCasa(){
     const fat=L30.reduce((s,p)=>s+(p.v||0),0); const cl=new Set(L30.map(p=>p.cli).filter(c=>c>=0)).size;
     const ds=pr.dias||[]; const noDia=ds.length?P.filter(p=>!p.cancel&&ok(p)&&p.d>=dias30&&ds.includes(p.d.getDay())):[];
     const sem=semanas.map((ini,i)=>L.filter(p=>p.d>=ini&&p.d<(i?semanas[i-1]:new Date(REF.getTime()+864e5))).length).reverse();
-    h+=`<tr><td><b>${esc(pr.nome)}</b><span class="sub">${ds.length?ds.map(d=>DIAS_NOME[d]).join(', '):'todo dia'}</span></td><td class="num">${fmtN(L30.length)}</td><td class="num">${fmtR0(fat)}</td><td class="num">${L30.length?fmtR(fat/L30.length):'—'}</td><td class="num">${fmtN(cl)}</td>
+    const Lv=(temPer()?L:L30).slice().sort((a,b)=>b.d-a.d); RES_LST['pc:'+k]=()=>tabPedidos(Lv);
+    h+=`<tr data-rd="pc:${k}" class="rd" title="Clique para ver os pedidos"><td><b>${esc(pr.nome)}</b> <span class="rd-sv">▸</span><span class="sub">${ds.length?ds.map(d=>DIAS_NOME[d]).join(', '):'todo dia'}</span></td><td class="num">${fmtN(L30.length)}</td><td class="num">${fmtR0(fat)}</td><td class="num">${L30.length?fmtR(fat/L30.length):'—'}</td><td class="num">${fmtN(cl)}</td>
       <td class="num">${ds.length&&noDia.length?fmtP(L30.length/noDia.length):'—'}${ds.length&&noDia.length?`<span class="sub">de ${fmtN(noDia.length)} pedidos</span>`:''}</td><td style="white-space:nowrap">${sem.map(fmtN).join(' · ')}</td></tr>`; });
   if(!PROMOS.length) h+='<tr><td colspan="7" class="muted" style="padding:20px">Nenhuma promoção cadastrada.</td></tr>';
-  $('#tbPromoCasa').innerHTML=h;
+  $('#tbPromoCasa').innerHTML=h; ligarRes($('#tbPromoCasa'));
 }
 let PC_EDIT=null, PC_LISTA=null;
 function renderPromosCasa(){
@@ -1698,7 +1717,7 @@ function renderResultados(){
   const res={};
   Object.keys(contatos).forEach(id=>{ const inf=cInfo(id); const cli=idCli[id]; if(!inf||cli==null||!cliCanal(cli)) return;
     if(diasEntre(inf.d,hoje)>dias) return;
-    const r=res[inf.c]=res[inf.c]||{n:0,cedo:0,volt:0,fat:0,base:0,nb:0};
+    const r=res[inf.c]=res[inf.c]||{n:0,cedo:0,volt:0,fat:0,base:0,nb:0,lst:[]};
     r.n++;
     const ps=ped.get(cli)||[];
     // linha de base: em quantas semanas dos 90 dias antes do contato o cliente pediu
@@ -1707,23 +1726,26 @@ function renderResultados(){
     if(diasEntre(inf.d,REF)<7){ r.cedo++; }
     const depois=ps.filter(p=>p.d>=new Date(inf.d.getTime()-12*36e5) && diasEntre(inf.d,p.d)<=7);
     if(depois.length){ r.volt++; r.fat+=depois.reduce((s,p)=>s+(p.v||0),0); }
+    r.lst.push({cli, d:inf.d, dep:depois.slice().sort((a,b)=>a.d-b.d), cedo:diasEntre(inf.d,REF)<7});
   });
   const ks=Object.keys(res).sort((a,b)=>res[b].n-res[a].n);
   let h='<tr><th>Campanha</th><th class="num">Contatados</th><th class="num">Pediram em 7 dias</th><th class="num" title="Quanto esse tipo de cliente costuma pedir numa semana normal, sem mensagem">Sem mensagem</th><th class="num">Faturamento</th></tr>';
   ks.forEach(k=>{ const r=res[k]; const tx=r.volt/r.n, base=r.nb?r.base/r.nb:0;
-    h+=`<tr><td>${esc(NOME_CAMP[k]||k)}</td><td class="num">${fmtN(r.n)}${r.cedo?`<span class="sub" title="contatados há menos de 7 dias: ainda podem pedir">${r.cedo} recentes</span>`:''}</td><td class="num"><b>${fmtP(tx)}</b><span class="sub">${fmtN(r.volt)} clientes</span></td><td class="num">${fmtP(base)}</td><td class="num">${fmtR0(r.fat)}</td></tr>`; });
+    RES_LST['ct:'+k]=()=>detContatos(r.lst);
+    h+=`<tr data-rd="ct:${esc(k)}" class="rd" title="Clique para ver quem foi contatado e quem pediu"><td>${esc(NOME_CAMP[k]||k)} <span class="rd-sv">▸</span></td><td class="num">${fmtN(r.n)}${r.cedo?`<span class="sub" title="contatados há menos de 7 dias: ainda podem pedir">${r.cedo} recentes</span>`:''}</td><td class="num"><b>${fmtP(tx)}</b><span class="sub">${fmtN(r.volt)} clientes</span></td><td class="num">${fmtP(base)}</td><td class="num">${fmtR0(r.fat)}</td></tr>`; });
   if(!ks.length) h+='<tr><td colspan="5" class="muted" style="padding:20px">Nenhum contato marcado nesse período. Marque "Contatado" nas listas e os resultados aparecem aqui.</td></tr>';
-  $('#tbRes').innerHTML=h;
+  $('#tbRes').innerHTML=h; ligarRes($('#tbRes'));
   // cupons
-  const cup=(D.cupons||[]).map((nome,i)=>({nome,u:0,u30:0,fat:0,desc:0,cl:new Set(),novos:0,ult:null}));
+  const cup=(D.cupons||[]).map((nome,i)=>({i,nome,u:0,u30:0,fat:0,desc:0,cl:new Set(),novos:0,ult:null,ps:[]}));
   const primeiro=new Map(); P.forEach(p=>{ if(!p.cancel&&p.cli>=0&&(!primeiro.has(p.cli)||p.d<primeiro.get(p.cli))) primeiro.set(p.cli,p.d); });
   P.forEach(p=>{ if(p.cancel||p.cup==null||p.cup<0||!okData(p)) return; const c=cup[p.cup]; c.u++; if(diasEntre(p.d,REF)<=30)c.u30++; c.fat+=p.v||0; c.desc+=p.desc||0;
-    if(p.cli>=0){ c.cl.add(p.cli); if(+primeiro.get(p.cli)===+p.d) c.novos++; } if(!c.ult||p.d>c.ult)c.ult=p.d; });
+    const nv=p.cli>=0&&+primeiro.get(p.cli)===+p.d; c.ps.push(Object.assign({},p,{_novo:nv}));
+    if(p.cli>=0){ c.cl.add(p.cli); if(nv) c.novos++; } if(!c.ult||p.d>c.ult)c.ult=p.d; });
   const cs=cup.filter(c=>c.u).sort((a,b)=>b.u30-a.u30||b.u-a.u);
   let hc='<tr><th>Cupom</th><th class="num">Usos em 30 dias</th><th class="num">Clientes</th><th class="num">Faturamento</th><th class="num">Desconto dado</th></tr>';
-  cs.forEach(c=>{ hc+=`<tr><td><b>${esc(c.nome)}</b><span class="sub">último uso ${c.ult?c.ult.toLocaleDateString('pt-BR'):'—'}</span></td><td class="num">${fmtN(c.u30)}<span class="sub">${fmtN(c.u)} no total</span></td><td class="num">${fmtN(c.cl.size)}<span class="sub">${fmtN(c.novos)} no 1º pedido</span></td><td class="num">${fmtR0(c.fat)}</td><td class="num">${fmtR0(c.desc)}<span class="sub">${c.desc?fmtR(c.fat/c.desc)+' vendidos por R$ 1':''}</span></td></tr>`; });
+  cs.forEach(c=>{ RES_LST['cp:'+c.i]=()=>tabPedidos(c.ps.slice().sort((a,b)=>b.d-a.d),true); hc+=`<tr data-rd="cp:${c.i}" class="rd" title="Clique para ver os pedidos com este cupom"><td><b>${esc(c.nome)}</b> <span class="rd-sv">▸</span><span class="sub">último uso ${c.ult?c.ult.toLocaleDateString('pt-BR'):'—'}</span></td><td class="num">${fmtN(c.u30)}<span class="sub">${fmtN(c.u)} no total</span></td><td class="num">${fmtN(c.cl.size)}<span class="sub">${fmtN(c.novos)} no 1º pedido</span></td><td class="num">${fmtR0(c.fat)}</td><td class="num">${fmtR0(c.desc)}<span class="sub">${c.desc?fmtR(c.fat/c.desc)+' vendidos por R$ 1':''}</span></td></tr>`; });
   if(!cs.length) hc+='<tr><td colspan="5" class="muted" style="padding:20px">Nenhum cupom usado nos pedidos baixados ainda.</td></tr>';
-  $('#tbCup').innerHTML=hc;
+  $('#tbCup').innerHTML=hc; ligarRes($('#tbCup'));
 }
 $('#rPeriodo').onchange=renderResultados;
 
