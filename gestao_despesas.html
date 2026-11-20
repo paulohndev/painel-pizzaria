@@ -494,7 +494,7 @@ rect.maria-x{transform-box:fill-box;transform-origin:0 50%;animation:cresceX .7s
       <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn sec" onclick="fecharNota()">Cancelar</button><button class="btn" onclick="salvarNota()">Salvar nota</button></div>
     </div>
     <div class="grid" style="grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);align-items:start">
-      <div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Contas</h2><div class="row"><button class="btn sm" onclick="novaNota()">+ Nota com itens</button><button class="btn sm sec" onclick="contaSimples()">+ Conta simples</button></div></div><div id="ctLista" style="margin-top:12px"></div></div>
+      <div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Contas</h2><div class="row"><button class="btn sm" onclick="novaNota()">+ Nota com itens</button><button class="btn sm sec" onclick="contaSimples()">+ Conta simples</button></div></div><div class="row" style="gap:8px;margin-top:10px;align-items:center"><span class="muted">Contas pagas:</span><select id="ctPer" onchange="renderContas()"><option value="30">Últimos 30 dias</option><option value="mes">Este mês</option><option value="mesant">Mês passado</option><option value="90">Últimos 90 dias</option><option value="ano">Este ano</option><option value="tudo">Todas</option></select></div><div id="ctLista" style="margin-top:12px"></div></div>
       <div><div class="card"><h2>Próximas 4 semanas</h2><div id="ctSemanas"></div><p class="muted" style="margin-bottom:0">Quanto vence em cada semana, para planejar o caixa.</p></div><div class="card" id="ctPont"></div></div>
     </div>
   </section>
@@ -1121,7 +1121,11 @@ function togConta(k){ctAbertos.has(k)?ctAbertos.delete(k):ctAbertos.add(k);rende
 function variacaoLinha(x){if(!x.itemId||!(x.precoUnit>0))return null;const s=statsItem(itemDe(x.itemId)||{id:x.itemId});const i=s.cs?s.cs.findIndex(o=>o.x.id===x.id):-1;if(i<1)return null;return s.cs[i].pu/s.cs[i-1].pu-1}
 function htmlItensNota(ls){return `<table><tr><th>Item</th><th>Marca</th><th class="r">Quantidade</th><th class="r">Preço/un</th><th class="r">vs compra anterior</th><th class="r">Total</th></tr>${ls.map(x=>{const v=variacaoLinha(x);return `<tr><td>${x.itemId?`<a href="#" onclick="event.preventDefault();segIt='itens';itemSel='${x.itemId}';irAba('itens')">${esc(x.descricao)}</a>`:esc(x.descricao)}<br><span class="muted">${esc(x.categoria)}</span></td><td>${esc(nomeMarca(x))||'<span class="muted">—</span>'}</td><td class="r">${x.qtd?N2(x.qtd)+' '+unTxt(x.unidade):'—'}</td><td class="r">${x.precoUnit?'R$ '+fmtPU(x.precoUnit):'—'}${x.desconto?`<br><span class="muted">desc. ${R(x.desconto)}</span>`:''}</td><td class="r">${v==null?'<span class="muted">primeira compra</span>':`<b class="${v>.005?'up':v<-.005?'down':''}">${v>0?'▲ +':v<0?'▼ ':''}${(v*100).toFixed(1).replace('.',',')}%</b>`}</td><td class="r"><b>${R(x.valor)}</b></td></tr>`}).join('')}</table>`}
 let voltarContas=false;
-function renderContas(){const hj=hoje(),ab=contasAgrupadas(x=>!x.pago),pg=contasAgrupadas(x=>x.pago&&x.pagoEm&&x.pagoEm>=addDias(hj,-30)&&!x.jurosDe).sort((a,b)=>b.pagoEm.localeCompare(a.pagoEm));
+function perPagas(){const v=($('ctPer')||{}).value||'30',d=new Date(),y=d.getFullYear(),m=d.getMonth(),hj=hoje();
+  if(v==='mes')return[isoDe(new Date(y,m,1)),hj,'este mês'];if(v==='mesant')return[isoDe(new Date(y,m-1,1)),isoDe(new Date(y,m,0)),'no mês passado'];
+  if(v==='90')return[addDias(hj,-90),hj,'nos últimos 90 dias'];if(v==='ano')return[`${y}-01-01`,hj,'este ano'];if(v==='tudo')return['0000-01-01','9999-12-31','(todas)'];
+  return[addDias(hj,-30),hj,'nos últimos 30 dias']}
+function renderContas(){const hj=hoje(),ab=contasAgrupadas(x=>!x.pago),[pIni,pFim,pTxt]=perPagas(),pg=contasAgrupadas(x=>x.pago&&x.pagoEm&&x.pagoEm>=pIni&&x.pagoEm<=pFim&&!x.jurosDe).sort((a,b)=>b.pagoEm.localeCompare(a.pagoEm));
   const venc=ab.filter(contaVencida),hojeL=ab.filter(c=>c.venc===hj),sem=ab.filter(c=>c.venc>hj&&c.venc<=addDias(hj,7)),dep=ab.filter(c=>!c.venc||c.venc>addDias(hj,7));
   const sv=l=>l.reduce((a,c)=>a+c.valor,0);
   $('ctKpis').innerHTML=[['Vencidas',R(sv(venc)),`${venc.length} conta(s)`,venc.length?'neg':''],['Vencem hoje',R(sv(hojeL)),`${hojeL.length} conta(s)`,''],['Próximos 7 dias',R(sv(sem)),`${sem.length} conta(s)`,''],['Total em aberto',R(sv(ab)),`${ab.length} conta(s)`,'']]
@@ -1129,7 +1133,7 @@ function renderContas(){const hj=hoje(),ab=contasAgrupadas(x=>!x.pago),pg=contas
   const ord=l=>l.sort((a,b)=>(a.venc||'9').localeCompare(b.venc||'9'));
   const sec=(tit,l,cls)=>l.length?`<div class="ct-sec ${cls||''}"><div class="ct-h"><span>${tit}</span><span class="muted">${l.length} conta(s) · <b style="color:var(--ink)">${R(sv(l))}</b></span></div>${ord(l).map(linhaConta).join('')}</div>`:'';
   $('ctLista').innerHTML=(ab.length?sec('Vencidas',venc,'venc')+sec('Vencem hoje',hojeL,'hj')+sec('Próximos 7 dias',sem)+sec('Mais para frente',dep):'<div class="empty">Nenhuma conta em aberto. 👍</div>')
-    +(pg.length?`<details class="ct-pagas" ${ctPagasAb?'open':''} ontoggle="ctPagasAb=this.open"><summary>Pagas nos últimos 30 dias (${pg.length} · ${R(sv(pg))})</summary>${pg.map(linhaConta).join('')}</details>`:'');
+    +(pg.length?`<details class="ct-pagas" ${ctPagasAb?'open':''} ontoggle="ctPagasAb=this.open"><summary>Pagas ${pTxt} (${pg.length} · ${R(sv(pg))})</summary>${pg.map(linhaConta).join('')}</details>`:'');
   const prox=[0,1,2,3].map(w=>{const a=addDias(hj,w*7),b=addDias(hj,w*7+6),l=ab.filter(c=>c.venc>=a&&c.venc<=b);return{a,b,v:sv(l),n:l.length}}),mx=Math.max(1,...prox.map(p=>p.v));
   renderPontualidade();
   $('ctSemanas').innerHTML=prox.map((p,i)=>`<div class="hbr"><span>${i===0?'Esta semana':`${fmtD(p.a).slice(0,5)} a ${fmtD(p.b).slice(0,5)}`}</span><div class="tr"><div style="width:${p.v/mx*100}%"></div></div><b>${p.v?R(p.v):'—'}</b></div>`).join('');

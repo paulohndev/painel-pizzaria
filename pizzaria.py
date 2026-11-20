@@ -545,6 +545,10 @@ def montar_dados(db, cfg, nome_loja):
     pedidos = []
     itens = {}     # (turno, canal, nome) -> [qtd, valor]
     sabores = {}   # (turno, canal, grupo, nome) -> [qtd, valor]
+    itens_dia = {}     # (dia, turno, canal, nome) -> [qtd, valor]  (para filtrar por período)
+    sabores_dia = {}   # (dia, turno, canal, grupo, nome) -> [qtd, valor]
+    idx_nome, lista_nome = {}, []
+    DIA0 = datetime(2000, 1, 1).date()
     sem_detalhe = 0
     compras = []   # pedidos concluídos com cliente, para as recomendações
     abertos = []   # pedidos em andamento (para o alerta de combo ao vivo)
@@ -649,12 +653,19 @@ def montar_dados(db, cfg, nome_loja):
                     acc = itens.setdefault(k, [0, 0.0])
                     acc[0] += it.get("quantity") or 0
                     acc[1] += it.get("total_price") or 0
+                    dia = (dt.date() - DIA0).days
+                    accd = itens_dia.setdefault((dia, t, ci, idx(idx_nome, lista_nome, k[2])), [0, 0.0])
+                    accd[0] += it.get("quantity") or 0
+                    accd[1] += it.get("total_price") or 0
                     for op in it.get("options") or []:
                         k2 = (t, ci, (op.get("option_group_name") or "").strip(), (op.get("name") or "?").strip())
                         acc2 = sabores.setdefault(k2, [0, 0.0])
                         q = (op.get("quantity") or 1) * (it.get("quantity") or 1)
                         acc2[0] += q
                         acc2[1] += (op.get("unit_price") or 0) * q
+                        acc3 = sabores_dia.setdefault((dia, t, ci, idx(idx_nome, lista_nome, k2[2]), idx(idx_nome, lista_nome, k2[3])), [0, 0.0])
+                        acc3[0] += q
+                        acc3[1] += (op.get("unit_price") or 0) * q
             if status == "closed" and cli_i >= 0:
                 compras.append(compra)
             if status not in ("closed", "canceled") and cli_i >= 0 and (datetime.now() - dt).total_seconds() < 4 * 3600:
@@ -721,6 +732,9 @@ def montar_dados(db, cfg, nome_loja):
         "pedidos": pedidos,
         "itens": [[k[0], k[1], k[2], round(v[0], 2), round(v[1], 2)] for k, v in itens.items()],
         "sabores": [[k[0], k[1], k[2], k[3], round(v[0], 2), round(v[1], 2)] for k, v in sabores.items()],
+        "nomes_it": lista_nome,
+        "itens_dia": [list(k) + [round(v[0], 2), round(v[1], 2)] for k, v in itens_dia.items()],
+        "sabores_dia": [list(k) + [round(v[0], 2), round(v[1], 2)] for k, v in sabores_dia.items()],
         "config": {"dias_ativo": cfg["dias_ativo"], "pedidos_fiel": cfg["pedidos_fiel"], "mensagem": cfg["mensagem"]},
         "sem_detalhe": sem_detalhe,
         "cupons": lista_cupom,

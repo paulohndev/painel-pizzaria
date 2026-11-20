@@ -199,6 +199,21 @@ continua exatamente como era.
 Para voltar ao menu antigo (por app): botão "Voltar ao menu antigo", no pé da
 barra. O mesmo botão liga o menu novo de novo. Nenhum dado muda com a troca.
 
+FILTRO POR DATA (versão 2.8)
+------------------------------------------------------------
+No alto das páginas de vendas, ao lado de Turno e Canal, agora tem "Período":
+todo o período, últimos 7/30/90 dias, este mês, mês passado, este ano, ano
+passado ou "Escolher datas…" (de / até). Ele vale em:
+  - Números > Vendas (Visão geral): os quadros comparam com o período anterior
+    do mesmo tamanho; com até 2 meses, os gráficos passam a ser por dia;
+  - Cardápio > Mais vendidos (com busca por item ou sabor);
+  - Clientes > Mapa e bairros (tabela de bairros);
+  - Mensagens > Resultados (promoções da casa e cupons);
+  - Clientes: a lista mostra só quem pediu no período. Também tem filtro por bairro.
+Em Despesas > Contas a pagar dá para ver as contas pagas por período.
+Despesas > Lançamentos, Dashboard e Desperdício já tinham o filtro de período
+(no quadro de filtros, no alto da página).
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".
