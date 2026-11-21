@@ -313,6 +313,8 @@ Baixar, Editar e Apagar.
 Os arquivos ficam no computador, na pasta da Equipe (dentro de Database), na
 subpasta "documentos". Ao importar o holerite do contador, dá para guardar o
 arquivo nos documentos de cada funcionário automaticamente.
+Ao guardar um documento do tipo "Holerite" de um funcionário CLT, o sistema
+pergunta se a Zoe deve ler e lançar na folha (com a conferência antes).
 
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------

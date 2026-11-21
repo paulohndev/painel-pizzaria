@@ -1,12 +1,12 @@
 {
- "versao": "2.16.0",
- "notas": "Documentos de cada funcionário: guardar registro, atestados, exames, holerites e outros, com tipo, nome, data e validade",
+ "versao": "2.16.1",
+ "notas": "Holerite guardado em Documentos agora oferece leitura pela Zoe e lançamento na folha",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "98e4461c50b5db2d886d3a7a3104d5d14061f9d5664c908713bf5dbfc5f67f7b",
+  "LEIA-ME.txt": "7836f28b52a1e4ebebb91f6ea841eb175bd3f9e3ec7a7f9fa74159f2bc83549b",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Reiniciar vigia (Windows).bat": "5e84e856b54c774385eca8a458844393e02e6d2d8054062012349a2bc95d5ce6",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
@@ -21,7 +21,7 @@
   "gestao_apps.txt": "53b5b0a3b85d8266e891c30ed756520f4d7c0f0d706fd9ade6fb539bde669680",
   "gestao_casca.html": "dbafa5adae41bab6dd0bea392eb2a8e5d968322b5afe5eb2bf5ae47d9596c56d",
   "gestao_despesas.html": "19bebbe8ad3fd62a7939fcb5814ddb346c39caab562a44a247a2743e2c2e9aae",
-  "gestao_equipe.html": "6094b84bb9c6361bb94dc66137214034a2086043a85388324bd391ea114bee7a",
+  "gestao_equipe.html": "a771285b743f6ed8bf55a551d3159dbdf119f0747c216d4de57fbf3f3a0f5a05",
   "gestao_fichas.html": "45c42ac9910612268c5a12a49ef6d74cf73b4045461ad8da6cca9213eddc7a61",
   "gestao_painel.html": "54753bdc63735d998fc1a26e05909b44d89950ad9239e94e3df3ec84678ebb3d",
   "ia.py": "2ead90b313218d2e91ab790d592a641d5e332b5aa9d7d8c5d1d78c915a9ffa30",
@@ -30,7 +30,7 @@
   "painel_modelo.html": "cb7eb4e46a415749d5a2ec6baf51bf89eea1220c781b69d0aedf2d4a65048378",
   "pizzaria.py": "2367b8eeed37ce703c75b970ab4b2318af827add91b2eef281ffce9b752d4856",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "c59328780ec1e537f9dd72b45bb83d65f3a293f176571a71c5d36d29118497e4",
+  "vigia.py": "874fc315abe80095221a0db48f27bab549c63c332466b020e63d30dfdc22561e",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }

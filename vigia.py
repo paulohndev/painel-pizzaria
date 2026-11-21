@@ -948,7 +948,11 @@ def ia_post(caminho, dado):
     try:
         ia, D = _ia()
         if caminho == "/api/ia/holerite":
-            r = ia_painel.ler_holerite(ia, dado.get("arquivos") or [])
+            try:
+                r = ia_painel.ler_holerite(ia, dado.get("arquivos") or [])
+            except ErroIA as e:
+                log("IA: não consegui ler o holerite: %s" % e)
+                raise
             log("IA: holerite lido (%d funcionário(s))" % len(r["funcionarios"]))
             return r, 200
         if caminho == "/api/ia/resumo":

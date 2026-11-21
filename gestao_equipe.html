@@ -941,7 +941,9 @@ async function guardarDoc(fid,file,meta){const f=func(fid);if(!f)return null;con
 async function addDoc(fid){const fs=[...($('docArq').files||[])];if(!fs.length)return toast('Escolha o arquivo');if(!ARQ.handle)return toast('Para guardar documentos, a pasta da Equipe precisa estar ligada');
   if(fs.some(x=>x.size>25e6))return toast('Arquivo grande demais (máx. 25 MB)');
   const tipo=$('docTipo').value,nome=$('docNome').value.trim(),data=$('docData').value||hoje(),vence=$('docVence').value||'',obs=$('docObs').value.trim();
-  try{for(const x of fs)await guardarDoc(fid,x,{tipo,nome:nome?(fs.length>1?nome+' – '+x.name.replace(/\.[^.]+$/,''):nome):x.name.replace(/\.[^.]+$/,''),data,vence,obs});mudou();toast(fs.length>1?fs.length+' documentos guardados':'Documento guardado')}
+  try{for(const x of fs)await guardarDoc(fid,x,{tipo,nome:nome?(fs.length>1?nome+' – '+x.name.replace(/\.[^.]+$/,''):nome):x.name.replace(/\.[^.]+$/,''),data,vence,obs});mudou();toast(fs.length>1?fs.length+' documentos guardados':'Documento guardado');
+    const f=func(fid),lev=fs.filter(x=>/^(application\/pdf|image\/)/.test(x.type||'')||/\.pdf$/i.test(x.name));
+    if(tipo==='Holerite'&&f&&f.vinculo==='clt'&&lev.length)confirmar('Lançar este holerite na folha?',`<p>Quer que a Zoe leia o holerite de <b>${esc(f.nome)}</b> e lance na folha os proventos, os descontos legais e os outros descontos?</p><p class="muted">Antes de lançar aparece a conferência, item por item.</p>`,()=>enviarHol(lev,fid),'Ler com a Zoe',true),$('mSim').className='btn'}
   catch(e){toast('Não consegui guardar: '+(e.message||e))}}
 async function arquivoDoc(fid,d){const dir=await dirDocs(fid);return (await dir.getFileHandle(d.id+'.'+d.ext)).getFile()}
 async function abrirDoc(fid,did,baixar){const f=func(fid),d=f&&(f.docs||[]).find(x=>x.id===did);if(!d)return;
@@ -964,13 +966,15 @@ function acharFunc(nome){const a=normN(nome);if(!a.length)return null;let best=n
 function abrirHolerite(){HOL={etapa:1};desenharHol();$('holModal').classList.add('show')}
 function fecharHol(){$('holModal').classList.remove('show');HOL=null}
 function lerB64(f){return new Promise((ok,err)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=()=>err('Não consegui ler '+f.name);r.readAsDataURL(f)})}
-async function enviarHol(){const fs=[...$('holArq').files];if(!fs.length)return toast('Escolha o arquivo do holerite');
+async function enviarHol(arqs,fidPref){const fs=arqs||[...$('holArq').files];if(!fs.length)return toast('Escolha o arquivo do holerite');
   if(fs.some(f=>f.size>15e6))return toast('Arquivo grande demais (máx. 15 MB)');
-  HOL={etapa:2,arquivo:fs.map(f=>f.name).join(', ')};desenharHol();
+  HOL={etapa:2,arquivo:fs.map(f=>f.name).join(', ')};desenharHol();$('holModal').classList.add('show');
   try{const arquivos=[];for(const f of fs)arquivos.push({nome:f.name,tipo:f.type||(f.name.toLowerCase().endsWith('.pdf')?'application/pdf':'image/jpeg'),dados:await lerB64(f)});
     const r=await fetch('/api/ia/holerite',{method:'POST',headers:{'Content-Type':'application/json','X-Painel':'1'},body:JSON.stringify({arquivos})});const j=await r.json();
     if(j.erro){HOL={etapa:1,erro:j.erro};return desenharHol()}
-    HOL={etapa:3,files:fs,guardar:true,arquivo:HOL.arquivo,comp:j.competencia||'',dest:db.mesAtual,fs:(j.funcionarios||[]).map(x=>{const f=acharFunc(x.nome);return{...x,fid:f?f.id:'',usar:true,zerar:true,usarSal:false,itens:(x.itens||[]).map(it=>({...it,dest:destinoHol(it),on:!['info','adiant','sal','sf'].includes(destinoHol(it))}))}})};
+    if(!HOL||HOL.etapa!==2)return;
+    const unico=(j.funcionarios||[]).length===1;
+    HOL={etapa:3,files:fs,guardar:!fidPref,jaGuardado:!!fidPref,arquivo:HOL.arquivo,comp:j.competencia||'',dest:db.mesAtual,fs:(j.funcionarios||[]).map(x=>{const f=fidPref&&unico?func(fidPref):acharFunc(x.nome);return{...x,fid:f?f.id:'',usar:true,zerar:true,usarSal:false,itens:(x.itens||[]).map(it=>({...it,dest:destinoHol(it),on:!['info','adiant','sal','sf'].includes(destinoHol(it))}))}})};
     desenharHol()}catch(e){HOL={etapa:1,erro:'Não consegui falar com o sistema: '+e};desenharHol()}}
 function desenharHol(){const H=HOL;if(!H)return;let h='';
   if(H.etapa===1){h=`<h3>Importar holerite do contador</h3><p class="muted">Mande o PDF (ou fotos) dos holerites que o contador enviou. A Zoe lê e preenche a folha com o que estiver lá: horas extras, adicional noturno, feriados, INSS, IRRF, vale-transporte e outros descontos. Antes de lançar, você confere tudo.</p>
@@ -992,7 +996,7 @@ function desenharHol(){const H=HOL;if(!H)return;let h='';
         ${f&&x.salario_contratual&&Math.abs(+x.salario_contratual-(f.salario||0))>.5?`<p class="up" style="margin:6px 0 0;font-size:13px">O salário no holerite (${R(+x.salario_contratual)}) é diferente do cadastro (${R(f.salario||0)}). <label class="chk-x"><input type="checkbox" ${x.usarSal?'checked':''} onchange="HOL.fs[${i}].usarSal=this.checked"> atualizar o cadastro</label></p>`:''}
         ${temH?`<p style="margin:6px 0 0;font-size:13px"><label class="chk-x"><input type="checkbox" ${x.zerar?'checked':''} onchange="HOL.fs[${i}].zerar=this.checked"> já existem horas noturnas, extras ou faltas lançadas para ${esc(f.nome)} nesta folha: apagar para não contar duas vezes (o holerite já traz esses valores)</label></p>`:''}
         ${!f&&x.usar?'<p class="up" style="margin:6px 0 0;font-size:13px">Escolha de quem é este holerite.</p>':''}</div>`});
-    h+=`<div class="row" style="justify-content:space-between;gap:8px;position:sticky;bottom:0;background:#fff;padding-top:8px;flex-wrap:wrap"><label class="chk-x"><input type="checkbox" ${H.guardar?'checked':''} ${ARQ.handle?'':'disabled'} onchange="HOL.guardar=this.checked"> guardar o arquivo nos documentos de cada funcionário</label><span class="row" style="gap:8px"><button class="btn sec" onclick="fecharHol()">Cancelar</button><button class="btn" onclick="aplicarHol()">Lançar na folha de ${fMes(H.dest)}</button></span></div>`}
+    h+=`<div class="row" style="justify-content:space-between;gap:8px;position:sticky;bottom:0;background:#fff;padding-top:8px;flex-wrap:wrap">${H.jaGuardado?'<span class="muted" style="font-size:13px">O arquivo já está guardado nos documentos.</span>':`<label class="chk-x"><input type="checkbox" ${H.guardar?'checked':''} ${ARQ.handle?'':'disabled'} onchange="HOL.guardar=this.checked"> guardar o arquivo nos documentos de cada funcionário</label>`}<span class="row" style="gap:8px"><button class="btn sec" onclick="fecharHol()">Cancelar</button><button class="btn" onclick="aplicarHol()">Lançar na folha de ${fMes(H.dest)}</button></span></div>`}
   $('holCorpo').innerHTML=h}
 function aplicarHol(){const H=HOL;if(!H||H.etapa!==3)return;const fo=db.folhas[H.dest];if(!fo||fo.status==='fechada')return toast('Escolha uma folha aberta');
   const uso=H.fs.filter(x=>x.usar);if(uso.some(x=>!x.fid))return toast('Escolha o funcionário de cada holerite');let n=0;
