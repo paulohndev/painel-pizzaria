@@ -57,7 +57,7 @@ class IA:
         req = urllib.request.Request(url, data=json.dumps(corpo).encode("utf-8"), method="POST",
                                      headers=dict({"Content-Type": "application/json"}, **cab))
         try:
-            with urllib.request.urlopen(req, timeout=90) as r:
+            with urllib.request.urlopen(req, timeout=180) as r:
                 return json.loads(r.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
             try:

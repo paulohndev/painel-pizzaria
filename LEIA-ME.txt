@@ -280,6 +280,26 @@ desconto extra tem sua caixinha; ao dar baixa no 5º dia útil, todos ficam
 marcados. Lance o provento ou desconto na folha em que ele vai ser pago.
 Diaristas e motoboys continuam com uma baixa só.
 
+HOLERITE DO CONTADOR (versão 2.15)
+------------------------------------------------------------
+Em Equipe > Folha do mês: "📄 Importar holerite do contador". Escolha o PDF
+(ou fotos) que o contador mandou; a Zoe lê e mostra, para cada funcionário:
+  - de quem é o holerite (o sistema acha pelo nome; dá para trocar);
+  - cada linha (item, referência, valor) e para onde vai:
+      horas extras, adicional noturno, DSR, feriado e outros proventos → "Outros proventos";
+      INSS, IRRF e vale-transporte → "Descontos legais";
+      faltas, atrasos e outros descontos → "Outros descontos";
+      salário → só confere (o salário vem do cadastro);
+      adiantamento → não lança (as quinzenas já cuidam disso);
+      FGTS e bases de cálculo → só informação.
+Dá para desmarcar qualquer linha. Se já houver horas noturnas, extras ou faltas
+lançadas à mão naquela folha, o sistema oferece apagar para não contar duas vezes.
+Depois é só continuar lançando o que for da casa (consumo, vales, feriados...).
+Na página do funcionário aparece o líquido do holerite ao lado do líquido do
+sistema, para conferir. Importar de novo troca os itens que vieram do holerite.
+Precisa da Zoe ligada com o Claude. O arquivo é enviado para a IA ler e gasta
+créditos dela (mais que uma pergunta comum).
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

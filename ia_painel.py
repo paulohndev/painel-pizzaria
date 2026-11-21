@@ -862,3 +862,49 @@ def dica_pagina(ia, D, aba, tela="", liberar=False, api=None):
     r = perguntar(ia, D, [{"role": "user", "content": "Estou abrindo a página de %s. O que eu preciso saber agora?" % alvo}],
                   api=api, liberar=liberar, tela=tela, extra=SIS_DICA)
     return r
+
+
+# ---------- holerite do contador: a Zoe lê o PDF/foto e devolve os dados em JSON ----------
+SIS_HOLERITE = """Você lê holerites (recibos de pagamento de salário) brasileiros enviados pelo contador de uma pizzaria.
+Extraia SOMENTE o que está escrito no documento. Não invente nada. Se algo não aparece, use null.
+Pode haver um holerite por página, vários funcionários no mesmo arquivo, ou o mesmo holerite em duas vias: não repita funcionário.
+Responda APENAS com um JSON, sem texto antes ou depois, neste formato:
+{"competencia":"AAAA-MM","empresa":"...","funcionarios":[{"nome":"...","cargo":"...","admissao":"AAAA-MM-DD ou null",
+ "salario_contratual":0.0,"itens":[{"codigo":"...","descricao":"...","referencia":"texto da coluna referência, ex. 30,00 ou 25:00 ou 7,50%","valor":0.0,
+ "natureza":"provento|desconto|informativo",
+ "tipo":"salario|hora_extra|adicional_noturno|dsr|feriado|ferias|decimo_terceiro|salario_familia|outro_provento|inss|irrf|vale_transporte|adiantamento|falta|atraso|outro_desconto|fgts|base"}],
+ "total_proventos":0.0,"total_descontos":0.0,"liquido":0.0,"fgts_mes":0.0}]}
+Regras: "salario" é a linha de salário/dias normais/horas normais. Adiantamento quinzenal/salarial descontado é "adiantamento".
+Valores com ponto decimal (1234.56), sem R$. Bases de cálculo (base INSS, base FGTS, base IRRF) e FGTS são "informativo"."""
+
+
+def ler_holerite(ia, arquivos):
+    if getattr(ia, "provedor", "") != "claude":
+        raise ErroIA("Para ler holerite a Zoe precisa estar usando o Claude (config.ini, seção [ia]).")
+    blocos = []
+    for a in (arquivos or [])[:6]:
+        tipo = str(a.get("tipo") or "").lower()
+        dados = str(a.get("dados") or "")
+        if not dados:
+            continue
+        if tipo == "application/pdf":
+            blocos.append({"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": dados}})
+        elif tipo in ("image/jpeg", "image/png", "image/webp", "image/gif"):
+            blocos.append({"type": "image", "source": {"type": "base64", "media_type": tipo, "data": dados}})
+    if not blocos:
+        raise ErroIA("Envie o holerite em PDF ou foto (JPG/PNG).")
+    blocos.append({"type": "text", "text": "Leia os holerites acima e responda só com o JSON pedido."})
+    txt, _ = ia.conversar(SIS_HOLERITE, [{"role": "user", "content": blocos}], max_tokens=8000, forte=True, voltas=0)
+    t = txt.strip()
+    if t.startswith("```"):
+        t = t.split("\n", 1)[1] if "\n" in t else t
+        t = t.rsplit("```", 1)[0]
+    i, j = t.find("{"), t.rfind("}")
+    try:
+        dado = json.loads(t[i:j + 1])
+    except ValueError:
+        raise ErroIA("Não consegui entender a leitura do holerite. Tente de novo ou mande uma foto mais nítida.")
+    fs = dado.get("funcionarios") or []
+    if not fs:
+        raise ErroIA("Não encontrei nenhum holerite nesse arquivo.")
+    return {"competencia": dado.get("competencia"), "empresa": dado.get("empresa"), "funcionarios": fs}

@@ -479,6 +479,7 @@ rect.maria-x{transform-box:fill-box;transform-origin:0 50%;animation:cresceX .7s
 </main>
 
 <div id="print"></div>
+<div class="modal-bg" id="holModal"><div class="modal" style="max-width:980px;width:96vw;max-height:90vh;overflow:auto"><div id="holCorpo"></div></div></div>
 <div class="modal-bg" id="modal"><div class="modal"><h3 id="mTitulo"></h3><div id="mTexto"></div><div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn sec" id="mNao">Cancelar</button><button class="btn danger" id="mSim">Confirmar</button></div></div></div>
 <div class="toast" id="toast"></div>
 
@@ -691,7 +692,7 @@ function rFolha(){
   const fo=db.folhas[mesVer],fechada=fo.status==='fechada';
   const PP=periodo(mesVer),venceu=!fechada&&mesVer===db.mesAtual&&hoje()>PP.fim;
   $('mesStatus').innerHTML=`<span class="muted" style="font-size:13px">${fD(PP.ini)} a ${fD(PP.fim)}</span> `+(fechada?`<span class="st neu">🔒 Fechada em ${fD((fo.fechadaEm||'').slice(0,10))}</span>`:`<span class="st ok">Aberta</span>`)+(venceu?` <span class="st warn" title="O período desta folha acabou em ${fD(PP.fim)}">período encerrado · feche para abrir ${fMes(proxMes(mesVer))}</span>`:'');
-  $('folhaAcoes').innerHTML=`<button class="btn sm sec" onclick="imprimirFolha('${mesVer}')">Imprimir folha</button><button class="btn sm sec" onclick="imprimirRecibos('${mesVer}')">Imprimir recibos</button><button class="btn sm sec" onclick="exportarMes('${mesVer}')">Exportar Excel</button>`+
+  $('folhaAcoes').innerHTML=`<button class="btn sm" onclick="abrirHolerite()">📄 Importar holerite do contador</button><button class="btn sm sec" onclick="imprimirFolha('${mesVer}')">Imprimir folha</button><button class="btn sm sec" onclick="imprimirRecibos('${mesVer}')">Imprimir recibos</button><button class="btn sm sec" onclick="exportarMes('${mesVer}')">Exportar Excel</button>`+
     (fechada?`<button class="btn sm" onclick="reabrir('${mesVer}')">Reabrir</button>`:mesVer===db.mesAtual?`<button class="btn sm" onclick="pedirFechamento()">Fechar folha e abrir ${fMes(proxMes(mesVer))}</button>`:'');
   const t=totaisMes(mesVer),ta=db.folhas[antMes(mesVer)]?totaisMes(antMes(mesVer)):null;
   $('fKpis').innerHTML=[
@@ -844,6 +845,7 @@ function rFunc(){
         ${r.sfAviso?`<p class="muted">${r.sfAviso}</p>`:''}
         ${r.saldo<0?'<p class="muted">Saldo negativo: o funcionário deve esse valor (ex.: consumo maior que o que falta receber).</p>':''}
       ${fx.vinculo==='clt'?`<p class="muted">Valor-hora: ${R(r.vh)} (${R(fx.salario)} ÷ ${C().jornada} h). Controle interno: INSS e IR seguem a folha do contador.</p>`:''}
+      ${l.holerite?`<div class="parc-box" style="background:#f3f8ff;border-color:#cfe0fb"><b>Holerite do contador${l.holerite.competencia?' ('+fMes(l.holerite.competencia)+')':''}</b><div style="font-size:13.5px;margin-top:4px">Líquido no holerite: <b>${R(l.holerite.liquido)}</b> · no sistema: <b>${R(r.liq)}</b>${Math.abs(l.holerite.liquido-r.liq)>0.5?` <span class="up">(diferença de ${R(r.liq-l.holerite.liquido)}: pode ser proporcional, consumo ou descontos lançados só aqui)</span>`:' <span class="st ok" style="font-size:11px">confere</span>'}</div>${l.legaisItens?`<div class="muted" style="font-size:12.5px;margin-top:2px">Descontos legais: ${l.legaisItens.map(x=>esc(x.d)+' '+R(x.v)).join(' · ')}</div>`:''}<div class="muted" style="font-size:12px;margin-top:2px">Importado em ${fD(l.holerite.em)} · ${esc(l.holerite.arquivo||'')}</div></div>`:''}
       ${(()=>{const pc=parcelas(fx,l,r,mesFunc);if(!pc)return'';return `<div class="parc-box"><h3 style="margin:0 0 8px">Pagamento em duas partes</h3>
         <div class="parc-l ${pc.p1pago?'ok':''}"><div><b>5º dia útil</b> <span class="muted">(${fD(pc.d1)}) · 1ª quinzena, ${fD(pc.P.qa[0]).slice(0,5)} a ${fD(pc.P.qa[1]).slice(0,5)}${pc.qa&&pc.qa.fr<1?` · ${pc.qa.d} de ${pc.qa.tot} dias`:''}</span>
           <div class="muted" style="font-size:13px;margin-top:2px">${R(pc.sal1)} do salário${pc.extras>0.004?` + proventos ${R(pc.extras)}`:''}${pc.descs>0.004?` − descontos ${R(pc.descs)}`:''} = <b style="color:var(--ink)">${R(pc.p1)}</b></div>
@@ -905,11 +907,64 @@ function setP1(v){const l=lanc(mesFunc,funcAtual,true);if(String(v).trim()==='')
 function parcHTML(f,l,r,ym,compacto){const pc=parcelas(f,l,r,ym);if(!pc)return'';const id=f.id;
   const ck=(n,on,v,dt,em)=>`<label class="parc ${on?'ok':''}"><input type="checkbox" ${on?'checked':''} onchange="pagarParc('${id}',${n},this.checked,'${ym}')"><span><b>${n===1?'5º dia útil':'Dia 20'}</b> <span class="muted">${fD(dt).slice(0,5)}</span><br>${R(v)}${on&&em?` <span class="muted">· pago ${fD(em).slice(0,5)}</span>`:''}</span></label>`;
   return compacto?`<div class="parcs">${ck(1,pc.p1pago,pc.p1,pc.d1,pc.p1em)}${ck(2,pc.p2pago,pc.p2,pc.d2,pc.p2em)}</div>`:pc}
+
+/* ---------- holerite do contador: a Zoe lê e o sistema preenche a folha ---------- */
+let HOL=null;
+const TIPO_HOL={salario:'Salário',hora_extra:'Hora extra',adicional_noturno:'Adicional noturno',dsr:'DSR',feriado:'Feriado',ferias:'Férias',decimo_terceiro:'13º',salario_familia:'Salário-família',outro_provento:'Provento',inss:'INSS',irrf:'IRRF',vale_transporte:'Vale-transporte',adiantamento:'Adiantamento',falta:'Falta',atraso:'Atraso',outro_desconto:'Desconto',fgts:'FGTS',base:'Base de cálculo'};
+const LEGAIS_HOL=['inss','irrf','vale_transporte'];
+function destinoHol(it){const t=it.tipo||'',n=it.natureza;if(n==='informativo'||t==='fgts'||t==='base')return'info';if(t==='salario')return'sal';if(t==='adiantamento')return'adiant';if(LEGAIS_HOL.includes(t))return'legal';if(t==='salario_familia')return'sf';return n==='desconto'?'desc':'prov'}
+const normN=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z ]/g,' ').split(/\s+/).filter(w=>w.length>1);
+function acharFunc(nome){const a=normN(nome);if(!a.length)return null;let best=null,bs=0;db.funcionarios.forEach(f=>{const b=normN(f.nome);const comum=a.filter(w=>b.includes(w)).length;const sc=comum/Math.max(1,Math.min(a.length,b.length))+(a[0]===b[0]?.5:0);if(sc>bs){bs=sc;best=f}});return bs>=.8?best:null}
+function abrirHolerite(){HOL={etapa:1};desenharHol();$('holModal').classList.add('show')}
+function fecharHol(){$('holModal').classList.remove('show');HOL=null}
+function lerB64(f){return new Promise((ok,err)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=()=>err('Não consegui ler '+f.name);r.readAsDataURL(f)})}
+async function enviarHol(){const fs=[...$('holArq').files];if(!fs.length)return toast('Escolha o arquivo do holerite');
+  if(fs.some(f=>f.size>15e6))return toast('Arquivo grande demais (máx. 15 MB)');
+  HOL={etapa:2,arquivo:fs.map(f=>f.name).join(', ')};desenharHol();
+  try{const arquivos=[];for(const f of fs)arquivos.push({nome:f.name,tipo:f.type||(f.name.toLowerCase().endsWith('.pdf')?'application/pdf':'image/jpeg'),dados:await lerB64(f)});
+    const r=await fetch('/api/ia/holerite',{method:'POST',headers:{'Content-Type':'application/json','X-Painel':'1'},body:JSON.stringify({arquivos})});const j=await r.json();
+    if(j.erro){HOL={etapa:1,erro:j.erro};return desenharHol()}
+    HOL={etapa:3,arquivo:HOL.arquivo,comp:j.competencia||'',dest:db.mesAtual,fs:(j.funcionarios||[]).map(x=>{const f=acharFunc(x.nome);return{...x,fid:f?f.id:'',usar:true,zerar:true,usarSal:false,itens:(x.itens||[]).map(it=>({...it,dest:destinoHol(it),on:!['info','adiant','sal','sf'].includes(destinoHol(it))}))}})};
+    desenharHol()}catch(e){HOL={etapa:1,erro:'Não consegui falar com o sistema: '+e};desenharHol()}}
+function desenharHol(){const H=HOL;if(!H)return;let h='';
+  if(H.etapa===1){h=`<h3>Importar holerite do contador</h3><p class="muted">Mande o PDF (ou fotos) dos holerites que o contador enviou. A Zoe lê e preenche a folha com o que estiver lá: horas extras, adicional noturno, feriados, INSS, IRRF, vale-transporte e outros descontos. Antes de lançar, você confere tudo.</p>
+    ${H.erro?`<div class="lock" style="color:var(--bad)">${esc(H.erro)}</div>`:''}
+    <input type="file" id="holArq" accept="application/pdf,image/*" multiple style="margin:10px 0">
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn sec" onclick="fecharHol()">Cancelar</button><button class="btn" onclick="enviarHol()">Ler com a Zoe</button></div>`}
+  else if(H.etapa===2){h=`<h3>Lendo o holerite…</h3><p class="muted">A Zoe está lendo <b>${esc(H.arquivo)}</b>. Pode levar até um minuto.</p><div class="row" style="justify-content:flex-end"><button class="btn sec" onclick="fecharHol()">Cancelar</button></div>`}
+  else{const meses=mesesExistentes().filter(m=>db.folhas[m].status!=='fechada');if(!meses.includes(H.dest))H.dest=meses[0]||db.mesAtual;
+    h=`<h3>Conferir holerite${H.comp?' de '+fMes(H.comp):''}</h3>
+    <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px"><span>Lançar na folha de</span><select onchange="HOL.dest=this.value;desenharHol()">${meses.map(m=>`<option value="${m}" ${m===H.dest?'selected':''}>${fMes(m)} (${fD(periodo(m).ini).slice(0,5)} a ${fD(periodo(m).fim).slice(0,5)})</option>`).join('')}</select>
+    <span class="muted" style="font-size:13px">Lance na folha em que esses valores vão ser pagos (o 5º dia útil dela).</span></div>`;
+    H.fs.forEach((x,i)=>{const f=func(x.fid),l=f?lanc(H.dest,f.id):null,temH=l&&(l.noturnoHoras||l.he1||l.he2||l.faltasDias);
+      h+=`<div class="card" style="padding:12px 14px;margin:10px 0;${x.usar?'':'opacity:.55'}"><div class="row" style="justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <label class="chk-x"><input type="checkbox" ${x.usar?'checked':''} onchange="HOL.fs[${i}].usar=this.checked;desenharHol()"> <b>${esc(x.nome||'?')}</b> <span class="muted">${esc(x.cargo||'')}</span></label>
+        <span>é <select onchange="HOL.fs[${i}].fid=this.value;desenharHol()"><option value="">— escolha o funcionário —</option>${db.funcionarios.filter(f=>f.vinculo==='clt'||f.id===x.fid).map(f=>`<option value="${f.id}" ${f.id===x.fid?'selected':''}>${esc(f.nome)}</option>`).join('')}</select></span>
+        <span class="muted">líquido no holerite: <b style="color:var(--ink)">${R(+x.liquido||0)}</b></span></div>
+        <table style="margin-top:8px"><tr><th></th><th>Item</th><th>Ref.</th><th class="r">Valor</th><th>Vai para</th></tr>${(x.itens||[]).map((it,k)=>{const d=it.dest,lbl={prov:'Outros proventos',desc:'Outros descontos',legal:'Descontos legais',sal:'Salário (só confere)',adiant:'Não lança: já está nas quinzenas',info:'Só informação',sf:'Não lança: o sistema calcula'}[d];
+          return `<tr style="${it.on?'':'color:var(--muted)'}"><td>${['prov','desc','legal'].includes(d)?`<input type="checkbox" ${it.on?'checked':''} onchange="HOL.fs[${i}].itens[${k}].on=this.checked">`:''}</td><td>${esc(it.descricao||TIPO_HOL[it.tipo]||'')}</td><td class="muted">${esc(it.referencia||'')}</td><td class="r ${it.natureza==='desconto'?'up':''}">${it.natureza==='desconto'?'−':''}${R(+it.valor||0)}</td><td class="muted" style="font-size:12.5px">${lbl}</td></tr>`}).join('')}</table>
+        ${f&&x.salario_contratual&&Math.abs(+x.salario_contratual-(f.salario||0))>.5?`<p class="up" style="margin:6px 0 0;font-size:13px">O salário no holerite (${R(+x.salario_contratual)}) é diferente do cadastro (${R(f.salario||0)}). <label class="chk-x"><input type="checkbox" ${x.usarSal?'checked':''} onchange="HOL.fs[${i}].usarSal=this.checked"> atualizar o cadastro</label></p>`:''}
+        ${temH?`<p style="margin:6px 0 0;font-size:13px"><label class="chk-x"><input type="checkbox" ${x.zerar?'checked':''} onchange="HOL.fs[${i}].zerar=this.checked"> já existem horas noturnas, extras ou faltas lançadas para ${esc(f.nome)} nesta folha: apagar para não contar duas vezes (o holerite já traz esses valores)</label></p>`:''}
+        ${!f&&x.usar?'<p class="up" style="margin:6px 0 0;font-size:13px">Escolha de quem é este holerite.</p>':''}</div>`});
+    h+=`<div class="row" style="justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff;padding-top:8px"><button class="btn sec" onclick="fecharHol()">Cancelar</button><button class="btn" onclick="aplicarHol()">Lançar na folha de ${fMes(H.dest)}</button></div>`}
+  $('holCorpo').innerHTML=h}
+function aplicarHol(){const H=HOL;if(!H||H.etapa!==3)return;const fo=db.folhas[H.dest];if(!fo||fo.status==='fechada')return toast('Escolha uma folha aberta');
+  const uso=H.fs.filter(x=>x.usar);if(uso.some(x=>!x.fid))return toast('Escolha o funcionário de cada holerite');let n=0;
+  uso.forEach(x=>{const f=func(x.fid);if(!f)return;const l=lanc(H.dest,f.id,true);
+    l.provs=(l.provs||[]).filter(y=>y.fonte!=='holerite');l.descs=(l.descs||[]).filter(y=>y.fonte!=='holerite');
+    const its=(x.itens||[]).filter(it=>it.on&&+it.valor>0),nm=it=>(it.descricao||TIPO_HOL[it.tipo]||'Item')+(it.referencia?` (${it.referencia})`:'');
+    its.filter(it=>it.dest==='prov').forEach(it=>l.provs.push({d:nm(it),v:Math.round(+it.valor*100)/100,fonte:'holerite'}));
+    its.filter(it=>it.dest==='desc').forEach(it=>l.descs.push({d:nm(it),v:Math.round(+it.valor*100)/100,fonte:'holerite'}));
+    const leg=its.filter(it=>it.dest==='legal');if(leg.length){l.legais=Math.round(leg.reduce((a,it)=>a+(+it.valor),0)*100)/100;l.legaisItens=leg.map(it=>({d:nm(it),v:+it.valor}))}
+    if(x.zerar){l.noturnoHoras=0;l.he1=0;l.he2=0;l.faltasDias=0;l.atrasosHoras=0}
+    if(x.usarSal&&+x.salario_contratual>0)f.salario=Math.round(+x.salario_contratual*100)/100;
+    l.holerite={arquivo:H.arquivo,competencia:H.comp||'',liquido:+x.liquido||0,prov:+x.total_proventos||0,desc:+x.total_descontos||0,fgts:+x.fgts_mes||0,em:hoje()};n++});
+  mudou();fecharHol();mesVer=H.dest;toast(`Holerite lançado para ${n} funcionário${n===1?'':'s'}`);if(aba==='folha')rFolha()}
 /* ---------- outros proventos e descontos (vários por mês) ---------- */
 const SUG_X={provs:['Feriado trabalhado','Gorjeta','Bônus','Comissão','Ajuda de custo','Hora extra avulsa'],descs:['Adiantamento','Vale','Quebra de caixa','Uniforme','Falta avulsa','Empréstimo']};
 function extrasHTML(k,l,fechada){const P=k==='provs',a=l[k]||[],tot=somaX(a),id='x'+k;
   return `<div class="extras" style="grid-column:1/-1"><div class="row" style="justify-content:space-between"><b>${P?'Outros proventos':'Outros descontos'}</b>${a.length?`<span class="${P?'':'up'}">${P?'':'−'}${R(tot)}</span>`:''}</div>
-   ${a.length?`<table>${a.map((x,i)=>`<tr><td><label class="chk-x" title="${P?'Marque quando for pago':'Marque quando for descontado'}"><input type="checkbox" ${x.ok?'checked':''} onchange="okX('${k}',${i},this.checked)"> ${esc(x.d||(P?'Outros proventos':'Outros descontos'))}</label>${x.ok?` <span class="st ok" style="font-size:11px">${P?'pago':'descontado'}${x.em?' '+fD(x.em).slice(0,5):''}</span>`:''}</td><td class="r">${R(+x.v||0)}</td><td class="r">${fechada?'':`<button class="icon del" title="Remover" onclick="remX('${k}',${i})">✕</button>`}</td></tr>`).join('')}</table>`:`<p class="muted" style="margin:4px 0">${P?'Nenhum provento extra (feriado, gorjeta, bônus…).':'Nenhum desconto extra (adiantamento, vale…).'}</p>`}
+   ${a.length?`<table>${a.map((x,i)=>`<tr><td><label class="chk-x" title="${P?'Marque quando for pago':'Marque quando for descontado'}"><input type="checkbox" ${x.ok?'checked':''} onchange="okX('${k}',${i},this.checked)"> ${esc(x.d||(P?'Outros proventos':'Outros descontos'))}</label>${x.fonte==='holerite'?' <span class="tag" style="font-size:10.5px">holerite</span>':''}${x.ok?` <span class="st ok" style="font-size:11px">${P?'pago':'descontado'}${x.em?' '+fD(x.em).slice(0,5):''}</span>`:''}</td><td class="r">${R(+x.v||0)}</td><td class="r">${fechada?'':`<button class="icon del" title="Remover" onclick="remX('${k}',${i})">✕</button>`}</td></tr>`).join('')}</table>`:`<p class="muted" style="margin:4px 0">${P?'Nenhum provento extra (feriado, gorjeta, bônus…).':'Nenhum desconto extra (adiantamento, vale…).'}</p>`}
    ${fechada?'':`<form class="row" style="margin-top:6px" onsubmit="event.preventDefault();addX('${k}')"><input id="${id}D" list="${id}L" placeholder="${P?'ex.: Feriado 15/11':'ex.: Adiantamento dia 10'}" style="flex:1;min-width:160px"><datalist id="${id}L">${SUG_X[k].map(t=>`<option value="${t}">`).join('')}</datalist><input id="${id}V" inputmode="decimal" placeholder="R$" style="width:100px"><button class="btn sm">${P?'+ Provento':'+ Desconto'}</button></form>
    <div class="row" style="gap:6px;margin-top:6px">${SUG_X[k].slice(0,4).map(t=>`<button type="button" class="chipx" onclick="$('${id}D').value='${t}';$('${id}V').focus()">${t}</button>`).join('')}</div>`}</div>`}
 function addX(k){const fo=db.folhas[mesFunc];if(fo.status==='fechada')return;const d=$('x'+k+'D').value.trim(),v=num($('x'+k+'V').value);

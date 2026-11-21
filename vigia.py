@@ -947,6 +947,10 @@ def ia_resumo(gerar=False, novo=False):
 def ia_post(caminho, dado):
     try:
         ia, D = _ia()
+        if caminho == "/api/ia/holerite":
+            r = ia_painel.ler_holerite(ia, dado.get("arquivos") or [])
+            log("IA: holerite lido (%d funcionário(s))" % len(r["funcionarios"]))
+            return r, 200
         if caminho == "/api/ia/resumo":
             return ia_resumo(gerar=True, novo=bool(dado.get("novo")))
         if caminho == "/api/ia/mensagem":
