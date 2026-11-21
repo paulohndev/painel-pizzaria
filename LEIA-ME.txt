@@ -300,6 +300,20 @@ sistema, para conferir. Importar de novo troca os itens que vieram do holerite.
 Precisa da Zoe ligada com o Claude. O arquivo é enviado para a IA ler e gasta
 créditos dela (mais que uma pergunta comum).
 
+DOCUMENTOS DE CADA FUNCIONÁRIO (versão 2.16)
+------------------------------------------------------------
+Na página de cada funcionário (Equipe > clique no nome) tem o quadro
+"Documentos". Para guardar: escolha o arquivo (PDF, foto, Word, Excel; até
+25 MB; dá para mandar vários de uma vez), o tipo (Registro / contrato,
+Documento pessoal, Atestado, Exame (ASO), Holerite, Férias, Recibo,
+Advertência, Rescisão, Outro), o nome, a data do documento e, se tiver,
+"Vale até" (o sistema marca quando estiver perto de vencer ou vencido).
+A lista fica em ordem de data, com filtro por tipo; cada documento tem Abrir,
+Baixar, Editar e Apagar.
+Os arquivos ficam no computador, na pasta da Equipe (dentro de Database), na
+subpasta "documentos". Ao importar o holerite do contador, dá para guardar o
+arquivo nos documentos de cada funcionário automaticamente.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".
