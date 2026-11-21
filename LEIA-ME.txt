@@ -257,22 +257,27 @@ FOLHA: PROPORCIONAL E VÁRIOS PROVENTOS/DESCONTOS (versão 2.11)
     Bônus; Adiantamento, Vale, Quebra de caixa). Os lançamentos antigos foram
     mantidos, cada um como o primeiro item da lista.
 
-PAGAMENTO EM DUAS PARTES: 5º DIA ÚTIL E DIA 20 (versão 2.13)
+FOLHA DO DIA 21 AO DIA 20, PAGA EM DUAS QUINZENAS (versão 2.14)
 ------------------------------------------------------------
-Para funcionários CLT, o salário de um mês é pago no mês seguinte, em duas partes
-(ex.: salário de novembro):
-  - 5º dia útil (05/12): a parte fixa do salário (padrão R$ 1.000) + todos os
-    proventos − todos os descontos.
-  - Dia 20 (20/12): o resto do salário.
-O valor da parte fixa de cada funcionário fica no cadastro dele ("Pago no 5º dia
-útil"); em branco, usa o padrão de Ajustes > Cálculo da folha. Para um mês
-diferente, mude na página do funcionário ("Parte do salário neste dia").
+A folha de um mês vai do dia 21 do mês anterior ao dia 20 do mês
+(ex.: folha de novembro = 21/10 a 20/11). Para funcionários CLT:
+  - 1ª quinzena (21 a 05): paga no 5º dia útil do mês. Valor: a parte fixa
+    (padrão R$ 1.000; cada funcionário pode ter o seu no cadastro, em "Pago no
+    5º dia útil") + todos os proventos − todos os descontos.
+  - 2ª quinzena (06 a 20): paga no dia 20. Valor: o resto do salário.
+Quem entra ou sai no meio recebe só os dias trabalhados de cada quinzena.
+Ex.: Bianca entrou em 12/11 → folha de novembro: nada no 5º dia útil e 9 de
+15 dias da 2ª quinzena no dia 20 (R$ 600 de R$ 2.000). Na folha de dezembro
+(21/11 a 20/12) ela recebe as duas quinzenas completas.
+Para pagar o mês inteiro mesmo assim, marque "pagar o mês inteiro (sem
+proporcional)" no lançamento. Depois do dia 20, a folha avisa que o período
+acabou e oferece fechar e abrir a próxima.
 O 5º dia útil conta sábado como dia útil e pula domingos e feriados (nacionais,
 de Pernambuco e do Recife).
-Na Folha do mês, cada funcionário tem duas caixinhas (5º dia útil e Dia 20) para
-dar baixa; no alto aparecem o total de cada data e quanto ainda falta. Dá para
-dar baixa mesmo com a folha fechada. Cada provento e desconto extra tem sua
-caixinha de "pago"/"descontado"; ao dar baixa no 5º dia útil, todos ficam marcados.
+Na Folha do mês, cada funcionário tem duas caixinhas (5º dia útil e Dia 20)
+para dar baixa; dá para dar baixa mesmo com a folha fechada. Cada provento e
+desconto extra tem sua caixinha; ao dar baixa no 5º dia útil, todos ficam
+marcados. Lance o provento ou desconto na folha em que ele vai ser pago.
 Diaristas e motoboys continuam com uma baixa só.
 
 VIGIA E ALERTAS EM TEMPO REAL

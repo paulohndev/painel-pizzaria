@@ -447,7 +447,7 @@ rect.maria-x{transform-box:fill-box;transform-origin:0 50%;animation:cresceX .7s
     <div class="card">
       <h2>Parâmetros de cálculo (CLT)</h2>
       <div class="form-grid">
-        <span class="lbl">Pago no 5º dia útil (R$) <span class="muted">· padrão para todos; o resto do salário sai no dia 20. Cada funcionário pode ter o seu valor no cadastro.</span></span><input data-c="valorP1" class="inp-yel">
+        <span class="lbl">Pago no 5º dia útil (R$) <span class="muted">· 1ª quinzena (21 a 05), padrão para todos; a 2ª quinzena (06 a 20), com o resto do salário, sai no dia 20. A folha vai do dia 21 ao dia 20. Cada funcionário pode ter o seu valor no cadastro.</span></span><input data-c="valorP1" class="inp-yel">
         <span class="lbl">Jornada mensal (horas) <span class="muted">· divisor do valor-hora</span></span><input data-c="jornada" class="inp-yel">
         <span class="lbl">Adicional noturno (%)</span><span class="pct"><input data-cp="pctNoturno" class="inp-yel">%</span>
         <span class="lbl">Hora extra comum (%)</span><span class="pct"><input data-cp="pctHE1" class="inp-yel">%</span>
@@ -602,32 +602,38 @@ function aplicarDadosPasta(d){db=normalizar(d);try{localStorage.setItem(KEY,JSON
 const somaX=a=>(a||[]).reduce((s,x)=>s+(+x.v||0),0);
 const LANC0={provs:[],descs:[],diasMoto:[],salario:null,noturnoHoras:0,he1:0,he2:0,outrosProv:0,outrosProvDesc:'',faltasDias:0,atrasosHoras:0,consumo:[],outrosDesc:0,outrosDescDesc:'',legais:0,
   dias:0,valorDia:null,entregas:0,valorEntrega:null,diarias:0,valorDiaria:null,pago:false,pagoEm:'',obs:''};
-function ativoNoMes(f,ym){const ini=ym+'-01',fim=fimMes(ym);return (!f.admissao||f.admissao<=fim)&&(!f.demissao||f.demissao>=ini)}
+function ativoNoMes(f,ym){const P=periodo(ym),ini=P.ini,fim=P.fim;return (!f.admissao||f.admissao<=fim)&&(!f.demissao||f.demissao>=ini)}
 function funcsDoMes(ym){const fo=db.folhas[ym];if(!fo)return[];
   if(fo.status==='fechada')return Object.keys(fo.itens).map(id=>({...(fo.itens[id]._func||func(id)||{id,nome:'(removido)',vinculo:'clt'}),id}));
   const ids=new Set(Object.keys(fo.itens));db.funcionarios.forEach(f=>{if(ativoNoMes(f,ym))ids.add(f.id)});
   return [...ids].map(id=>func(id)||(fo.itens[id]&&fo.itens[id]._func)).filter(Boolean)}
 function lanc(ym,id,criar){const fo=db.folhas[ym];if(!fo)return{...LANC0,consumo:[],diasMoto:[],provs:[],descs:[],_ym:ym};if(!fo.itens[id]){if(!criar)return{...LANC0,consumo:[],diasMoto:[],provs:[],descs:[],_ym:ym};fo.itens[id]={...LANC0,consumo:[],diasMoto:[],provs:[],descs:[]}}Object.defineProperty(fo.itens[id],'_ym',{value:ym,enumerable:false,configurable:true,writable:true});return fo.itens[id]}
-// salário proporcional: quem entrou ou saiu no meio do mês recebe salário ÷ 30 × dias trabalhados
+// período da folha: do dia 21 do mês anterior ao dia 20 do mês.
+// 1ª quinzena: 21 a 05 (paga no 5º dia útil do mês); 2ª quinzena: 06 a 20 (paga no dia 20).
+const antMesP=ym=>{let[y,m]=ym.split('-').map(Number);m--;if(m<1){m=12;y--}return y+'-'+String(m).padStart(2,'0')};
+function periodo(ym){const a=antMesP(ym);return{ini:a+'-21',fim:ym+'-20',qa:[a+'-21',ym+'-05'],qb:[ym+'-06',ym+'-20']}}
+const _dd=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5)+1;
+function fracQ(f,q){const a=f.admissao&&f.admissao>q[0]?f.admissao:q[0],b=f.demissao&&f.demissao<q[1]?f.demissao:q[1];const tot=_dd(q[0],q[1]);if(a>b)return{d:0,tot,fr:0};const d=_dd(a,b);return{d,tot,fr:d/tot}}
+function valoresQ(f,l,sal){const fixo=l&&l.p1v!=null?l.p1v:(f.parte1!=null&&f.parte1!==''?+f.parte1:((typeof C==='function'&&C().valorP1)??1000));const vA=Math.max(0,Math.min(fixo,sal));return{vA,vB:sal-vA,fixo}}
 function propDias(f,ym,l){if(!ym||!f||l.semProp)return null;const fo=db.folhas[ym];if(fo&&fo.status==='fechada')return l._prop||null;
-  const dm=+fimMes(ym).slice(8);let d0=1,d1=dm;if(f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
-  if(f.admissao&&f.admissao>fimMes(ym))return{dias:0,de:'',ate:''};
-  const dias=Math.max(0,Math.min(30,d1-d0+1));if(dias>=30)return null;
-  return{dias,de:d0>1?ym+'-'+pad(d0):'',ate:d1<dm?ym+'-'+pad(d1):''}}
+  const P=periodo(ym),A=fracQ(f,P.qa),B=fracQ(f,P.qb);if(A.fr>=1&&B.fr>=1)return null;
+  return{qa:A,qb:B,de:f.admissao&&f.admissao>P.ini&&f.admissao<=P.fim?f.admissao:'',ate:f.demissao&&f.demissao>=P.ini&&f.demissao<P.fim?f.demissao:''}}
+function salProp(f,l,sal,pp){if(!pp)return sal;if(pp.dias!=null)return Math.round(sal/30*pp.dias*100)/100;const v=valoresQ(f,l,sal);return Math.round((v.vA*pp.qa.fr+v.vB*pp.qb.fr)*100)/100}
+function txtProp(pp){if(pp.dias!=null)return `${pp.dias} dias`;const q=(x,n)=>x.fr>=1?`${n} completa`:x.d?`${x.d} de ${x.tot} dias da ${n}`:`sem a ${n}`;return `${q(pp.qa,'1ª quinzena')} · ${q(pp.qb,'2ª quinzena')}`}
 function calc(f,l,ym){
   const c=C(),r={prov:[],desc:[],ym:ym||l._ym||''};let vh=0;
   if(f.vinculo==='clt'){
     const sal=l.salario!=null?l.salario:(f.salario||0);vh=c.jornada>0?sal/c.jornada:0;
     const hRed=(l.noturnoHoras||0)*(c.reduzida?60/52.5:1),noct=hRed*vh*c.pctNoturno;
     const pp=propDias(f,r.ym,l);
-    if(pp){const v=Math.round(sal/30*pp.dias*100)/100;r.prop=pp;r.salCheio=sal;
-      r.prov.push(['Salário base',v,`proporcional: ${R(sal)} ÷ 30 × ${pp.dias} dia${pp.dias===1?'':'s'}${pp.de?' (entrou em '+fD(pp.de)+')':''}${pp.ate?' (saiu em '+fD(pp.ate)+')':''}`])}
+    if(pp){const v=salProp(f,l,sal,pp);r.prop=pp;r.salCheio=sal;r.salProp=v;
+      r.prov.push(['Salário base',v,`proporcional: ${txtProp(pp)}${pp.de?' (entrou em '+fD(pp.de)+')':''}${pp.ate?' (saiu em '+fD(pp.ate)+')':''}`])}
     else r.prov.push(['Salário base',sal,l.salario!=null&&l.salario!==f.salario?'valor deste mês':'']);
     if(l.noturnoHoras)r.prov.push(['Adicional noturno',noct,`${fH(l.noturnoHoras)} h${c.reduzida?` → ${N(hRed)} h reduzidas`:''} × ${R(vh)} × ${Pc(c.pctNoturno,0)}`]);
     if(l.he1)r.prov.push([`Horas extras ${Pc(c.pctHE1,0)}`,l.he1*vh*(1+c.pctHE1),`${fH(l.he1)} h × ${R(vh*(1+c.pctHE1))}`]);
     if(l.he2)r.prov.push([`Horas extras ${Pc(c.pctHE2,0)}`,l.he2*vh*(1+c.pctHE2),`${fH(l.he2)} h × ${R(vh*(1+c.pctHE2))}`]);
     const nf=+f.filhosSF||0;
-    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=(r.prop?sal/30*r.prop.dias:sal)+noct+he+somaX(l.provs);
+    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=(r.prop?r.salProp:sal)+noct+he+somaX(l.provs);
       if(rem<=c.sfLimite){const ym=r.ym||'',dm=ym?+fimMes(ym).slice(8):30;let d0=1,d1=dm;
         if(ym&&f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(ym&&f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
         const dias=Math.max(0,d1-d0+1),prop=dias/dm,v=Math.round(c.sfCota*nf*prop*100)/100;
@@ -662,8 +668,8 @@ $('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)i
 function abrirFunc(id){funcAtual=id;irAba('func')}
 function render(){
   $('demoBanner').classList.toggle('show',db.funcionarios.some(f=>f.demo));
-  const atual=hoje().slice(0,7);$('viradaBanner').classList.toggle('show',db.mesAtual<atual);
-  $('viradaMsg').innerHTML=`A folha de <b>${fMes(db.mesAtual)}</b> ainda está aberta e o mês já acabou.`;
+  const fimP=periodo(db.mesAtual).fim;$('viradaBanner').classList.toggle('show',hoje()>fimP);
+  $('viradaMsg').innerHTML=`A folha de <b>${fMes(db.mesAtual)}</b> (${fD(periodo(db.mesAtual).ini).slice(0,5)} a ${fD(fimP).slice(0,5)}) ainda está aberta e o período já acabou em ${fD(fimP)}. Ao fechar, abre a de <b>${fMes(proxMes(db.mesAtual))}</b> (${fD(periodo(proxMes(db.mesAtual)).ini).slice(0,5)} a ${fD(periodo(proxMes(db.mesAtual)).fim).slice(0,5)}).`;
   {const ano=hoje().slice(0,4),pz=prazos13(ano),dd=hoje(),cl=db.funcionarios.filter(f=>f.vinculo==='clt'&&avos13(f,ano).avos>0&&!(f.demissao&&f.demissao<=ano+'-12-31')),pend1=cl.filter(f=>!reg13(ano,f.id).p1Pago),pend2=cl.filter(f=>!reg13(ano,f.id).p2Pago);
    let msg='';if(dd>=ano+'-10-15'&&dd<=pz.p1&&pend1.length)msg=`<b>13º salário:</b> a 1ª parcela vence em <b>${fD(pz.p1)}</b> — ${pend1.length} funcionário(s) ainda sem pagamento registrado.`;
    else if(dd>pz.p1&&dd<=pz.p2&&pend2.length)msg=`<b>13º salário:</b> a 2ª parcela vence em <b>${fD(pz.p2)}</b> — ${pend2.length} funcionário(s) ainda sem pagamento registrado.`;
@@ -683,7 +689,8 @@ function rFolha(){
   if(!db.folhas[mesVer])mesVer=db.mesAtual;
   $('selMes').innerHTML=mesesExistentes().map(m=>`<option value="${m}" ${m===mesVer?'selected':''}>${fMes(m)}${db.folhas[m].status==='fechada'?' (fechada)':''}</option>`).join('');
   const fo=db.folhas[mesVer],fechada=fo.status==='fechada';
-  $('mesStatus').innerHTML=fechada?`<span class="st neu">🔒 Fechada em ${fD((fo.fechadaEm||'').slice(0,10))}</span>`:`<span class="st ok">Aberta</span>`;
+  const PP=periodo(mesVer),venceu=!fechada&&mesVer===db.mesAtual&&hoje()>PP.fim;
+  $('mesStatus').innerHTML=`<span class="muted" style="font-size:13px">${fD(PP.ini)} a ${fD(PP.fim)}</span> `+(fechada?`<span class="st neu">🔒 Fechada em ${fD((fo.fechadaEm||'').slice(0,10))}</span>`:`<span class="st ok">Aberta</span>`)+(venceu?` <span class="st warn" title="O período desta folha acabou em ${fD(PP.fim)}">período encerrado · feche para abrir ${fMes(proxMes(mesVer))}</span>`:'');
   $('folhaAcoes').innerHTML=`<button class="btn sm sec" onclick="imprimirFolha('${mesVer}')">Imprimir folha</button><button class="btn sm sec" onclick="imprimirRecibos('${mesVer}')">Imprimir recibos</button><button class="btn sm sec" onclick="exportarMes('${mesVer}')">Exportar Excel</button>`+
     (fechada?`<button class="btn sm" onclick="reabrir('${mesVer}')">Reabrir</button>`:mesVer===db.mesAtual?`<button class="btn sm" onclick="pedirFechamento()">Fechar folha e abrir ${fMes(proxMes(mesVer))}</button>`:'');
   const t=totaisMes(mesVer),ta=db.folhas[antMes(mesVer)]?totaisMes(antMes(mesVer)):null;
@@ -699,7 +706,7 @@ function rFolha(){
   let h='<tr><th>Funcionário</th><th>Função</th><th class="r">Proventos</th><th class="r">Noturno</th><th class="r">Consumo</th><th class="r">Descontos</th><th class="r">A pagar</th><th>Pagamento</th><th></th></tr>';
   ['clt','diarista','motoboy'].forEach(v=>{const g=fs.filter(f=>f.vinculo===v).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));if(!g.length)return;
     h+=`<tr class="grp"><td colspan="9">${VINC[v]} · ${g.length} · ${R(t.porV[v])}</td></tr>`;
-    h+=g.map(f=>{const l=lanc(mesVer,f.id),r=calc(f,l);return `<tr><td><a href="#" onclick="event.preventDefault();abrirFunc('${f.id}')"><b>${esc(f.nome)}</b></a>${f.demissao&&f.demissao<=fimMes(mesVer)?' <span class="tag off">desligado '+fD(f.demissao)+'</span>':''}${r.prop?` <span class="tag" title="Salário de ${R(r.salCheio)}, proporcional a ${r.prop.dias} dias neste mês">proporcional · ${r.prop.dias} dia${r.prop.dias===1?'':'s'}</span>`:''}</td><td class="muted">${esc(f.funcao||'')}${f.vinculo==='motoboy'?` · ${r.dias||0} diária${r.dias===1?'':'s'}`:''}</td>
+    h+=g.map(f=>{const l=lanc(mesVer,f.id),r=calc(f,l);return `<tr><td><a href="#" onclick="event.preventDefault();abrirFunc('${f.id}')"><b>${esc(f.nome)}</b></a>${f.demissao&&f.demissao<=fimMes(mesVer)?' <span class="tag off">desligado '+fD(f.demissao)+'</span>':''}${r.prop?` <span class="tag" title="Salário de ${R(r.salCheio)}: ${txtProp(r.prop)}">proporcional · ${R(r.salProp)}</span>`:''}</td><td class="muted">${esc(f.funcao||'')}${f.vinculo==='motoboy'?` · ${r.dias||0} diária${r.dias===1?'':'s'}`:''}</td>
       <td class="r">${R(r.totProv)}</td><td class="r">${r.noturno?R(r.noturno):'—'}</td><td class="r">${r.consumo?R(r.consumo):'—'}</td><td class="r">${r.totDesc?R(r.totDesc):'—'}</td><td class="r"><b>${R(r.saldo)}</b>${r.jaPago?`<br><span class="muted">${R(r.jaPago)} já pago</span>`:''}</td>
       <td>${f.vinculo==='clt'?parcHTML(f,l,r,mesVer,true):fechada?(l.pago?'<span class="st ok">Pago</span>':'<span class="st warn">Não</span>'):`<label style="flex-direction:row;align-items:center;gap:6px;font-weight:400;color:var(--ink)"><input type="checkbox" ${l.pago?'checked':''} onchange="marcarPago('${f.id}',this.checked)">${l.pago&&l.pagoEm?fD(l.pagoEm).slice(0,5):''}</label>`}</td>
       <td class="r"><button class="icon" onclick="abrirFunc('${f.id}')">Lançar / ver</button></td></tr>`}).join('')});
@@ -781,7 +788,7 @@ function rFunc(){
   let campos='';
   if(fx.vinculo==='clt')campos=`<div class="fx">
       ${inp('salario','Salário deste mês (R$)',l.salario!=null?vIn(l.salario):'',vIn(f.salario)+' (cadastro)','num')}
-      ${r.prop||l.semProp?`<div class="prop-box" style="grid-column:1/-1">${r.prop?`<b>Salário proporcional:</b> ${R(r.salCheio)} ÷ 30 × ${r.prop.dias} dia${r.prop.dias===1?'':'s'} = <b>${R(r.salCheio/30*r.prop.dias)}</b>${r.prop.de?` · entrou em ${fD(r.prop.de)}`:''}${r.prop.ate?` · saiu em ${fD(r.prop.ate)}`:''}.`:'<b>Mês inteiro:</b> o proporcional está desligado para este mês.'}
+      ${r.prop||l.semProp?`<div class="prop-box" style="grid-column:1/-1">${r.prop?`<b>Salário proporcional:</b> ${txtProp(r.prop)} = <b>${R(r.salProp)}</b> de ${R(r.salCheio)}${r.prop.de?` · entrou em ${fD(r.prop.de)}`:''}${r.prop.ate?` · saiu em ${fD(r.prop.ate)}`:''}. <span class="muted">Folha de ${fD(periodo(mesFunc).ini)} a ${fD(periodo(mesFunc).fim)}.</span>`:'<b>Mês inteiro:</b> o proporcional está desligado para este mês.'}
         <label class="chk"><input type="checkbox" ${dis} ${l.semProp?'checked':''} onchange="setL('semProp',this.checked)"> pagar o mês inteiro (sem proporcional)</label></div>`:''}
       ${inp('noturnoHoras','Horas noturnas (22h–5h)',fH(l.noturnoHoras),'ex.: 35:30','h')}
       ${inp('he1',`Horas extras ${Pc(C().pctHE1,0)}`,fH(l.he1),'ex.: 4:00','h')}
@@ -838,12 +845,12 @@ function rFunc(){
         ${r.saldo<0?'<p class="muted">Saldo negativo: o funcionário deve esse valor (ex.: consumo maior que o que falta receber).</p>':''}
       ${fx.vinculo==='clt'?`<p class="muted">Valor-hora: ${R(r.vh)} (${R(fx.salario)} ÷ ${C().jornada} h). Controle interno: INSS e IR seguem a folha do contador.</p>`:''}
       ${(()=>{const pc=parcelas(fx,l,r,mesFunc);if(!pc)return'';return `<div class="parc-box"><h3 style="margin:0 0 8px">Pagamento em duas partes</h3>
-        <div class="parc-l ${pc.p1pago?'ok':''}"><div><b>5º dia útil</b> <span class="muted">(${fD(pc.d1)})</span>
+        <div class="parc-l ${pc.p1pago?'ok':''}"><div><b>5º dia útil</b> <span class="muted">(${fD(pc.d1)}) · 1ª quinzena, ${fD(pc.P.qa[0]).slice(0,5)} a ${fD(pc.P.qa[1]).slice(0,5)}${pc.qa&&pc.qa.fr<1?` · ${pc.qa.d} de ${pc.qa.tot} dias`:''}</span>
           <div class="muted" style="font-size:13px;margin-top:2px">${R(pc.sal1)} do salário${pc.extras>0.004?` + proventos ${R(pc.extras)}`:''}${pc.descs>0.004?` − descontos ${R(pc.descs)}`:''} = <b style="color:var(--ink)">${R(pc.p1)}</b></div>
           <div class="row" style="gap:6px;margin-top:6px;font-size:13px"><span class="muted">Parte do salário neste dia:</span><input class="inp-yel" style="width:100px" ${pc.p1pago?'disabled':''} value="${vIn(pc.fixo)}" onchange="setP1(this.value)" title="Só para este mês. O valor de sempre fica no cadastro do funcionário.">${l.p1v!=null&&!pc.p1pago?`<a href="#" onclick="event.preventDefault();setP1('')">voltar ao do cadastro</a>`:''}</div></div>
           <label class="parc ${pc.p1pago?'ok':''}"><input type="checkbox" ${pc.p1pago?'checked':''} onchange="pagarParc('${fx.id}',1,this.checked,'${mesFunc}')"><span>${pc.p1pago?'Pago em '+fD(pc.p1em):'Dar baixa'}</span></label></div>
-        <div class="parc-l ${pc.p2pago?'ok':''}"><div><b>Dia 20</b> <span class="muted">(${fD(pc.d2)})</span>
-          <div class="muted" style="font-size:13px;margin-top:2px">resto do salário: ${R(pc.base)} − ${R(pc.sal1)} = <b style="color:var(--ink)">${R(pc.p2)}</b></div></div>
+        <div class="parc-l ${pc.p2pago?'ok':''}"><div><b>Dia 20</b> <span class="muted">(${fD(pc.d2)}) · 2ª quinzena, ${fD(pc.P.qb[0]).slice(0,5)} a ${fD(pc.P.qb[1]).slice(0,5)}${pc.qb&&pc.qb.fr<1?` · ${pc.qb.d} de ${pc.qb.tot} dias`:''}</span>
+          <div class="muted" style="font-size:13px;margin-top:2px">resto do salário${pc.qb&&pc.qb.fr<1?' (proporcional)':''} = <b style="color:var(--ink)">${R(pc.p2)}</b></div></div>
           <label class="parc ${pc.p2pago?'ok':''}"><input type="checkbox" ${pc.p2pago?'checked':''} onchange="pagarParc('${fx.id}',2,this.checked,'${mesFunc}')"><span>${pc.p2pago?'Pago em '+fD(pc.p2em):'Dar baixa'}</span></label></div>
         <p class="muted" style="margin:6px 0 0;font-size:12.5px">Proventos e descontos entram no 5º dia útil; ao dar baixa nele, os da lista ficam marcados. O valor de sempre do 5º dia útil fica no cadastro do funcionário.</p></div>`})()}
       <div class="row" style="margin-top:10px">${fx.vinculo==='clt'?'':fechada?(l.pago?`<span class="st ok">Pago em ${fD(l.pagoEm)}</span>`:'<span class="st warn">Não marcado como pago</span>'):`<label style="flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--ink)"><input type="checkbox" ${l.pago?'checked':''} onchange="setPago(this.checked)"> Pago${l.pago&&l.pagoEm?' em '+fD(l.pagoEm):''}</label>`}
@@ -884,12 +891,12 @@ function feriados(y){if(_fer[y])return _fer[y];const s=new Set(['01-01','03-06',
   const p=pascoa(y);s.add(isoDe(new Date(p.getFullYear(),p.getMonth(),p.getDate()-2)));return _fer[y]=s}
 function diaUtil(iso){const d=new Date(iso+'T12:00');return d.getDay()!==0&&!feriados(d.getFullYear()).has(iso)}
 function quintoUtil(ym){let n=0;const[y,m]=ym.split('-').map(Number);for(let d=1;d<=31;d++){const iso=isoDe(new Date(y,m-1,d));if(iso.slice(0,7)!==ym)break;if(diaUtil(iso)&&++n===5)return iso}return ym+'-05'}
-const datasParc=ym=>({d1:quintoUtil(proxMes(ym)),d2:proxMes(ym)+'-20'});
-function parcelas(f,l,r,ym){if(!f||f.vinculo!=='clt')return null;const base=(r.prov[0]||[0,0])[1]||0;
-  const fixo=l.p1v!=null?l.p1v:(f.parte1!=null&&f.parte1!==''?+f.parte1:(C().valorP1??1000)),sal1=Math.max(0,Math.min(fixo,base));
-  let p2=Math.round((base-sal1)*100)/100,p1=Math.round((r.liq-p2)*100)/100;if(p1<0){p2=Math.max(0,Math.round((p2+p1)*100)/100);p1=0}
-  const dt=datasParc(ym||r.ym);
-  return{p1,p2,fixo,sal1,base,d1:dt.d1,d2:dt.d2,extras:r.totProv-base,descs:r.totDesc,p1pago:!!l.p1pago,p2pago:!!l.p2pago,p1em:l.p1em||'',p2em:l.p2em||''}}
+const datasParc=ym=>({d1:quintoUtil(ym),d2:ym+'-20'});
+function parcelas(f,l,r,ym){if(!f||f.vinculo!=='clt')return null;ym=ym||r.ym;const sal=r.salCheio!=null?r.salCheio:((r.prov[0]||[0,0])[1]||0),v=valoresQ(f,l,sal),pp=r.prop;
+  const fa=pp&&pp.qa?pp.qa.fr:1,fb=pp&&pp.qb?pp.qb.fr:1,sA=pp&&pp.dias!=null?(r.prov[0][1]*v.vA/(sal||1)):v.vA*fa,sB=pp&&pp.dias!=null?(r.prov[0][1]-sA):v.vB*fb;
+  const base=(r.prov[0]||[0,0])[1]||0;let p2=Math.round(sB*100)/100,p1=Math.round((r.liq-p2)*100)/100;if(p1<0){p2=Math.max(0,Math.round((p2+p1)*100)/100);p1=0}
+  const dt=datasParc(ym),P=periodo(ym);
+  return{p1,p2,fixo:v.fixo,sal1:Math.round(sA*100)/100,sal2:p2,base,qa:pp&&pp.qa,qb:pp&&pp.qb,P,d1:dt.d1,d2:dt.d2,extras:r.totProv-base,descs:r.totDesc,p1pago:!!l.p1pago,p2pago:!!l.p2pago,p1em:l.p1em||'',p2em:l.p2em||''}}
 function pagarParc(id,n,on,ym){ym=ym||mesVer;const l=lanc(ym,id,true);l['p'+n+'pago']=on;l['p'+n+'em']=on?hoje():'';
   if(n===1&&on){(l.provs||[]).forEach(x=>{if(!x.ok){x.ok=true;x.em=hoje()}});(l.descs||[]).forEach(x=>{if(!x.ok){x.ok=true;x.em=hoje()}})}
   const f=func(id);if(f&&f.vinculo==='clt'){l.pago=!!(l.p1pago&&l.p2pago);l.pagoEm=l.pago?(l.p2em||hoje()):''}mudou();toast(on?(n===1?'Parte do 5º dia útil paga':'Parte do dia 20 paga'):'Baixa desfeita')}

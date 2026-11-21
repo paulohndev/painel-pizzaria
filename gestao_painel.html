@@ -646,7 +646,7 @@ function aplicarDadosPasta(d){db=normalizar(d);try{localStorage.setItem(KEY,JSON
 /* ---------- cálculos ---------- */
 const LANC0={diasMoto:[],salario:null,noturnoHoras:0,he1:0,he2:0,outrosProv:0,outrosProvDesc:'',faltasDias:0,atrasosHoras:0,consumo:[],outrosDesc:0,outrosDescDesc:'',legais:0,
   dias:0,valorDia:null,entregas:0,valorEntrega:null,diarias:0,valorDiaria:null,pago:false,pagoEm:'',obs:''};
-function ativoNoMes(f,ym){const ini=ym+'-01',fim=fimMes(ym);return (!f.admissao||f.admissao<=fim)&&(!f.demissao||f.demissao>=ini)}
+function ativoNoMes(f,ym){const P=periodo(ym),ini=P.ini,fim=P.fim;return (!f.admissao||f.admissao<=fim)&&(!f.demissao||f.demissao>=ini)}
 function funcsDoMes(ym){const fo=db.folhas[ym];if(!fo)return[];
   if(fo.status==='fechada')return Object.keys(fo.itens).map(id=>({...(fo.itens[id]._func||func(id)||{id,nome:'(removido)',vinculo:'clt'}),id}));
   const ids=new Set(Object.keys(fo.itens));db.funcionarios.forEach(f=>{if(ativoNoMes(f,ym))ids.add(f.id)});
@@ -655,23 +655,31 @@ function lanc(ym,id,criar){const fo=db.folhas[ym];if(!fo)return{...LANC0,consumo
 const somaX=a=>(a||[]).reduce((s,x)=>s+(+x.v||0),0);
 const xProv=l=>Array.isArray(l.provs)?l.provs:(l.outrosProv>0?[{d:l.outrosProvDesc,v:l.outrosProv}]:[]);
 const xDesc=l=>Array.isArray(l.descs)?l.descs:(l.outrosDesc>0?[{d:l.outrosDescDesc,v:l.outrosDesc}]:[]);
+// período da folha: do dia 21 do mês anterior ao dia 20 do mês.
+// 1ª quinzena: 21 a 05 (paga no 5º dia útil do mês); 2ª quinzena: 06 a 20 (paga no dia 20).
+const antMesP=ym=>{let[y,m]=ym.split('-').map(Number);m--;if(m<1){m=12;y--}return y+'-'+String(m).padStart(2,'0')};
+function periodo(ym){const a=antMesP(ym);return{ini:a+'-21',fim:ym+'-20',qa:[a+'-21',ym+'-05'],qb:[ym+'-06',ym+'-20']}}
+const _dd=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5)+1;
+function fracQ(f,q){const a=f.admissao&&f.admissao>q[0]?f.admissao:q[0],b=f.demissao&&f.demissao<q[1]?f.demissao:q[1];const tot=_dd(q[0],q[1]);if(a>b)return{d:0,tot,fr:0};const d=_dd(a,b);return{d,tot,fr:d/tot}}
+function valoresQ(f,l,sal){const fixo=l&&l.p1v!=null?l.p1v:(f.parte1!=null&&f.parte1!==''?+f.parte1:((typeof C==='function'&&C().valorP1)??1000));const vA=Math.max(0,Math.min(fixo,sal));return{vA,vB:sal-vA,fixo}}
 function propDias(f,ym,l){if(!ym||!f||l.semProp)return null;const fo=db.folhas[ym];if(fo&&fo.status==='fechada')return l._prop||null;
-  const dm=+fimMes(ym).slice(8);let d0=1,d1=dm;if(f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
-  if(f.admissao&&f.admissao>fimMes(ym))return{dias:0,de:'',ate:''};
-  const dias=Math.max(0,Math.min(30,d1-d0+1));if(dias>=30)return null;return{dias,de:d0>1?ym+'-'+pad(d0):'',ate:d1<dm?ym+'-'+pad(d1):''}}
+  const P=periodo(ym),A=fracQ(f,P.qa),B=fracQ(f,P.qb);if(A.fr>=1&&B.fr>=1)return null;
+  return{qa:A,qb:B,de:f.admissao&&f.admissao>P.ini&&f.admissao<=P.fim?f.admissao:'',ate:f.demissao&&f.demissao>=P.ini&&f.demissao<P.fim?f.demissao:''}}
+function salProp(f,l,sal,pp){if(!pp)return sal;if(pp.dias!=null)return Math.round(sal/30*pp.dias*100)/100;const v=valoresQ(f,l,sal);return Math.round((v.vA*pp.qa.fr+v.vB*pp.qb.fr)*100)/100}
+function txtProp(pp){if(pp.dias!=null)return `${pp.dias} dias`;const q=(x,n)=>x.fr>=1?`${n} completa`:x.d?`${x.d} de ${x.tot} dias da ${n}`:`sem a ${n}`;return `${q(pp.qa,'1ª quinzena')} · ${q(pp.qb,'2ª quinzena')}`}
 function calc(f,l,ym){
   const c=C(),r={prov:[],desc:[],ym:ym||l._ym||''};let vh=0;
   if(f.vinculo==='clt'){
     const sal=l.salario!=null?l.salario:(f.salario||0);vh=c.jornada>0?sal/c.jornada:0;
     const hRed=(l.noturnoHoras||0)*(c.reduzida?60/52.5:1),noct=hRed*vh*c.pctNoturno;
     const pp=propDias(f,r.ym,l);
-    if(pp){r.prop=pp;r.prov.push(['Salário base',Math.round(sal/30*pp.dias*100)/100,`proporcional: ${pp.dias} dias`])}
+    if(pp){r.prop=pp;r.salProp=salProp(f,l,sal,pp);r.prov.push(['Salário base',r.salProp,'proporcional'])}
     else r.prov.push(['Salário base',sal,l.salario!=null&&l.salario!==f.salario?'valor deste mês':'']);
     if(l.noturnoHoras)r.prov.push(['Adicional noturno',noct,`${fH(l.noturnoHoras)} h${c.reduzida?` → ${N(hRed)} h reduzidas`:''} × ${R(vh)} × ${Pc(c.pctNoturno,0)}`]);
     if(l.he1)r.prov.push([`Horas extras ${Pc(c.pctHE1,0)}`,l.he1*vh*(1+c.pctHE1),`${fH(l.he1)} h × ${R(vh*(1+c.pctHE1))}`]);
     if(l.he2)r.prov.push([`Horas extras ${Pc(c.pctHE2,0)}`,l.he2*vh*(1+c.pctHE2),`${fH(l.he2)} h × ${R(vh*(1+c.pctHE2))}`]);
     const nf=+f.filhosSF||0;
-    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=(r.prop?sal/30*r.prop.dias:sal)+noct+he+somaX(xProv(l));
+    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=(r.prop?r.salProp:sal)+noct+he+somaX(xProv(l));
       if(rem<=c.sfLimite){const ym=r.ym||'',dm=ym?+fimMes(ym).slice(8):30;let d0=1,d1=dm;
         if(ym&&f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(ym&&f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
         const dias=Math.max(0,d1-d0+1),prop=dias/dm,v=Math.round(c.sfCota*nf*prop*100)/100;
