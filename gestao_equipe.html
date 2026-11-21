@@ -144,6 +144,9 @@ svg text{font-family:"Segoe UI",system-ui,Arial,sans-serif}
 .recibo{border:1px solid #ccc;border-radius:8px;padding:14px 16px;margin-bottom:14px;break-inside:avoid}
 .cons-det{margin-top:10px;border-top:1px dashed #bbb;padding-top:8px;font-size:11.5px}.cons-det table{margin-top:4px}.cons-det td,.cons-det th{padding:2px 6px}
 .recibo .ass{margin-top:36px;display:flex;justify-content:space-between;gap:40px}.recibo .ass div{flex:1;border-top:1px solid #444;text-align:center;padding-top:4px;font-size:11px}
+.extras{border:1px solid var(--line,#eadfd3);border-radius:12px;padding:10px 12px;background:#fffdf9}.extras table{margin-top:6px}
+.chipx{border:1px solid var(--line,#eadfd3);background:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:12.5px;cursor:pointer}.chipx:hover{background:#fff3d6}
+.prop-box{background:#fff3d6;border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.5;display:block}.prop-box .chk{display:flex;flex-direction:row;align-items:center;gap:8px;font-weight:400;margin-top:6px}
 </style>
 <!--MARIA-FONTES--><style>.pbtn:not(.yel){display:none!important}#pastaBanner{display:none!important}</style><script>window.showDirectoryPicker=async()=>parent.__pastaServidor('equipe');</script><style id="maria-embutido">
 header nav#tabs{display:none!important}
@@ -512,7 +515,11 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* ---------- dados ---------- */
 let db=carregar();
 function normalizar(d){d.funcionarios=d.funcionarios||[];d.folhas=d.folhas||{};d.decimo=d.decimo||{};d.config={...CFG0,...(d.config||{})};d.mesAtual=d.mesAtual||hoje().slice(0,7);
-  if(!d.folhas[d.mesAtual])d.folhas[d.mesAtual]={status:'aberta',itens:{}};return d}
+  if(!d.folhas[d.mesAtual])d.folhas[d.mesAtual]={status:'aberta',itens:{}};
+  Object.values(d.folhas).forEach(fo=>Object.values(fo.itens||{}).forEach(l=>{
+    if(!Array.isArray(l.provs)){l.provs=l.outrosProv>0?[{d:l.outrosProvDesc||'',v:l.outrosProv}]:[];l.outrosProv=0;l.outrosProvDesc=''}
+    if(!Array.isArray(l.descs)){l.descs=l.outrosDesc>0?[{d:l.outrosDescDesc||'',v:l.outrosDesc}]:[];l.outrosDesc=0;l.outrosDescDesc=''}}));
+  return d}
 function carregar(){try{const s=localStorage.getItem(KEY);if(s)return normalizar(JSON.parse(s))}catch(e){}return normalizar({})}
 function salvar(){db._salvoEm=Date.now();agendarPasta();try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){alert('Não foi possível salvar. Faça uma cópia de segurança.')}}
 const C=()=>db.config;
@@ -587,25 +594,35 @@ function statusPasta(){const el=document.getElementById('pastaStatus');if(!el)re
 function aplicarDadosPasta(d){db=normalizar(d);try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}render()}
 
 /* ---------- cálculos ---------- */
-const LANC0={diasMoto:[],salario:null,noturnoHoras:0,he1:0,he2:0,outrosProv:0,outrosProvDesc:'',faltasDias:0,atrasosHoras:0,consumo:[],outrosDesc:0,outrosDescDesc:'',legais:0,
+const somaX=a=>(a||[]).reduce((s,x)=>s+(+x.v||0),0);
+const LANC0={provs:[],descs:[],diasMoto:[],salario:null,noturnoHoras:0,he1:0,he2:0,outrosProv:0,outrosProvDesc:'',faltasDias:0,atrasosHoras:0,consumo:[],outrosDesc:0,outrosDescDesc:'',legais:0,
   dias:0,valorDia:null,entregas:0,valorEntrega:null,diarias:0,valorDiaria:null,pago:false,pagoEm:'',obs:''};
 function ativoNoMes(f,ym){const ini=ym+'-01',fim=fimMes(ym);return (!f.admissao||f.admissao<=fim)&&(!f.demissao||f.demissao>=ini)}
 function funcsDoMes(ym){const fo=db.folhas[ym];if(!fo)return[];
   if(fo.status==='fechada')return Object.keys(fo.itens).map(id=>({...(fo.itens[id]._func||func(id)||{id,nome:'(removido)',vinculo:'clt'}),id}));
   const ids=new Set(Object.keys(fo.itens));db.funcionarios.forEach(f=>{if(ativoNoMes(f,ym))ids.add(f.id)});
   return [...ids].map(id=>func(id)||(fo.itens[id]&&fo.itens[id]._func)).filter(Boolean)}
-function lanc(ym,id,criar){const fo=db.folhas[ym];if(!fo)return{...LANC0,consumo:[],diasMoto:[],_ym:ym};if(!fo.itens[id]){if(!criar)return{...LANC0,consumo:[],diasMoto:[],_ym:ym};fo.itens[id]={...LANC0,consumo:[],diasMoto:[]}}Object.defineProperty(fo.itens[id],'_ym',{value:ym,enumerable:false,configurable:true,writable:true});return fo.itens[id]}
+function lanc(ym,id,criar){const fo=db.folhas[ym];if(!fo)return{...LANC0,consumo:[],diasMoto:[],provs:[],descs:[],_ym:ym};if(!fo.itens[id]){if(!criar)return{...LANC0,consumo:[],diasMoto:[],provs:[],descs:[],_ym:ym};fo.itens[id]={...LANC0,consumo:[],diasMoto:[],provs:[],descs:[]}}Object.defineProperty(fo.itens[id],'_ym',{value:ym,enumerable:false,configurable:true,writable:true});return fo.itens[id]}
+// salário proporcional: quem entrou ou saiu no meio do mês recebe salário ÷ 30 × dias trabalhados
+function propDias(f,ym,l){if(!ym||!f||l.semProp)return null;const fo=db.folhas[ym];if(fo&&fo.status==='fechada')return l._prop||null;
+  const dm=+fimMes(ym).slice(8);let d0=1,d1=dm;if(f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
+  if(f.admissao&&f.admissao>fimMes(ym))return{dias:0,de:'',ate:''};
+  const dias=Math.max(0,Math.min(30,d1-d0+1));if(dias>=30)return null;
+  return{dias,de:d0>1?ym+'-'+pad(d0):'',ate:d1<dm?ym+'-'+pad(d1):''}}
 function calc(f,l,ym){
   const c=C(),r={prov:[],desc:[],ym:ym||l._ym||''};let vh=0;
   if(f.vinculo==='clt'){
     const sal=l.salario!=null?l.salario:(f.salario||0);vh=c.jornada>0?sal/c.jornada:0;
     const hRed=(l.noturnoHoras||0)*(c.reduzida?60/52.5:1),noct=hRed*vh*c.pctNoturno;
-    r.prov.push(['Salário base',sal,l.salario!=null&&l.salario!==f.salario?'valor deste mês':'']);
+    const pp=propDias(f,r.ym,l);
+    if(pp){const v=Math.round(sal/30*pp.dias*100)/100;r.prop=pp;r.salCheio=sal;
+      r.prov.push(['Salário base',v,`proporcional: ${R(sal)} ÷ 30 × ${pp.dias} dia${pp.dias===1?'':'s'}${pp.de?' (entrou em '+fD(pp.de)+')':''}${pp.ate?' (saiu em '+fD(pp.ate)+')':''}`])}
+    else r.prov.push(['Salário base',sal,l.salario!=null&&l.salario!==f.salario?'valor deste mês':'']);
     if(l.noturnoHoras)r.prov.push(['Adicional noturno',noct,`${fH(l.noturnoHoras)} h${c.reduzida?` → ${N(hRed)} h reduzidas`:''} × ${R(vh)} × ${Pc(c.pctNoturno,0)}`]);
     if(l.he1)r.prov.push([`Horas extras ${Pc(c.pctHE1,0)}`,l.he1*vh*(1+c.pctHE1),`${fH(l.he1)} h × ${R(vh*(1+c.pctHE1))}`]);
     if(l.he2)r.prov.push([`Horas extras ${Pc(c.pctHE2,0)}`,l.he2*vh*(1+c.pctHE2),`${fH(l.he2)} h × ${R(vh*(1+c.pctHE2))}`]);
     const nf=+f.filhosSF||0;
-    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=sal+noct+he+(l.outrosProv||0);
+    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=(r.prop?sal/30*r.prop.dias:sal)+noct+he+somaX(l.provs);
       if(rem<=c.sfLimite){const ym=r.ym||'',dm=ym?+fimMes(ym).slice(8):30;let d0=1,d1=dm;
         if(ym&&f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(ym&&f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
         const dias=Math.max(0,d1-d0+1),prop=dias/dm,v=Math.round(c.sfCota*nf*prop*100)/100;
@@ -622,9 +639,9 @@ function calc(f,l,ym){
     if(l.entregas||l.diarias){const ve=l.valorEntrega??f.valorEntrega??0,vdd=l.valorDiaria??f.valorDiaria??0;if(l.entregas)r.prov.push(['Entregas (lançamento antigo)',l.entregas*ve,'']);if(l.diarias)r.prov.push(['Diárias (lançamento antigo)',l.diarias*vdd,''])}
     r.jaPago=ds.filter(x=>x.pago!==false).reduce((a,x)=>a+(x.valor||0),0);r.dias=ds.length;
   }
-  if(l.outrosProv)r.prov.push([l.outrosProvDesc||'Outros proventos',l.outrosProv,'']);
+  (l.provs||[]).forEach(x=>{if(+x.v)r.prov.push([x.d||'Outros proventos',+x.v,'outros proventos'])});
   const cons=(l.consumo||[]).reduce((a,x)=>a+(x.valor||0),0);if(cons)r.desc.push(['Consumo na casa',cons,`${l.consumo.length} lançamento(s)`]);
-  if(l.outrosDesc)r.desc.push([l.outrosDescDesc||'Outros descontos',l.outrosDesc,'']);
+  (l.descs||[]).forEach(x=>{if(+x.v)r.desc.push([x.d||'Outros descontos',+x.v,'outros descontos'])});
   if(l.legais)r.desc.push(['Descontos legais (contador)',l.legais,'INSS, IR, VT…']);
   r.totProv=r.prov.reduce((a,x)=>a+x[1],0);r.totDesc=r.desc.reduce((a,x)=>a+x[1],0);r.liq=r.totProv-r.totDesc;r.jaPago=r.jaPago||0;r.saldo=r.liq-r.jaPago;r.vh=vh;r.consumo=cons;r.noturno=r.noturno||0;return r;
 }
@@ -675,7 +692,7 @@ function rFolha(){
   let h='<tr><th>Funcionário</th><th>Função</th><th class="r">Proventos</th><th class="r">Noturno</th><th class="r">Consumo</th><th class="r">Descontos</th><th class="r">A pagar</th><th>Pago</th><th></th></tr>';
   ['clt','diarista','motoboy'].forEach(v=>{const g=fs.filter(f=>f.vinculo===v).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));if(!g.length)return;
     h+=`<tr class="grp"><td colspan="9">${VINC[v]} · ${g.length} · ${R(t.porV[v])}</td></tr>`;
-    h+=g.map(f=>{const l=lanc(mesVer,f.id),r=calc(f,l);return `<tr><td><a href="#" onclick="event.preventDefault();abrirFunc('${f.id}')"><b>${esc(f.nome)}</b></a>${f.demissao&&f.demissao<=fimMes(mesVer)?' <span class="tag off">desligado '+fD(f.demissao)+'</span>':''}</td><td class="muted">${esc(f.funcao||'')}${f.vinculo==='motoboy'?` · ${r.dias||0} diária${r.dias===1?'':'s'}`:''}</td>
+    h+=g.map(f=>{const l=lanc(mesVer,f.id),r=calc(f,l);return `<tr><td><a href="#" onclick="event.preventDefault();abrirFunc('${f.id}')"><b>${esc(f.nome)}</b></a>${f.demissao&&f.demissao<=fimMes(mesVer)?' <span class="tag off">desligado '+fD(f.demissao)+'</span>':''}${r.prop?` <span class="tag" title="Salário de ${R(r.salCheio)}, proporcional a ${r.prop.dias} dias neste mês">proporcional · ${r.prop.dias} dia${r.prop.dias===1?'':'s'}</span>`:''}</td><td class="muted">${esc(f.funcao||'')}${f.vinculo==='motoboy'?` · ${r.dias||0} diária${r.dias===1?'':'s'}`:''}</td>
       <td class="r">${R(r.totProv)}</td><td class="r">${r.noturno?R(r.noturno):'—'}</td><td class="r">${r.consumo?R(r.consumo):'—'}</td><td class="r">${r.totDesc?R(r.totDesc):'—'}</td><td class="r"><b>${R(r.saldo)}</b>${r.jaPago?`<br><span class="muted">${R(r.jaPago)} já pago</span>`:''}</td>
       <td>${fechada?(l.pago?'<span class="st ok">Pago</span>':'<span class="st warn">Não</span>'):`<label style="flex-direction:row;align-items:center;gap:6px;font-weight:400;color:var(--ink)"><input type="checkbox" ${l.pago?'checked':''} onchange="marcarPago('${f.id}',this.checked)">${l.pago&&l.pagoEm?fD(l.pagoEm).slice(0,5):''}</label>`}</td>
       <td class="r"><button class="icon" onclick="abrirFunc('${f.id}')">Lançar / ver</button></td></tr>`}).join('')});
@@ -686,11 +703,11 @@ function marcarPago(id,on){const l=lanc(mesVer,id,true);l.pago=on;l.pagoEm=on?ho
 function pedirFechamento(){const ym=db.mesAtual,t=totaisMes(ym),np=funcsDoMes(ym).filter(f=>!lanc(ym,f.id).pago).length;
   confirmar(`Fechar a folha de ${fMes(ym)}?`,`<p>A folha de <b>${fMes(ym)}</b> (${t.n} funcionários, total de ${R(t.liq)}${t.jaPago?`, sendo ${R(t.jaPago)} já pagos nas diárias`:''}) será guardada no histórico e não poderá mais ser editada, a não ser que você a reabra.</p>${np?`<p class="up">${np} funcionário(s) ainda não estão marcados como pagos.</p>`:''}<p>Em seguida abre a folha de <b>${fMes(proxMes(ym))}</b> com os funcionários ativos.</p>`,()=>fecharMes(),'Fechar folha',true)}
 function fecharMes(){const ym=db.mesAtual,fo=db.folhas[ym];
-  funcsDoMes(ym).forEach(f=>{const l=lanc(ym,f.id,true),fc=func(f.id);l._func=clone(fc||f);l._calc=(()=>{const r=calc(l._func,l);return{prov:r.totProv,desc:r.totDesc,liq:r.liq}})()});
+  funcsDoMes(ym).forEach(f=>{const l=lanc(ym,f.id,true),fc=func(f.id);l._func=clone(fc||f);{const pp=l._func.vinculo==='clt'?propDias(l._func,ym,l):null;if(pp)l._prop=pp;else delete l._prop}l._calc=(()=>{const r=calc(l._func,l);return{prov:r.totProv,desc:r.totDesc,liq:r.liq}})()});
   fo.status='fechada';fo.fechadaEm=new Date().toISOString();const nx=proxMes(ym);if(!db.folhas[nx])db.folhas[nx]={status:'aberta',itens:{}};db.mesAtual=nx;mesVer=nx;mudou();toast(`Folha de ${fMes(ym)} fechada. Folha de ${fMes(nx)} aberta.`)}
 function reabrir(ym){confirmar(`Reabrir a folha de ${fMes(ym)}?`,`Ela volta a ficar editável${ym!==antMes(db.mesAtual)?'':`, e a folha de ${fMes(db.mesAtual)} continua existindo`}. Os valores passam a usar o cadastro atual dos funcionários.`,()=>{
-  const fo=db.folhas[ym];fo.status='aberta';delete fo.fechadaEm;Object.values(fo.itens).forEach(l=>{delete l._calc});
-  if(ym<db.mesAtual){const atual=db.folhas[db.mesAtual];if(atual&&!Object.keys(atual.itens).some(k=>{const l=atual.itens[k];return l.noturnoHoras||l.dias||l.entregas||(l.consumo||[]).length||l.outrosProv||l.outrosDesc||l.legais||l.faltasDias||l.pago}))delete db.folhas[db.mesAtual];db.mesAtual=ym}
+  const fo=db.folhas[ym];fo.status='aberta';delete fo.fechadaEm;Object.values(fo.itens).forEach(l=>{delete l._calc;delete l._prop});
+  if(ym<db.mesAtual){const atual=db.folhas[db.mesAtual];if(atual&&!Object.keys(atual.itens).some(k=>{const l=atual.itens[k];return l.noturnoHoras||l.dias||l.entregas||(l.consumo||[]).length||(l.provs||[]).length||(l.descs||[]).length||l.legais||l.faltasDias||l.pago}))delete db.folhas[db.mesAtual];db.mesAtual=ym}
   mesVer=ym;mudou();toast('Folha reaberta')},'Reabrir')}
 
 /* ---------- EQUIPE ---------- */
@@ -757,6 +774,8 @@ function rFunc(){
   let campos='';
   if(fx.vinculo==='clt')campos=`<div class="fx">
       ${inp('salario','Salário deste mês (R$)',l.salario!=null?vIn(l.salario):'',vIn(f.salario)+' (cadastro)','num')}
+      ${r.prop||l.semProp?`<div class="prop-box" style="grid-column:1/-1">${r.prop?`<b>Salário proporcional:</b> ${R(r.salCheio)} ÷ 30 × ${r.prop.dias} dia${r.prop.dias===1?'':'s'} = <b>${R(r.salCheio/30*r.prop.dias)}</b>${r.prop.de?` · entrou em ${fD(r.prop.de)}`:''}${r.prop.ate?` · saiu em ${fD(r.prop.ate)}`:''}.`:'<b>Mês inteiro:</b> o proporcional está desligado para este mês.'}
+        <label class="chk"><input type="checkbox" ${dis} ${l.semProp?'checked':''} onchange="setL('semProp',this.checked)"> pagar o mês inteiro (sem proporcional)</label></div>`:''}
       ${inp('noturnoHoras','Horas noturnas (22h–5h)',fH(l.noturnoHoras),'ex.: 35:30','h')}
       ${inp('he1',`Horas extras ${Pc(C().pctHE1,0)}`,fH(l.he1),'ex.: 4:00','h')}
       ${inp('he2',`Horas extras ${Pc(C().pctHE2,0)}`,fH(l.he2),'domingos/feriados','h')}
@@ -785,8 +804,7 @@ function rFunc(){
       ${!naFolha&&!fechada?'<div class="lock">Este funcionário não está ativo neste mês (veja as datas de admissão e desligamento).</div>':''}
       ${campos}
       <div class="fx" style="margin-top:10px">
-        ${inp('outrosProv','Outros proventos (R$)',vIn(l.outrosProv),'bônus, gorjeta…','num')}<label>Descrição<input ${dis} value="${esc(l.outrosProvDesc)}" placeholder="ex.: gorjeta" onchange="setL('outrosProvDesc',this.value)"></label>
-        ${inp('outrosDesc','Outros descontos (R$)',vIn(l.outrosDesc),'0','num')}<label>Descrição<input ${dis} value="${esc(l.outrosDescDesc)}" placeholder="ex.: adiantamento" onchange="setL('outrosDescDesc',this.value)"></label>
+        ${extrasHTML('provs',l,fechada)}${extrasHTML('descs',l,fechada)}
         ${fx.vinculo==='clt'?inp('legais','Descontos legais do contador (R$)',vIn(l.legais),'INSS, IR, VT','num'):''}
         <label class="${fx.vinculo==='clt'?'':'s2'}" style="grid-column:span ${fx.vinculo==='clt'?3:4}">Observações do mês<input ${dis} value="${esc(l.obs)}" onchange="setL('obs',this.value)"></label>
       </div>
@@ -840,7 +858,18 @@ function rFunc(){
 function setL(k,v,tipo){const fo=db.folhas[mesFunc];if(fo.status==='fechada')return;const l=lanc(mesFunc,funcAtual,true);
   if(tipo==='h'){const h=horas(v);if(!(h>=0))return toast('Use horas como 35:30 ou 35,5');l[k]=h}
   else if(tipo==='num'){if(String(v).trim()===''){l[k]=['salario','valorDia','valorEntrega','valorDiaria'].includes(k)?null:0}else{const n=num(v);if(!(n>=0))return toast('Valor inválido');l[k]=n}}
-  else l[k]=v;mudou()}
+  else l[k]=v;if(k==='semProp'&&!v)delete l.semProp;mudou()}
+
+/* ---------- outros proventos e descontos (vários por mês) ---------- */
+const SUG_X={provs:['Feriado trabalhado','Gorjeta','Bônus','Comissão','Ajuda de custo','Hora extra avulsa'],descs:['Adiantamento','Vale','Quebra de caixa','Uniforme','Falta avulsa','Empréstimo']};
+function extrasHTML(k,l,fechada){const P=k==='provs',a=l[k]||[],tot=somaX(a),id='x'+k;
+  return `<div class="extras" style="grid-column:1/-1"><div class="row" style="justify-content:space-between"><b>${P?'Outros proventos':'Outros descontos'}</b>${a.length?`<span class="${P?'':'up'}">${P?'':'−'}${R(tot)}</span>`:''}</div>
+   ${a.length?`<table>${a.map((x,i)=>`<tr><td>${esc(x.d||(P?'Outros proventos':'Outros descontos'))}</td><td class="r">${R(+x.v||0)}</td><td class="r">${fechada?'':`<button class="icon del" title="Remover" onclick="remX('${k}',${i})">✕</button>`}</td></tr>`).join('')}</table>`:`<p class="muted" style="margin:4px 0">${P?'Nenhum provento extra (feriado, gorjeta, bônus…).':'Nenhum desconto extra (adiantamento, vale…).'}</p>`}
+   ${fechada?'':`<form class="row" style="margin-top:6px" onsubmit="event.preventDefault();addX('${k}')"><input id="${id}D" list="${id}L" placeholder="${P?'ex.: Feriado 15/11':'ex.: Adiantamento dia 10'}" style="flex:1;min-width:160px"><datalist id="${id}L">${SUG_X[k].map(t=>`<option value="${t}">`).join('')}</datalist><input id="${id}V" inputmode="decimal" placeholder="R$" style="width:100px"><button class="btn sm">${P?'+ Provento':'+ Desconto'}</button></form>
+   <div class="row" style="gap:6px;margin-top:6px">${SUG_X[k].slice(0,4).map(t=>`<button type="button" class="chipx" onclick="$('${id}D').value='${t}';$('${id}V').focus()">${t}</button>`).join('')}</div>`}</div>`}
+function addX(k){const fo=db.folhas[mesFunc];if(fo.status==='fechada')return;const d=$('x'+k+'D').value.trim(),v=num($('x'+k+'V').value);
+  if(!(v>0)){$('x'+k+'V').focus();return toast('Informe o valor')}const l=lanc(mesFunc,funcAtual,true);l[k]=l[k]||[];l[k].push({d,v:Math.round(v*100)/100});mudou();toast(k==='provs'?'Provento lançado':'Desconto lançado');setTimeout(()=>$('x'+k+'D')&&$('x'+k+'D').focus(),30)}
+function remX(k,i){const l=lanc(mesFunc,funcAtual,true),x=(l[k]||[])[i];if(!x)return;confirmar('Remover?',`${esc(x.d||'Lançamento')} — ${R(+x.v||0)}.`,()=>{l[k].splice(i,1);mudou()},'Remover')}
 function proxDiaMoto(l){const ds=l.diasMoto||[];if(!ds.length)return mesFunc===hoje().slice(0,7)?hoje():mesFunc+'-01';const u=[...ds].sort((a,b)=>a.data.localeCompare(b.data)).pop().data;const[y,m,d]=u.split('-').map(Number);const n=isoDe(new Date(y,m-1,d+1));return n.slice(0,7)===mesFunc?n:u}
 function addDia(){const v=num($('dmValor').value),dt=$('dmData').value;if(!dt)return toast('Informe a data');if(dt.slice(0,7)!==mesFunc)return toast('A data precisa ser de '+fMes(mesFunc));if(!(v>0))return toast('Informe quanto ele recebeu');
   const l=lanc(mesFunc,funcAtual,true);l.diasMoto=l.diasMoto||[];if(l.diasMoto.some(d=>d.data===dt)&&!confirm('Já existe uma diária em '+fD(dt)+'. Lançar outra no mesmo dia?'))return;
@@ -1161,7 +1190,7 @@ function baixar(nome,b,tipo){const bl=b instanceof Blob?b:new Blob([b],{type:tip
 const carimbo=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}h${pad(d.getMinutes())}`};
 const CABF=['Mês','Funcionário','Vínculo','Função','Salário/base','Horas noturnas','Adicional noturno','Horas extras (R$)','Salário-família','Dias/diárias','Outros proventos','Total proventos','Faltas/atrasos','Consumo na casa','Outros descontos','Descontos legais','Total descontos','Total líquido','Já pago nas diárias','Saldo a pagar','Pago','Pago em'];
 function linhasMes(ym){return funcsDoMes(ym).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(f0=>{const{l,f}=fDe(ym,f0),r=calc(f,l),g=n=>(r.prov.find(x=>x[0].startsWith(n))||[0,0])[1],gd=n=>(r.desc.find(x=>x[0].startsWith(n))||[0,0])[1];
-  return[fMesC(ym),f.nome,VINC[f.vinculo],f.funcao||'',f.vinculo==='clt'?g('Salário'):f.vinculo==='diarista'?g('Dias'):r.totProv-(l.outrosProv||0),f.vinculo==='clt'?Math.round((l.noturnoHoras||0)*100)/100:'',r.noturno||'',g('Horas extras')+((r.prov.filter(x=>x[0].startsWith('Horas extras'))[1]||[0,0])[1]),r.sf||'',f.vinculo==='diarista'?l.dias:f.vinculo==='motoboy'?(l.diasMoto||[]).length:'',l.outrosProv||'',r.totProv,gd('Faltas')+gd('Atrasos'),r.consumo||'',l.outrosDesc||'',l.legais||'',r.totDesc,r.liq,r.jaPago||'',r.saldo,l.pago?'Sim':'Não',l.pagoEm?fD(l.pagoEm):'']})}
+  return[fMesC(ym),f.nome,VINC[f.vinculo],f.funcao||'',f.vinculo==='clt'?g('Salário'):f.vinculo==='diarista'?g('Dias'):r.totProv-somaX(l.provs),f.vinculo==='clt'?Math.round((l.noturnoHoras||0)*100)/100:'',r.noturno||'',g('Horas extras')+((r.prov.filter(x=>x[0].startsWith('Horas extras'))[1]||[0,0])[1]),r.sf||'',f.vinculo==='diarista'?l.dias:f.vinculo==='motoboy'?(l.diasMoto||[]).length:'',somaX(l.provs)||'',r.totProv,gd('Faltas')+gd('Atrasos'),r.consumo||'',somaX(l.descs)||'',l.legais||'',r.totDesc,r.liq,r.jaPago||'',r.saldo,l.pago?'Sim':'Não',l.pagoEm?fD(l.pagoEm):'']})}
 const TIPF=['s','s','s','s','n','q','n','n','n','q','n','n','n','n','n','n','n','n','n','n','s','s'],LARF=[9,28,18,16,13,11,13,13,13,10,13,14,13,13,13,13,14,14,15,14,7,11];
 function exportarMes(ym){const ls=linhasMes(ym);if(!ls.length)return toast('Folha vazia');
   const cons=[];funcsDoMes(ym).forEach(f=>(lanc(ym,f.id).consumo||[]).forEach(c=>cons.push([fD(c.data),f.nome,c.desc,c.valor])));

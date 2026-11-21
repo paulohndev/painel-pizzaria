@@ -652,17 +652,26 @@ function funcsDoMes(ym){const fo=db.folhas[ym];if(!fo)return[];
   const ids=new Set(Object.keys(fo.itens));db.funcionarios.forEach(f=>{if(ativoNoMes(f,ym))ids.add(f.id)});
   return [...ids].map(id=>func(id)||(fo.itens[id]&&fo.itens[id]._func)).filter(Boolean)}
 function lanc(ym,id,criar){const fo=db.folhas[ym];if(!fo)return{...LANC0,consumo:[],diasMoto:[],_ym:ym};if(!fo.itens[id]){if(!criar)return{...LANC0,consumo:[],diasMoto:[],_ym:ym};fo.itens[id]={...LANC0,consumo:[],diasMoto:[]}}Object.defineProperty(fo.itens[id],'_ym',{value:ym,enumerable:false,configurable:true,writable:true});return fo.itens[id]}
+const somaX=a=>(a||[]).reduce((s,x)=>s+(+x.v||0),0);
+const xProv=l=>Array.isArray(l.provs)?l.provs:(l.outrosProv>0?[{d:l.outrosProvDesc,v:l.outrosProv}]:[]);
+const xDesc=l=>Array.isArray(l.descs)?l.descs:(l.outrosDesc>0?[{d:l.outrosDescDesc,v:l.outrosDesc}]:[]);
+function propDias(f,ym,l){if(!ym||!f||l.semProp)return null;const fo=db.folhas[ym];if(fo&&fo.status==='fechada')return l._prop||null;
+  const dm=+fimMes(ym).slice(8);let d0=1,d1=dm;if(f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
+  if(f.admissao&&f.admissao>fimMes(ym))return{dias:0,de:'',ate:''};
+  const dias=Math.max(0,Math.min(30,d1-d0+1));if(dias>=30)return null;return{dias,de:d0>1?ym+'-'+pad(d0):'',ate:d1<dm?ym+'-'+pad(d1):''}}
 function calc(f,l,ym){
   const c=C(),r={prov:[],desc:[],ym:ym||l._ym||''};let vh=0;
   if(f.vinculo==='clt'){
     const sal=l.salario!=null?l.salario:(f.salario||0);vh=c.jornada>0?sal/c.jornada:0;
     const hRed=(l.noturnoHoras||0)*(c.reduzida?60/52.5:1),noct=hRed*vh*c.pctNoturno;
-    r.prov.push(['Salário base',sal,l.salario!=null&&l.salario!==f.salario?'valor deste mês':'']);
+    const pp=propDias(f,r.ym,l);
+    if(pp){r.prop=pp;r.prov.push(['Salário base',Math.round(sal/30*pp.dias*100)/100,`proporcional: ${pp.dias} dias`])}
+    else r.prov.push(['Salário base',sal,l.salario!=null&&l.salario!==f.salario?'valor deste mês':'']);
     if(l.noturnoHoras)r.prov.push(['Adicional noturno',noct,`${fH(l.noturnoHoras)} h${c.reduzida?` → ${N(hRed)} h reduzidas`:''} × ${R(vh)} × ${Pc(c.pctNoturno,0)}`]);
     if(l.he1)r.prov.push([`Horas extras ${Pc(c.pctHE1,0)}`,l.he1*vh*(1+c.pctHE1),`${fH(l.he1)} h × ${R(vh*(1+c.pctHE1))}`]);
     if(l.he2)r.prov.push([`Horas extras ${Pc(c.pctHE2,0)}`,l.he2*vh*(1+c.pctHE2),`${fH(l.he2)} h × ${R(vh*(1+c.pctHE2))}`]);
     const nf=+f.filhosSF||0;
-    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=sal+noct+he+(l.outrosProv||0);
+    if(nf>0){const he=(l.he1||0)*vh*(1+c.pctHE1)+(l.he2||0)*vh*(1+c.pctHE2),rem=(r.prop?sal/30*r.prop.dias:sal)+noct+he+somaX(xProv(l));
       if(rem<=c.sfLimite){const ym=r.ym||'',dm=ym?+fimMes(ym).slice(8):30;let d0=1,d1=dm;
         if(ym&&f.admissao&&f.admissao.slice(0,7)===ym)d0=+f.admissao.slice(8);if(ym&&f.demissao&&f.demissao.slice(0,7)===ym)d1=+f.demissao.slice(8);
         const dias=Math.max(0,d1-d0+1),prop=dias/dm,v=Math.round(c.sfCota*nf*prop*100)/100;
@@ -679,9 +688,9 @@ function calc(f,l,ym){
     if(l.entregas||l.diarias){const ve=l.valorEntrega??f.valorEntrega??0,vdd=l.valorDiaria??f.valorDiaria??0;if(l.entregas)r.prov.push(['Entregas (lançamento antigo)',l.entregas*ve,'']);if(l.diarias)r.prov.push(['Diárias (lançamento antigo)',l.diarias*vdd,''])}
     r.jaPago=ds.filter(x=>x.pago!==false).reduce((a,x)=>a+(x.valor||0),0);r.dias=ds.length;
   }
-  if(l.outrosProv)r.prov.push([l.outrosProvDesc||'Outros proventos',l.outrosProv,'']);
+  xProv(l).forEach(x=>{if(+x.v)r.prov.push([x.d||'Outros proventos',+x.v,''])});
   const cons=(l.consumo||[]).reduce((a,x)=>a+(x.valor||0),0);if(cons)r.desc.push(['Consumo na casa',cons,`${l.consumo.length} lançamento(s)`]);
-  if(l.outrosDesc)r.desc.push([l.outrosDescDesc||'Outros descontos',l.outrosDesc,'']);
+  xDesc(l).forEach(x=>{if(+x.v)r.desc.push([x.d||'Outros descontos',+x.v,''])});
   if(l.legais)r.desc.push(['Descontos legais (contador)',l.legais,'INSS, IR, VT…']);
   r.totProv=r.prov.reduce((a,x)=>a+x[1],0);r.totDesc=r.desc.reduce((a,x)=>a+x[1],0);r.liq=r.totProv-r.totDesc;r.jaPago=r.jaPago||0;r.saldo=r.liq-r.jaPago;r.vh=vh;r.consumo=cons;r.noturno=r.noturno||0;return r;
 }

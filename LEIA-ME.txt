@@ -244,6 +244,19 @@ No aviso: "Está certo", "Corrigir" ou "Perguntar à Zoe" (ela olha o histórico
 e as fichas técnicas e diz o que isso muda no custo das pizzas).
 Precisa de pelo menos 2 compras anteriores do item (3 para contas) para comparar.
 
+FOLHA: PROPORCIONAL E VÁRIOS PROVENTOS/DESCONTOS (versão 2.11)
+------------------------------------------------------------
+  - Quem entra ou sai no meio do mês (CLT) recebe o salário proporcional:
+    salário ÷ 30 × dias trabalhados no mês (pela data de admissão ou
+    desligamento do cadastro). Na folha aparece "proporcional · N dias"; no
+    lançamento aparece a conta. Para pagar o mês inteiro mesmo assim, marque
+    "pagar o mês inteiro (sem proporcional)" no lançamento daquele mês.
+    Folhas já fechadas não mudam.
+  - "Outros proventos" e "Outros descontos" agora aceitam vários lançamentos
+    no mesmo mês, cada um com descrição e valor (ex.: Feriado 15/11, Gorjeta,
+    Bônus; Adiantamento, Vale, Quebra de caixa). Os lançamentos antigos foram
+    mantidos, cada um como o primeiro item da lista.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".
