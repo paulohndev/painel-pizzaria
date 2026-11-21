@@ -257,6 +257,23 @@ FOLHA: PROPORCIONAL E VÁRIOS PROVENTOS/DESCONTOS (versão 2.11)
     Bônus; Adiantamento, Vale, Quebra de caixa). Os lançamentos antigos foram
     mantidos, cada um como o primeiro item da lista.
 
+PAGAMENTO EM DUAS PARTES: DIA 20 E 5º DIA ÚTIL (versão 2.12)
+------------------------------------------------------------
+Para funcionários CLT, a folha do mês é paga em duas partes:
+  - Dia 20 do mês: adiantamento de 50% do salário (o % muda em Ajustes >
+    Cálculo da folha; dá para mudar o valor de um funcionário num mês).
+    Quem entrou depois do dia 20 não recebe adiantamento.
+  - 5º dia útil do mês seguinte: o restante do salário + todos os proventos
+    − todos os descontos. O 5º dia útil conta sábado como dia útil e pula
+    domingos e feriados (nacionais, de Pernambuco e do Recife).
+Na Folha do mês, cada funcionário tem duas caixinhas (Dia 20 e 5º dia útil)
+para dar baixa, com o valor de cada parte; no alto aparecem o total de cada
+data e quanto ainda falta pagar. Dá para dar baixa mesmo com a folha fechada.
+Na página do funcionário aparece a conta do 5º dia útil, e cada provento e
+desconto extra tem sua caixinha de "pago"/"descontado"; ao dar baixa no 5º dia
+útil, todos ficam marcados. Diaristas e motoboys continuam com uma baixa só.
+Folhas antigas marcadas como "pago" ficaram com as duas partes pagas.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".
