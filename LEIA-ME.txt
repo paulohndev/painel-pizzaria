@@ -316,6 +316,17 @@ arquivo nos documentos de cada funcionário automaticamente.
 Ao guardar um documento do tipo "Holerite" de um funcionário CLT, o sistema
 pergunta se a Zoe deve ler e lançar na folha (com a conferência antes).
 
+DATA DA ÚLTIMA MENSAGEM EM TODO LUGAR (versão 2.17)
+------------------------------------------------------------
+  - Ao lado do nome do cliente aparece a última mensagem e quando pode mandar
+    de novo, ex.: "⏳ msg em 18/11 · próxima a partir de 25/11" ou
+    "📨 última msg em 02/11 (há 21 d)". Vale em Hoje, Clientes, Promoções,
+    Listas, Lembretes e nas listas que a Zoe mostra no chat.
+  - Quem você marcou como contatado (ou clicou no WhatsApp) já conta na hora,
+    sem esperar o sistema se atualizar.
+  - A Zoe agora enxerga o histórico de mensagens: não sugere quem recebeu
+    mensagem recentemente e diz a data da última mensagem de cada um.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

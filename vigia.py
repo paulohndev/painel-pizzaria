@@ -983,6 +983,10 @@ def ia_post(caminho, dado):
                 except Exception as e:  # o Gestão nunca pode derrubar a IA do painel
                     log("Gestão: não consegui ler os dados para a IA (%s)" % e)
                     extras, assin = {}, ""
+                try:
+                    extras["mensagens_clientes"] = ia_painel.tabela_mensagens(D)
+                except Exception as e:
+                    log("IA: não consegui montar o histórico de mensagens (%s)" % e)
                 ia_painel.montar_analise(db, D, (versao, assin), liberar, extras)
                 if caminho == "/api/ia/dica":
                     aba = str(dado.get("aba") or "")

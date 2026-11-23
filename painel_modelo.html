@@ -1968,7 +1968,15 @@ if(AO_VIVO) setTimeout(()=>iaResumo(false),800);
 // ------------------------------------------------------------ ENVIOS (WhatsApp automático)
 const ENV=(D&&D.envio)||{}; const ENVCFG=(D&&D.envio_cfg)||{ativo:false,regras:null,perfis:[]};
 const ENV_PERFIL=Object.fromEntries((ENVCFG.perfis||[]).map(p=>[p[0],p[1]]));
-function envDe(cli){ const e=ENV[cli]; if(!e) return null; return {pf:e[0], ult:e[1]?new Date(e[1].replace(' ','T')):null, st:e[2], lib:e[3], mot:e[4], n30:e[5], taxa:e[6], fila:e[7]}; }
+function envDe(cli){ const e=ENV[cli]; const c=D.clientes[cli]; const ci=c&&c.id!=null?cInfo(c.id):null;
+  if(!e&&!ci) return null;
+  const r=e?{pf:e[0], ult:e[1]?new Date(e[1].replace(' ','T')):null, st:e[2], lib:e[3], mot:e[4], n30:e[5], taxa:e[6], fila:e[7]}:{pf:'',ult:null,st:'livre',lib:'',mot:'',n30:0,taxa:-1,fila:''};
+  // marcado depois que a página foi montada: conta como mensagem e aplica o intervalo do perfil
+  if(ci && (!r.ult || ci.d.toDateString()!==r.ult.toDateString() && ci.d>r.ult)){
+    r.ult=ci.d; r.n30=(r.n30||0)+1;
+    if(r.st==='livre'){ const dias=((ENVCFG.regras||{}).perfis||{})[r.pf]||7; const lib=new Date(ci.d.getTime()+dias*864e5);
+      if(lib>new Date()){ r.st='aguardar'; r.lib=lib.toISOString().slice(0,10); r.mot=`recebeu mensagem em ${ci.d.toLocaleDateString('pt-BR')}; o intervalo é de ${dias} dias`; } } }
+  return r; }
 function dtCurta(s){ if(!s) return ''; const d=new Date(s.length>10?s.replace(' ','T'):s+'T12:00'); return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+(s.length>10?' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''); }
 function envTexto(e){
   if(!e) return '';
@@ -1977,17 +1985,18 @@ function envTexto(e){
   if(e.st==='so_app') return 'só pede por app';
   if(e.st==='na_fila') return '🕒 na fila · '+dtCurta(e.fila);
   if(e.st==='pausado') return '⏸ pausado até '+dtCurta(e.lib);
-  if(e.st==='aguardar') return '⏳ só a partir de '+dtCurta(e.lib.slice(0,10));
-  if(ha!=null) return '📨 recebeu há '+(ha===0?'menos de 1 dia':ha+' d');
+  const quando=e.ult?(ha===0?'hoje':ha===1?'ontem':e.ult.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})):'';
+  if(e.st==='aguardar') return '⏳ msg '+(quando?(quando==='hoje'||quando==='ontem'?quando:'em '+quando)+' · ':'')+'próxima a partir de '+dtCurta(e.lib.slice(0,10));
+  if(ha!=null) return '📨 última msg '+(quando==='hoje'||quando==='ontem'?quando:'em '+quando+' (há '+ha+' d)');
   return '';
 }
-function envSelo(cli){ const e=envDe(cli); const t=envTexto(e); return t?` <span class="env-b ${e.st}" title="${esc(e.mot||'')}">${esc(t)}</span>`:''; }
+function envSelo(cli){ const e=envDe(cli); const t=envTexto(e); return t?` <span class="env-b ${e.st}" title="${esc((e.mot||'')+(e.ult?' · última mensagem: '+e.ult.toLocaleDateString('pt-BR'):''))}">${esc(t)}</span>`:''; }
 // aviso ao clicar no WhatsApp de quem não deveria receber agora
 window.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||MODAL_WA) return;
   const u=new URL(a.href); const num=(u.pathname.match(/\d+/)||[''])[0]; const cli=TEL_IDX[num.slice(-11)]; if(cli==null) return;
   const en=envDe(cli); if(!en||!['aguardar','pausado','bloqueado'].includes(en.st)) return;
   const c=D.clientes[cli]; const txt=en.st==='bloqueado'?`${primeiroNome(c)} pediu para não receber mensagens.`:
-    `${primeiroNome(c)} ${en.ult?'recebeu mensagem em '+en.ult.toLocaleDateString('pt-BR'):'já recebeu mensagens'} (${en.mot}). O recomendado é esperar até ${dtCurta(en.lib.slice(0,10))}.`;
+    `${primeiroNome(c)} ${en.ult?'recebeu mensagem em '+en.ult.toLocaleDateString('pt-BR'):'já recebeu mensagens'}${en.mot?' ('+en.mot+')':''}. O recomendado é esperar até ${dtCurta(en.lib.slice(0,10))}.`;
   if(!confirm(txt+'\n\nAbrir o WhatsApp mesmo assim?')){ e.preventDefault(); e.stopPropagation(); } },true);
 // clicou no WhatsApp: conta como mensagem enviada para o limite de frequência
 document.addEventListener('click',e=>{ const a=e.target.closest('a.wa'); if(!a||e.defaultPrevented) return;
@@ -2233,7 +2242,7 @@ function lembRender(){
   let h=''; grupos.forEach(([t,itens])=>{ if(!itens.length) return; h+=`<div class="lb-grupo">${t} · ${itens.length}</div>`;
     itens.forEach(l=>{ const cli=IDX_CHAVE[l.chave]; const c=cli!=null?D.clientes[cli]:null; const w=c&&!l.feito?waLink(c,''):null;
       const cls=l.feito?'feito':l.quando&&l.quando<hoje?'atrasado':l.quando===hoje?'hoje':'';
-      h+=`<div class="lb-item ${cls}">${l.grupo_titulo?`<div class="lb-gt">${esc(l.grupo_titulo)}</div>`:''}<div class="t">${cli!=null?`<a class="cli" data-i="${cli}"><b>${esc(c.nome||l.nome)}</b></a>`:`<b>${esc(l.nome||'cliente')}</b>`}${c?ptsTag(c):''}<span class="q">${l.feito?'feito '+dtCurta(l.feito):esc(quandoLabel(l.quando))}</span></div>
+      h+=`<div class="lb-item ${cls}">${l.grupo_titulo?`<div class="lb-gt">${esc(l.grupo_titulo)}</div>`:''}<div class="t">${cli!=null?`<a class="cli" data-i="${cli}"><b>${esc(c.nome||l.nome)}</b></a>${envSelo(cli)}`:`<b>${esc(l.nome||'cliente')}</b>`}${c?ptsTag(c):''}<span class="q">${l.feito?'feito '+dtCurta(l.feito):esc(quandoLabel(l.quando))}</span></div>
         <div class="tx">${esc(l.texto||'')}</div><div class="ac">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}
         ${l.feito?`<button data-lb="reabrir" data-id="${l.id}">Reabrir</button>`:`<button data-lb="feito" data-id="${l.id}">✓ Feito</button>${cli!=null?`<button data-lbed="${l.id}">Editar</button>`:''}`}<button data-lb="apagar" data-id="${l.id}">Apagar</button></div></div>`; }); });
   if(h) h='<button class="btn" id="lbPagina" style="margin:0 0 8px;font-size:12.5px">Abrir a página de lembretes ↗</button>'+h;
@@ -2296,7 +2305,7 @@ function idsDoHistorico(m){
     else if(a.tipo==='reserva') p.push(`reserva id ${(a.reserva||{}).id} ${a.acao}`); });
   return p.length?`\n[nesta resposta: ${p.join(' | ')}]`:''; }
 function cliLinha(cli, nota){ const c=D.clientes[cli]; if(!c) return ''; const x=pcMemo().get(cli); const w=waLink(c,'');
-  return `<div class="ac-cli"><div class="n"><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${ptsTag(c)}${pinBtn(cli)}<span class="sub">${esc(nota||'')}${nota&&x?' · ':''}${x?fmtN(x.n)+' pedidos · último há '+diasEntre(x.ult,new Date())+' d · '+fmtR0(x.v):''}</span></div>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}</div>`; }
+  return `<div class="ac-cli"><div class="n"><a class="cli" data-i="${cli}">${esc(c.nome||'(sem nome)')}</a>${ptsTag(c)}${pinBtn(cli)}${envSelo(cli)}<span class="sub">${esc(nota||'')}${nota&&x?' · ':''}${x?fmtN(x.n)+' pedidos · último há '+diasEntre(x.ult,new Date())+' d · '+fmtR0(x.v):''}</span></div>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}</div>`; }
 function nomePagina(pg){ return {g_painel:'Painel geral',g_despesas:'Despesas',g_fichas:'Fichas técnicas',g_equipe:'Equipe e folha'}[pg]||PAGINAS[pg]||pg; }
 function acaoHTML(a, k, lim){
   if(a.tipo==='clientes'){ const gs=gruposDe(a); const tot=gs.reduce((s,g)=>s+g.ids.length,0); const LIM=lim||8; const ab=a.abertos||{};

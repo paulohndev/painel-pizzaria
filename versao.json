@@ -1,12 +1,12 @@
 {
- "versao": "2.16.1",
- "notas": "Holerite guardado em Documentos agora oferece leitura pela Zoe e lançamento na folha",
+ "versao": "2.17.0",
+ "notas": "Data da última mensagem ao lado de cada cliente em todas as listas; contatos marcados contam na hora; a Zoe passa a respeitar o histórico de mensagens",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "7836f28b52a1e4ebebb91f6ea841eb175bd3f9e3ec7a7f9fa74159f2bc83549b",
+  "LEIA-ME.txt": "04ebb1ae56a3bc594fd4e235e746557f7a44e81c772f2ff202ab90f6e8c43931",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Reiniciar vigia (Windows).bat": "5e84e856b54c774385eca8a458844393e02e6d2d8054062012349a2bc95d5ce6",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
@@ -25,12 +25,12 @@
   "gestao_fichas.html": "45c42ac9910612268c5a12a49ef6d74cf73b4045461ad8da6cca9213eddc7a61",
   "gestao_painel.html": "54753bdc63735d998fc1a26e05909b44d89950ad9239e94e3df3ec84678ebb3d",
   "ia.py": "2ead90b313218d2e91ab790d592a641d5e332b5aa9d7d8c5d1d78c915a9ffa30",
-  "ia_painel.py": "54707a11ca824f849bd470844caf6ce2f5b544479b5b18fa8d08ce182b30123a",
+  "ia_painel.py": "2e615f7cc675744f305cff37337c768d0969c0d9cb85bd14a3c81837bc35f3a4",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "cb7eb4e46a415749d5a2ec6baf51bf89eea1220c781b69d0aedf2d4a65048378",
+  "painel_modelo.html": "e33b5a9823184a85f4ff515532b507b9113b7614172be0687439eccd56f0b228",
   "pizzaria.py": "2367b8eeed37ce703c75b970ab4b2318af827add91b2eef281ffce9b752d4856",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "874fc315abe80095221a0db48f27bab549c63c332466b020e63d30dfdc22561e",
+  "vigia.py": "e3c548cce073bfef9e9b9e2902b69419d5ceb2cf5418fe91b61e57e8f519067f",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }

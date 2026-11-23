@@ -662,6 +662,7 @@ FERRAMENTAS_ACAO = [
 
 GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_clientes, salvar_lista, criar_lembrete, escrever_mensagem, preparar_envio, "
               "gerar_relatorio, abrir_perfil e abrir_pagina.\n"
+              "- MENSAGENS JÁ MANDADAS: antes de sugerir mandar mensagem para alguém, consulte a tabela mensagens_clientes (ultima_mensagem, situacao, pode_mandar_a_partir). NÃO sugira quem está com situacao aguardar, pausado, na fila ou não quer receber; se o dono pedir alguém assim, avise a data da última mensagem e a partir de quando pode mandar. Ao listar clientes para contato, diga quando cada um recebeu a última mensagem (se recebeu). "
               "- Quando citar clientes específicos, chame mostrar_clientes. Se houver motivos diferentes, SEPARE EM GRUPOS com títulos que digam "
               "o critério (nunca misture tudo num grupo só). Dê uma nota curta por cliente quando ajudar.\n"
               "- Se o dono pedir para salvar/transformar em página/lista, use salvar_lista com os mesmos grupos.\n"
@@ -908,3 +909,22 @@ def ler_holerite(ia, arquivos):
     if not fs:
         raise ErroIA("Não encontrei nenhum holerite nesse arquivo.")
     return {"competencia": dado.get("competencia"), "empresa": dado.get("empresa"), "funcionarios": fs}
+
+
+ESQ_MSG = ("cliente_id INTEGER, nome TEXT, ultima_mensagem TEXT, mensagens_30d INTEGER, situacao TEXT, "
+           "pode_mandar_a_partir TEXT, motivo TEXT, perfil TEXT")
+
+
+def tabela_mensagens(D):
+    """Situação de mensagens de cada cliente (para a Zoe não sugerir quem acabou de receber)."""
+    nomes = {"livre": "livre", "aguardar": "aguardar", "pausado": "pausado", "bloqueado": "não quer receber",
+             "na_fila": "na fila", "so_app": "só pede por app"}
+    linhas = []
+    for i, e in (D.get("envio") or {}).items():
+        i = int(i)
+        if not e or (not e[1] and e[2] == "livre"):
+            continue
+        c = D["clientes"][i] if 0 <= i < len(D["clientes"]) else {}
+        linhas.append((i, c.get("nome") or "", e[1] or None, e[5] or 0, nomes.get(e[2], e[2]),
+                       (e[3] or "")[:16] or None, e[4] or "", e[0] or ""))
+    return (ESQ_MSG, linhas)
