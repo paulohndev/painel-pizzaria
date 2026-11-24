@@ -1,12 +1,12 @@
 {
- "versao": "2.18.0",
- "notas": "Cashback no lugar dos pontos: clientes, filtros, alertas, mensagens ({cashback}) e Zoe",
+ "versao": "2.19.0",
+ "notas": "Zoe: calendário e dias certos das promoções; sugestão de cupom por cliente",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "876cbbb0f69c696d726aaaa5a44d68599e02e1261a96688ee749db1da2398604",
+  "LEIA-ME.txt": "449da8c85dcbba65edb9e4b41bab6672cfc256ddbbb0daa7a7de23abceca1699",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Reiniciar vigia (Windows).bat": "5e84e856b54c774385eca8a458844393e02e6d2d8054062012349a2bc95d5ce6",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
@@ -25,12 +25,12 @@
   "gestao_fichas.html": "45c42ac9910612268c5a12a49ef6d74cf73b4045461ad8da6cca9213eddc7a61",
   "gestao_painel.html": "54753bdc63735d998fc1a26e05909b44d89950ad9239e94e3df3ec84678ebb3d",
   "ia.py": "2ead90b313218d2e91ab790d592a641d5e332b5aa9d7d8c5d1d78c915a9ffa30",
-  "ia_painel.py": "ee057477091d6c77732dc973127ebeca0ff871f3c09e7dd7fbc3cc546fd7cc87",
+  "ia_painel.py": "0472463d9f3492a179146b173160e7c41c1e7e0e17d0c6daee1d074e8a61a847",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "dd710b5bc5f28605b796c37ead73c929f933363cb31adbc94119d6cb6465b13f",
-  "pizzaria.py": "b003cd22dfa728c320d5d4939363b31eaf9e4d1dce6669a5bc6b1715dd331b00",
+  "painel_modelo.html": "3ee3cb5dac605e8a988cb4dbaa66e7794ea8b1de2b67bf1b8969c39ea1a8dce2",
+  "pizzaria.py": "4c5d6c63bb243fbe35135c0570383e617c0e93b90ad409506e1501db36cd2ff3",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "e3c548cce073bfef9e9b9e2902b69419d5ceb2cf5418fe91b61e57e8f519067f",
+  "vigia.py": "846cfd2174e33a112defc87e0c7372d0c3218ad5fbdd4aa6c9f85eb809daaac6",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }

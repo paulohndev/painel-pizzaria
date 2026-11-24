@@ -109,6 +109,166 @@ def contexto_cliente(D, cli, perfil):
     return "\n".join(linhas)
 
 
+# ------------------------------------------------------------------ datas e cupons
+
+def calendario(agora=None):
+    """Próximos 7 dias com nome e data, para a Zoe não errar 'hoje', 'amanhã' e o dia da semana."""
+    agora = agora or datetime.now()
+    out = []
+    for i in range(7):
+        d = agora + timedelta(days=i)
+        out.append("%s%s %s" % ("hoje " if i == 0 else ("amanhã " if i == 1 else ""), DIAS[d.weekday()], d.strftime("%d/%m")))
+    return "; ".join(out)
+
+
+def _dias_txt(dias):
+    if not dias or len(dias) == 7:
+        return "todos os dias"
+    if dias == [0, 1, 2, 3, 4]:
+        return "de segunda a sexta"
+    if dias == [5, 6]:
+        return "sábado e domingo"
+    nomes = [DIAS[d] for d in dias]
+    return "toda " + (", ".join(nomes[:-1]) + " e " + nomes[-1] if len(nomes) > 1 else nomes[0])
+
+
+def cupom_desc(c):
+    if c["tipo"] == "R$":
+        return "R$ %s de desconto" % ("%.0f" % c["valor"] if c["valor"] == int(c["valor"]) else ("%.2f" % c["valor"]).replace(".", ","))
+    if c["tipo"] == "%":
+        return "%s%% de desconto" % ("%.0f" % c["valor"])
+    if c["tipo"] == "frete":
+        return "entrega grátis" if not c["valor"] else "R$ %.0f de desconto na entrega" % c["valor"]
+    return "desconto"
+
+
+def cupom_situacao(c, agora=None):
+    """(estado, texto). estado: 'hoje' (vale agora/hoje), 'outro_dia', 'vencido', 'futuro', 'inativo'."""
+    agora = agora or datetime.now()
+    hoje = agora.strftime("%Y-%m-%d")
+    partes = [_dias_txt(c.get("dias") or [])]
+    if c.get("hi") and c.get("hf"):
+        partes.append("das %s às %s" % (c["hi"][:5].replace(":00", "h"), c["hf"][:5].replace(":00", "h")))
+    if c.get("ate"):
+        try:
+            a = datetime.strptime(c["ate"], "%Y-%m-%d")
+            partes.append("até %s (%s)" % (a.strftime("%d/%m"), DIAS[a.weekday()]))
+        except ValueError:
+            pass
+    if c.get("min"):
+        partes.append("pedido mínimo R$ %.0f" % c["min"])
+    if c.get("novos"):
+        partes.append("só para cliente novo")
+    if c.get("uma_vez"):
+        partes.append("1 uso por cliente")
+    regra = ", ".join(partes)
+    if not c.get("ativo", True):
+        return "inativo", regra + " (DESATIVADO no Cardápio Web)"
+    if c.get("ate") and c["ate"] < hoje:
+        return "vencido", regra + " (VENCIDO: precisa renovar no Cardápio Web antes de oferecer)"
+    if c.get("de") and c["de"] > hoje:
+        return "futuro", regra + " (começa em %s)" % c["de"][8:10] + "/" + c["de"][5:7]
+    if c.get("dias") and agora.weekday() not in c["dias"]:
+        prox = next(((agora + timedelta(days=i))) for i in range(1, 8) if (agora + timedelta(days=i)).weekday() in c["dias"])
+        return "outro_dia", regra + " (hoje NÃO vale; próximo dia que vale: %s %s)" % (DIAS[prox.weekday()], prox.strftime("%d/%m"))
+    return "hoje", regra + " (vale HOJE)"
+
+
+def cupons_texto(D, agora=None):
+    linhas = []
+    for c in D.get("cupons_loja") or []:
+        est, regra = cupom_situacao(c, agora)
+        if est == "inativo":
+            continue
+        linhas.append("  - %s: %s; %s" % (c["cod"] if not c.get("sem_codigo") else c["cod"] + " (sem código no cadastro)", cupom_desc(c), regra))
+    return ("Cupons cadastrados no Cardápio Web:\n" + "\n".join(linhas)) if linhas else ""
+
+
+def _stats_cli(D, cli):
+    rows = [p for p in D["pedidos"] if p[5] == cli and not p[7]]
+    if not rows:
+        return None
+    datas = sorted(datetime.strptime(p[0], "%Y-%m-%d %H:%M") for p in rows)
+    canais = D["canais"]
+    proprios = [p for p in rows if not canais[p[2]].get("ifood")]
+    tot = [p[4] for p in rows if p[4]]
+    dd = sorted({d.date() for d in datas})
+    iv = [(b - a).days for a, b in zip(dd, dd[1:])]
+    usados = Counter(D["cupons"][p[10]] for p in rows if len(p) > 10 and p[10] is not None and p[10] >= 0 and p[10] < len(D.get("cupons") or []))
+    return {"n": len(rows), "n_proprio": len(proprios), "ticket": (sum(tot) / len(tot)) if tot else 0,
+            "dias": (datetime.now() - datas[-1]).days, "ritmo": median(iv) if len(iv) >= 2 else None, "usados": usados}
+
+
+def sugerir_cupom(D, cli, agora=None):
+    """Escolhe o cupom que faz sentido para o cliente. Regras simples e explicáveis: quanto mais atrasado em relação ao
+    próprio ritmo, maior o desconto, sempre proporcional ao ticket dele; quem está no ritmo não precisa de cupom."""
+    agora = agora or datetime.now()
+    cupons = [c for c in D.get("cupons_loja") or [] if c.get("ativo", True) and not c.get("itens")]
+    st = _stats_cli(D, cli)
+    if not cupons:
+        return {"nenhum": True, "motivo": "Não achei cupons cadastrados no Cardápio Web (a lista é atualizada 1x por dia)."}
+    if not st:
+        return {"nenhum": True, "motivo": "Sem pedidos deste cliente para eu avaliar."}
+    da = (D.get("config") or {}).get("dias_ativo") or 45
+    ritmo = st["ritmo"] or 14
+    atraso = st["dias"] / max(ritmo, 3)
+    usados = {k.upper() for k in st["usados"]}
+
+    def cand(c):
+        est, regra = cupom_situacao(c, agora)
+        if est == "futuro":
+            return None
+        if c.get("min") and st["ticket"] and st["ticket"] < c["min"] * 0.9:
+            return None
+        if c.get("uma_vez") and c["cod"].upper() in usados:
+            return None
+        val = c["valor"] if c["tipo"] == "R$" else (st["ticket"] * c["valor"] / 100 if c["tipo"] == "%" else 6)
+        return {"cod": c["cod"], "desc": cupom_desc(c), "regra": regra, "estado": est, "val": round(val, 2), "novos": c.get("novos")}
+
+    lista = [x for x in (cand(c) for c in cupons) if x]
+    novos = [x for x in lista if x["novos"]]
+    if st["n_proprio"] == 0 and novos:
+        esc, motivo = novos[0], "Só pediu por iFood/99 até hoje. O cupom de cliente novo puxa o primeiro pedido pelo app próprio (e você não paga comissão)."
+        alt = []
+    else:
+        lista = [x for x in lista if not x["novos"]]
+        if not lista:
+            return {"nenhum": True, "motivo": "Nenhum cupom cadastrado serve para este cliente."}
+        hoje_dia = [x for x in lista if x["estado"] == "hoje" and "toda " in x["regra"]]
+        if atraso < 1.2 and st["dias"] < da:
+            m = "Não precisa de cupom: costuma pedir a cada ~%d dias e o último foi há %d. Um lembrete basta." % (ritmo, st["dias"])
+            if hoje_dia:
+                return {"nenhum": True, "motivo": m + " Se quiser dar um empurrão hoje, o %s vale hoje (%s)." % (hoje_dia[0]["cod"], hoje_dia[0]["desc"]),
+                        "opcional": hoje_dia[0]}
+            return {"nenhum": True, "motivo": m}
+        if st["dias"] > 120:
+            pct, sit = 0.20, "sumido há %d dias" % st["dias"]
+        elif atraso >= 2 or st["dias"] >= da:
+            pct, sit = 0.13, "está há %d dias sem pedir (o normal é a cada ~%d)" % (st["dias"], ritmo)
+        else:
+            pct, sit = 0.08, "passou um pouco do ritmo (último pedido há %d dias, costuma pedir a cada ~%d)" % (st["dias"], ritmo)
+        if st["n"] >= 8:
+            pct += 0.03
+            sit += ", e é cliente fiel (%d pedidos)" % st["n"]
+        alvo = max(st["ticket"] * pct, 4)
+        # prefere o que vale hoje e o valor mais perto do alvo, sem passar muito dele
+        def nota(x):
+            pen = abs(x["val"] - alvo) + (max(0, x["val"] - alvo * 1.3) * 2)
+            pen += {"hoje": 0, "outro_dia": 2, "vencido": 3}.get(x["estado"], 5)
+            return pen
+        lista.sort(key=nota)
+        esc, alt = lista[0], lista[1:3]
+        motivo = "Ticket médio R$ %.0f; %s. Desconto de uns %d%% do ticket (≈ R$ %.0f) costuma bastar para trazer de volta sem dar desconto demais." % (
+            st["ticket"], sit, round(pct * 100), alvo)
+    aviso = ""
+    if esc["estado"] == "vencido":
+        aviso = "Este cupom está vencido no Cardápio Web: renove a validade lá antes de mandar."
+    elif esc["estado"] == "outro_dia":
+        aviso = "Este cupom não vale hoje: " + esc["regra"].split("(hoje NÃO vale; ")[-1].rstrip(")") + "."
+    return {"cupom": esc, "motivo": motivo, "aviso": aviso,
+            "alternativas": [{"cod": x["cod"], "desc": x["desc"], "regra": x["regra"], "estado": x["estado"]} for x in alt]}
+
+
 # ------------------------------------------------------------------ mensagens
 
 SIS_MSG = ("Você escreve mensagens de WhatsApp em nome do dono da " + CASA +
@@ -130,6 +290,15 @@ SIS_MSG = ("Você escreve mensagens de WhatsApp em nome do dono da " + CASA +
            "'aquela quentinha de frango'), o dia ou o turno em que ele costuma pedir, etc. Não cite números de pedidos nem valores gastos.\n"
            "- Mantenha EXATAMENTE a mesma oferta/condição da mensagem de referência (desconto, preço, cupom, validade). "
            "Se a referência não tem oferta, não ofereça nada. Nunca invente promoção.\n"
+           "- DIAS E DATAS (muito importante): use o calendário dado ('hoje', 'amanhã' e as datas). Quando a oferta, promoção ou cupom "
+           "vale só em certos dias ou horários, convide o cliente para ESSES dias (se vale hoje, fale 'hoje'/'hoje à noite'). Nunca diga para "
+           "pedir num dia em que a oferta não vale, e nunca invente 'sábado', 'domingo' ou 'fim de semana' se isso não estiver na oferta. "
+           "O dia preferido do cliente serve só para personalizar quando a oferta não tem dia certo.\n"
+           "- Validade: se a mensagem é sobre uma promoção ou cupom de dia certo (ex.: a da terça), a validade é a do cupom/promoção, e "
+           "isso vale mais que um 'até domingo' que esteja na mensagem de referência. Cupom vencido ou que não vale no dia: não prometa "
+           "uma data que o cadastro não confirma.\n"
+           "- Cupom: só cite um cupom se o dono pediu ou se ele estiver na mensagem de referência. Escreva o código exatamente como está "
+           "cadastrado (ex.: CUPOM10) e explique em poucas palavras como usar (digitar o cupom no app ao fechar o pedido).\n"
            "- Quando fizer sentido, convide a pedir pelo app próprio.\n"
            "- Responda só com o texto da mensagem, sem aspas.")
 
@@ -168,11 +337,15 @@ def gerar_mensagem(ia, D, cli, perfil, motivo, referencia, tipo="", rascunho="",
     ctx = contexto_cliente(D, cli, perfil)
     hoje = datetime.now()
     dia_js = (hoje.weekday() + 1) % 7  # as promoções guardam o dia como no navegador (domingo = 0)
-    promos = ["%s: %s" % (x.get("nome"), x.get("oferta") or "") for x in (D.get("promos_casa") or [])
-              if isinstance(x, dict) and x.get("ativa", True) is not False and (not x.get("dias") or dia_js in (x.get("dias") or []))]
-    pedido = ("Hoje é %s, %s.\nMotivo do contato: %s\nMensagem de referência (mesma oferta): %s\n%s\nDados do cliente:\n%s%s%s" %
-              (DIAS[hoje.weekday()], hoje.strftime("%d/%m %H:%M"), motivo or "-", referencia or "-",
-               ("Promoções da casa valendo hoje: " + "; ".join(promos)[:600] + "\n") if promos else "",
+    dn = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"]
+    promos = ["%s: %s (%s%s)" % (x.get("nome"), x.get("oferta") or "", ", ".join(dn[d] for d in x.get("dias") or []) or "todo dia",
+                                 " · VALE HOJE" if (not x.get("dias") or dia_js in (x.get("dias") or [])) else " · hoje não vale")
+              for x in (D.get("promos_casa") or []) if isinstance(x, dict) and x.get("ativa", True) is not False]
+    cup = cupons_texto(D, hoje)
+    pedido = ("Hoje é %s, %s.\nCalendário: %s.\nMotivo do contato: %s\nMensagem de referência (mesma oferta): %s\n%s%s\nDados do cliente:\n%s%s%s" %
+              (DIAS[hoje.weekday()], hoje.strftime("%d/%m %H:%M"), calendario(hoje), motivo or "-", referencia or "-",
+               ("Promoções da casa (e os dias em que valem): " + "; ".join(promos)[:900] + "\n") if promos else "",
+               (cup[:1500] + "\n") if cup else "",
                ctx, _hist_msgs(historico), ("\nAnotações do dono sobre este cliente: " + " / ".join(notas)[:600]) if notas else ""))
     if (instrucao or "").strip():
         pedido += INSTRUCAO % instrucao.strip()[:1500]
@@ -489,7 +662,7 @@ def sistema_pergunta(D, liberar=False):
             "com os números principais (R$ com vírgula decimal) e, quando ajudar, uma recomendação prática.\n"
             "Você tem acesso a TODOS os dados que a API do Cardápio Web devolve. Use as ferramentas; nunca invente números. "
             "Pode fazer várias consultas, conferir e cruzar dados.\n"
-            "Hoje é %s, %s. Turnos: %s. 'grupo_canal' é próprio, iFood ou 99Food. Exclua cancelados (cancelado=1) de vendas.\n"
+            "Hoje é %s, %s (calendário: %s). Turnos: %s. 'grupo_canal' é próprio, iFood ou 99Food. Exclua cancelados (cancelado=1) de vendas.\n"
             "Base SQLite (datas 'AAAA-MM-DD HH:MM'):\n"
             "- pedidos(id, numero, data, dia_semana, hora, turno, status, canal, grupo_canal, tipo [Entrega/Retirada/No local/Mesa], momento "
             "[immediate/scheduled], agendado_para, cancelado, motivo_cancelamento, total, subtotal_itens, taxa_entrega, taxa_servico, taxa_adicional, "
@@ -510,7 +683,7 @@ def sistema_pergunta(D, liberar=False):
             "consultar_api (consulta ao vivo na API do Cardápio Web, só leitura, para o que não estiver na base ou for de agora).\n"
             "Para nomes de itens/sabores use LIKE com %% (ex.: opcao LIKE '%%calabresa%%'). %s"
             "Resposta em texto curto, com tópicos se precisar; sem tabelas grandes." %
-            (DIAS[hoje.weekday()], hoje.strftime("%d/%m/%Y %H:%M"), ", ".join(D["turnos"][:-1]),
+            (DIAS[hoje.weekday()], hoje.strftime("%d/%m/%Y %H:%M"), calendario(hoje), ", ".join(D["turnos"][:-1]),
              "" if liberar else "Telefone, e-mail, número da casa e complemento aparecem como '(oculto)' (o dono pode liberar no config.ini). "))
 
 
@@ -615,6 +788,10 @@ FERRAMENTAS_ACAO = [
                          "required": ["titulo", "ids", "texto"]}},
                                                      "quando": {"type": "string", "description": "Data AAAA-MM-DD (opcional)"}},
                     "required": ["grupos"]}},
+    {"name": "sugerir_cupom",
+     "description": "Sugere qual cupom cadastrado no Cardápio Web oferecer a UM cliente (pelo ticket médio, ritmo de pedidos e há quanto "
+                    "tempo não pede) e diz se o cupom vale hoje ou está vencido. Use antes de escrever mensagem com cupom.",
+     "parameters": {"type": "object", "properties": {"id": {"type": "integer"}}, "required": ["id"]}},
     {"name": "escrever_mensagem",
      "description": "Escreve uma mensagem de WhatsApp personalizada para UM cliente, seguindo o que o dono pediu, usando o histórico completo "
                     "dele. O dono vê a mensagem com botão para abrir no WhatsApp ou enviar pelo sistema. Para vários clientes "
@@ -663,8 +840,11 @@ FERRAMENTAS_ACAO = [
      "parameters": {"type": "object", "properties": {"pagina": {"type": "string"}}, "required": ["pagina"]}},
 ]
 
-GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_clientes, salvar_lista, criar_lembrete, escrever_mensagem, preparar_envio, "
+GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_clientes, sugerir_cupom, salvar_lista, criar_lembrete, escrever_mensagem, preparar_envio, "
               "gerar_relatorio, abrir_perfil e abrir_pagina.\n"
+              "- CUPONS: as regras de cada cupom (dias, horário, validade, mínimo) estão em cadastro_loja tipo='cupons'. Para sugerir "
+              "cupom a um cliente, use a ferramenta sugerir_cupom (ou o ticket médio dele e há quanto tempo não pede "
+              "(quanto mais atrasado, maior o desconto, sem passar de ~20% do ticket)). Avise se o cupom estiver vencido.\n"
               "- FIDELIDADE: a casa usa CASHBACK (saldo em reais, coluna clientes.cashback), não mais pontos. Não fale em pontos com clientes; a coluna pontos é do programa antigo. "
               "- MENSAGENS JÁ MANDADAS: antes de sugerir mandar mensagem para alguém, consulte a tabela mensagens_clientes (ultima_mensagem, situacao, pode_mandar_a_partir). NÃO sugira quem está com situacao aguardar, pausado, na fila ou não quer receber; se o dono pedir alguém assim, avise a data da última mensagem e a partir de quando pode mandar. Ao listar clientes para contato, diga quando cada um recebeu a última mensagem (se recebeu). "
               "- Quando citar clientes específicos, chame mostrar_clientes. Se houver motivos diferentes, SEPARE EM GRUPOS com títulos que digam "
@@ -766,6 +946,11 @@ def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete
             acoes.append({"tipo": "lembretes", "grupos": [{"titulo": g["titulo"], "texto": g["texto"], "ids": g["ids"]} for g in gs],
                           "ids": [i for g in gs for i in g["ids"]], "quando": q})
             return "%d lembrete(s) criado(s) em %d grupo(s)." % (total, len(gs))
+        if nome == "sugerir_cupom":
+            ids = ids_ok([args.get("id")])
+            if not ids:
+                return "Cliente não encontrado."
+            return json.dumps(sugerir_cupom(D, ids[0]), ensure_ascii=False)
         if nome == "escrever_mensagem":
             ids = ids_ok([args.get("id")])
             if not ids or escrever is None:

@@ -522,6 +522,36 @@ PRIORIDADE_CANAL = ["catalog", "whatsapp_extension", "store_front_catalog", "foo
 TIPOS = {"delivery": "Entrega", "takeout": "Retirada", "onsite": "No local", "closed_table": "Mesa"}
 
 
+DIAS_API = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
+
+
+def cupons_loja(db):
+    """Cupons cadastrados no Cardápio Web (regras de cada um), para a Zoe saber quando valem e sugerir um."""
+    try:
+        lst = json.loads(meta_get(db, "cupons_json") or "[]")
+    except ValueError:
+        return []
+    out = []
+    for c in lst if isinstance(lst, list) else []:
+        if not isinstance(c, dict):
+            continue
+        cod = str(c.get("code") or c.get("name") or "").strip()
+        if not cod:
+            continue
+        tp = str(c.get("type") or "")
+        out.append({
+            "cod": cod, "sem_codigo": not c.get("code"),
+            "tipo": "R$" if "flat" in tp else ("%" if "percent" in tp else ("frete" if "deliver" in tp or "fee" in tp else tp)),
+            "valor": float(c.get("value") or 0), "ativo": bool(c.get("active", True)),
+            "dias": sorted(DIAS_API[d] for d in (c.get("available_days") or []) if d in DIAS_API),  # weekday() do Python
+            "hi": c.get("availability_start_time") or "", "hf": c.get("availability_end_time") or "",
+            "de": (c.get("available_from") or "")[:10], "ate": (c.get("expires_at") or "")[:10],
+            "min": float(c.get("minimum_order_value") or 0), "novos": bool(c.get("new_customers_only")),
+            "uma_vez": c.get("customer_multi_use") is False, "itens": bool(c.get("items")),
+        })
+    return out
+
+
 def montar_dados(db, cfg, nome_loja):
     turnos = cfg["turnos"]
     nomes_turno = [t["nome"] for t in turnos] + ["Outro horário"]
@@ -739,6 +769,7 @@ def montar_dados(db, cfg, nome_loja):
         "config": {"dias_ativo": cfg["dias_ativo"], "pedidos_fiel": cfg["pedidos_fiel"], "mensagem": cfg["mensagem"], "fidelidade": cfg.get("fidelidade", "cashback")},
         "sem_detalhe": sem_detalhe,
         "cupons": lista_cupom,
+        "cupons_loja": cupons_loja(db),
         "avaliacoes": avaliacoes,
         "abertos": abertos,
         "vinc_sug": sugestoes,

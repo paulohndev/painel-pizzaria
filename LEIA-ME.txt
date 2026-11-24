@@ -338,6 +338,19 @@ CASHBACK NO LUGAR DOS PONTOS (v2.18.0)
 - Os saldos vêm do Cardápio Web na atualização diária de clientes (depois das 6h).
 - Para voltar ao modo antigo: em config.ini, seção [painel], fidelidade = pontos
 
+ZOE: DIAS CERTOS E SUGESTÃO DE CUPOM (v2.19.0)
+- A Zoe recebe o calendário da semana (hoje, amanhã e as datas) e as regras de cada cupom
+  cadastrado no Cardápio Web (dias, horário, validade, pedido mínimo). Mensagem de promoção
+  de dia certo (ex.: terça) convida para aquele dia, não para o fim de semana.
+- O dia preferido do cliente só é usado quando a oferta não tem dia certo.
+- Na janela de mensagem aparece "🎟️ Sugestão de cupom": o app olha o ticket médio, o ritmo
+  de pedidos e há quanto tempo o cliente não pede, e escolhe o cupom de valor mais adequado.
+  Quem está no ritmo recebe "não precisa de cupom". Quem só pediu por iFood/99 recebe o
+  cupom de cliente novo. "Usar na mensagem" pede para a Zoe reescrever já com o cupom.
+- Cupom vencido aparece com aviso para renovar no Cardápio Web antes de mandar.
+- A sugestão não gasta crédito da Zoe. No chat, peça "qual cupom mando pra Fulana?".
+- A lista de cupons vem do Cardápio Web na atualização diária.
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

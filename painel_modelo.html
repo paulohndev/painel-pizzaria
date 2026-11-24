@@ -425,6 +425,13 @@ button.pin.on{opacity:1;filter:none}
 .lb-chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 11px;font:inherit;font-size:12.5px;cursor:pointer}
 .lb-chips button.on{background:var(--sun);border-color:var(--sun);font-weight:600}
 .lb-info{font-size:13px;color:var(--mut);margin-bottom:8px}
+.ia-cup{font-size:13px;margin-bottom:10px;padding:8px 12px;border-radius:12px;background:#EEF6FF;line-height:1.45}
+.ia-cup b.cod{font-family:ui-monospace,Consolas,monospace;letter-spacing:.5px}
+.ia-cup .cup-av{color:#B3261E;font-weight:600;margin-top:3px}
+.ia-cup .cup-bts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.ia-cup .cup-bts button{border:1px solid #BCD3EE;background:#fff;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer}
+.ia-cup .cup-bts button.pri{background:#1F5FA8;color:#fff;border-color:#1F5FA8}
+.ia-cup .sub{color:#555;font-size:12px}
 .ia-pts{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;margin-bottom:10px;padding:8px 12px;border-radius:12px;background:#FFF8EE}
 .ia-pts b{font-size:14px}
 .ia-pts button{border:0;background:var(--sun);border-radius:999px;padding:4px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
@@ -939,6 +946,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div class="ia-cab"><h3 id="iaTitulo">Mensagem</h3><button id="iaFechar" title="Fechar">✕</button></div>
   <div class="ia-freq hidden" id="iaFreq"></div>
   <div class="ia-pts hidden" id="iaPts"></div>
+  <div class="ia-cup hidden" id="iaCup"></div>
   <div class="ia-instr" id="iaInstrBox"><input id="iaInstr" placeholder="Diga à Zoe o que você quer dizer (ex.: fala da Quinta do Clone, bem descontraído, sem emoji)"><button id="iaInstrBtn">✨ Escrever</button></div>
   <div class="ia-chips" id="iaChips"><button>Mais curta</button><button>Mais descontraída</button><button>Mais carinhosa</button><button>Sem emoji</button><button>Falar da promoção de hoje</button><button>Lembrar do cashback</button><button>Convidar para pedir pelo app</button></div>
   <div class="ia-status" id="iaStatus"></div>
@@ -1884,9 +1892,34 @@ function iaAbrir(a){
   const pt=$('#iaPts'); if(c.pontos){ pt.innerHTML=`<span>${FID_IC} <b>${fidFmt(c.pontos)}</b> ${FID_CB?'de cashback':'pontos acumulados'}</span><button id="iaAddPts">Incluir os pontos na mensagem</button>`; pt.className='ia-pts';
     $('#iaAddPts').onclick=()=>{ const ta=$('#iaTxt'); const frase=FID_CB?`Ah, e você tem ${fidFmt(c.pontos)} de cashback com a gente, dá pra usar no próximo pedido pelo app! 😉`:`Ah, e você tem ${fmtN(c.pontos)} pontos acumulados com a gente, dá pra usar no próximo pedido pelo app! 😉`; if(!ta.value.includes(fmtN(c.pontos)+' pontos')) ta.value=ta.value.trim()+' '+frase; $('#iaAddPts').textContent='Incluído ✓'; $('#iaAddPts').disabled=true; }; }
   else pt.className='ia-pts hidden';
+  iaCupom(c);
   $('#iaModal').classList.remove('hidden');
   if(IA_ON) iaGerar(false); else { $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem pronta. Pode editar antes de enviar.'; }
   return true;
+}
+// sugestão de cupom (regras locais: ticket, ritmo e há quanto tempo não pede; não gasta crédito da Zoe)
+function iaCupom(c){
+  const box=$('#iaCup'); box.className='ia-cup hidden'; const ctx=IA_CTX;
+  if(!(D.cupons_loja||[]).length) return;
+  api('/api/cupom/sugestao',{chave:c.chave}).then(r=>{
+    if(IA_CTX!==ctx||!r) return;
+    const usar=x=>{
+      const regra=String(x.regra||'').replace(/\s*\((vale HOJE|VENCIDO[^)]*|hoje NÃO vale[^)]*)\)/,'');
+      const instr=`ofereça o cupom ${x.cod} (${x.desc}; regras: ${regra}). Diga para digitar o cupom no app ao fechar o pedido`;
+      if(IA_ON){ $('#iaInstr').value=instr; iaGerar(true, instr); }
+      else { const ta=$('#iaTxt'); ta.value=ta.value.trim()+`\n\nUse o cupom ${x.cod} no app e ganhe ${x.desc}! 😉`; }
+    };
+    if(r.nenhum){
+      box.innerHTML=`🎟️ <b>Cupom:</b> ${esc(r.motivo||'')}${r.opcional?`<div class="cup-bts"><button class="pri" data-i="op">Usar ${esc(r.opcional.cod)} mesmo assim</button></div>`:''}`;
+      box.className='ia-cup'; const b=box.querySelector('[data-i=op]'); if(b) b.onclick=()=>usar(r.opcional); return;
+    }
+    const x=r.cupom, alt=r.alternativas||[];
+    box.innerHTML=`🎟️ <b>Sugestão de cupom:</b> <b class="cod">${esc(x.cod)}</b> · ${esc(x.desc)} ${x.estado==='hoje'?'<span class="sub">· ✅ vale hoje</span>':''}<div class="sub">${esc(String(x.regra||'').replace(/\s*\([^()]*\)$/,''))}</div>
+      <div class="sub">${esc(r.motivo||'')}</div>${r.aviso?`<div class="cup-av">⚠️ ${esc(r.aviso)}</div>`:''}
+      <div class="cup-bts"><button class="pri" data-i="0">Usar ${esc(x.cod)} na mensagem</button>${alt.map((a,i)=>`<button data-i="${i+1}" title="${esc(a.regra)}">${esc(a.cod)} · ${esc(a.desc)}${a.estado==='vencido'?' (vencido)':a.estado==='outro_dia'?' (outro dia)':''}</button>`).join('')}</div>`;
+    box.className='ia-cup';
+    const todos=[x,...alt]; box.querySelectorAll('.cup-bts button').forEach(b=>b.onclick=()=>usar(todos[+b.dataset.i]));
+  }).catch(()=>{});
 }
 function iaEditado(){ const t=$('#iaTxt').value.trim(); return !!(IA_CTX&&t&&t!==(IA_CTX.gerado||'').trim()&&t!==(IA_CTX.ref||'').trim()); }
 function iaBotaoOutra(){ const b=$('#iaOutra'); if(!b||b.disabled) return; b.textContent=iaEditado()?'✨ Reescrever a partir do meu texto':'✨ Escrever outra'; }

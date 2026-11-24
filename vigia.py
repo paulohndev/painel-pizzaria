@@ -637,6 +637,13 @@ class Painel(BaseHTTPRequestHandler):
                     ESTADO["alertas"] = [a for a in ESTADO["alertas"] if a["id"] != aid]
                     ESTADO["versao"] += 1
                 return self._json({"ok": True})
+            if u.path == "/api/cupom/sugestao":  # regras locais, não gasta crédito da IA
+                with ESTADO["trava"]:
+                    Dc = ESTADO["D"]
+                    cli = ESTADO["por_chave"].get(str(dado.get("chave") or ""))
+                if Dc is None or cli is None:
+                    return self._json({"nenhum": True, "motivo": "Cliente não encontrado."})
+                return self._json(ia_painel.sugerir_cupom(Dc, cli))
             if u.path.startswith("/api/ia/"):
                 return self._json(*ia_post(u.path, dado))
             if u.path == "/api/lembretes":
