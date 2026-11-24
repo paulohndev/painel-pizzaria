@@ -770,7 +770,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
       <button class="btn primary" id="cliEnvBt">📨 Mandar mensagem para este grupo</button>
     </div>
     <div class="card org-velho" style="margin-bottom:12px;padding:12px 14px">
-      <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">Mensagem do WhatsApp (<b>{nome}</b> vira o primeiro nome do cliente, <b>{pontos}</b> o saldo de pontos):</div>
+      <div style="font-size:12px;color:var(--text-2);margin-bottom:6px">Mensagem do WhatsApp (<b>{nome}</b> vira o primeiro nome do cliente, <b>{cashback}</b> o saldo de cashback):</div>
       <textarea id="msg"></textarea>
     </div>
     <div class="tablebox"><table id="tbCli"></table></div>
@@ -819,7 +819,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
         <p class="desc" id="cpDica"></p>
         <div style="font-size:12px;color:var(--text-2);margin:8px 0 4px">Oferta desta campanha</div>
         <input id="cpOferta" style="width:100%;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 9px">
-        <div style="font-size:12px;color:var(--text-2);margin:10px 0 4px">Mensagem do WhatsApp. Variáveis: <b>{nome}</b>, <b>{favorito}</b> (vira "aquela pizza de calabresa", "aquela quentinha"…), <b>{sugestao}</b>, <b>{base}</b>, <b>{oferta}</b>, <b>{pontos}</b></div>
+        <div style="font-size:12px;color:var(--text-2);margin:10px 0 4px">Mensagem do WhatsApp. Variáveis: <b>{nome}</b>, <b>{favorito}</b> (vira "aquela pizza de calabresa", "aquela quentinha"…), <b>{sugestao}</b>, <b>{base}</b>, <b>{oferta}</b>, <b>{cashback}</b></div>
         <textarea id="cpMsg" style="min-height:70px"></textarea>
         <div style="margin-top:8px;display:flex;gap:8px;align-items:center"><button class="btn" id="cpReset">Voltar ao texto padrão</button><span class="muted" style="font-size:12px">As edições ficam salvas neste computador.</span></div>
       </div>
@@ -865,7 +865,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
           <div class="toolbar" style="margin-top:8px"><select id="evMsg"></select>
             <label class="muted" style="font-size:13px" id="evIaLbl"><input type="checkbox" id="evIa"> ✨ A Zoe reescreve cada mensagem na hora do envio, mantendo a oferta</label></div>
           <textarea id="evTexto" class="ev-texto"></textarea>
-          <div class="muted" style="font-size:12px;margin-top:4px">Variáveis: {nome}, {favorito} (vira "aquela pizza de calabresa"), {oferta}, {sugestao}, {sabor_promo}, {pontos}, {bairro}. Mudar o texto aqui vale só para este envio.</div>
+          <div class="muted" style="font-size:12px;margin-top:4px">Variáveis: {nome}, {favorito} (vira "aquela pizza de calabresa"), {oferta}, {sugestao}, {sabor_promo}, {cashback}, {bairro}. Mudar o texto aqui vale só para este envio.</div>
         </div></div>
         <div class="ev-passo"><div class="ev-num">3</div><div class="ev-corpo"><b>Revisar e agendar</b>
           <div class="ev-resumo" id="evResumo"></div>
@@ -940,7 +940,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div class="ia-freq hidden" id="iaFreq"></div>
   <div class="ia-pts hidden" id="iaPts"></div>
   <div class="ia-instr" id="iaInstrBox"><input id="iaInstr" placeholder="Diga à Zoe o que você quer dizer (ex.: fala da Quinta do Clone, bem descontraído, sem emoji)"><button id="iaInstrBtn">✨ Escrever</button></div>
-  <div class="ia-chips" id="iaChips"><button>Mais curta</button><button>Mais descontraída</button><button>Mais carinhosa</button><button>Sem emoji</button><button>Falar da promoção de hoje</button><button>Lembrar dos pontos</button><button>Convidar para pedir pelo app</button></div>
+  <div class="ia-chips" id="iaChips"><button>Mais curta</button><button>Mais descontraída</button><button>Mais carinhosa</button><button>Sem emoji</button><button>Falar da promoção de hoje</button><button>Lembrar do cashback</button><button>Convidar para pedir pelo app</button></div>
   <div class="ia-status" id="iaStatus"></div>
   <textarea id="iaTxt"></textarea>
   <div id="iaPub" class="hidden"><label>Resposta pública para a avaliação (copie e cole no Cardápio Web / iFood)</label><textarea id="iaPubTxt" style="min-height:90px"></textarea></div>
@@ -1207,6 +1207,12 @@ function renderGeral(){
 
 // ------------------------------------------------------------ CLIENTES
 const CFG=D.config; const DA=CFG.dias_ativo, PF=CFG.pedidos_fiel;
+// fidelidade: a casa usa cashback (saldo em R$) no lugar de pontos. Em config.ini, [painel] fidelidade = pontos volta ao antigo.
+const FID_CB=(CFG.fidelidade||'cashback')!=='pontos';
+if(FID_CB) D.clientes.forEach(c=>{ c.pts_antigos=c.pontos; c.pontos=Math.round((+c.cashback||0)*100)/100; });
+const FID_NOME=FID_CB?'Cashback':'Pontos', FID_IC=FID_CB?'💰':'⭐';
+function fidFmt(v){ v=+v||0; return FID_CB?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):fmtN(v)+' pontos'; }
+function fidCurto(v){ v=+v||0; return FID_CB?'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2}):fmtN(v)+' pts'; }
 const SEGS=[
   {id:'fa', nome:'Fiéis ativos', dica:`${PF}+ pedidos e pediu nos últimos ${DA} dias`, f:(n,d)=>n>=PF&&d<=DA},
   {id:'fs', nome:'Fiéis sumindo', dica:`${PF}+ pedidos, mas não pede há mais de ${DA} dias`, f:(n,d)=>n>=PF&&d>DA},
@@ -1253,7 +1259,7 @@ function primeiroNome(c){ const nome=(c.nome||'').trim().split(/\s+/)[0]||''; re
 function waLink(c, texto){
   if(!c.tel || c.tel.length<10) return null;
   let num=c.tel; if(!(num.length>=12 && num.startsWith(c.ddi||'55'))) num=(c.ddi||'55')+num;
-  const txt=(texto!=null?texto:($('#msg').value||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{pontos\}/g,c.pontos));
+  const txt=(texto!=null?texto:($('#msg').value||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{pontos\}/g,fidFmt(c.pontos)).replace(/\{cashback\}/g,fidFmt(c.pontos)));
   return 'https://wa.me/'+num+(txt?'?text='+encodeURIComponent(txt):'');
 }
 let ultimaLista=[];
@@ -1281,7 +1287,7 @@ function renderClientes(){
   ultimaLista=F2;
   { const sg=SEGS.find(x=>x.id===segSel); $('#cliEnvTx').innerHTML=sg?`As mensagens saem pela página <b>Mensagens</b>, com o texto, os filtros e as regras de frequência num lugar só. O grupo <b>${esc(sg.nome)}</b> já vai escolhido.`:'Escolha um grupo acima para mandar mensagem para ele pela página <b>Mensagens</b>.'; $('#cliEnvBt').disabled=!sg; }
   const nPag=Math.max(1,Math.ceil(F2.length/PAG)); if(pag>=nPag)pag=nPag-1;
-  const cols=[['nome','Cliente'],['wa','',0],['ok','Feito',0],['seg','Grupo'],['dias','Sem pedir',1],['n','Pedidos',1],['pontos','Pontos',1],['gasto','Total gasto',1]];
+  const cols=[['nome','Cliente'],['wa','',0],['ok','Feito',0],['seg','Grupo'],['dias','Sem pedir',1],['n','Pedidos',1],['pontos',FID_NOME,1],['gasto','Total gasto',1]];
   let h='<tr>'+cols.map(c=>`<th class="${c[2]?'num ':''}${c[2]===0?'':'sort'}" data-k="${c[0]}">${c[1]}${ordCli.k===c[0]?(ordCli.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   F2.slice(pag*PAG,(pag+1)*PAG).forEach(c=>{const w=waLink(c); const feito=!!contatos[c.id];
     const turnosTxt=c.tc.map((n,t)=>n?`${D.turnos[t].slice(0,1)}${n}`:null).filter(Boolean).join(' · ');
@@ -1290,7 +1296,7 @@ function renderClientes(){
       <td>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:'<span class="muted">—</span>'}</td>
       <td class="ck"><input type="checkbox" data-id="${c.id}" ${feito?'checked':''}>${feito?`<span class="sub">${esc(cInfo(c.id).txt.slice(0,5))}</span>`:''}</td>
       <td><span class="tag">${esc((SEGS.find(s=>s.id===c.seg)||{}).nome||'')}</span>${c.outro?'<span class="sub">ativo em outro turno</span>':''}</td>
-      <td class="num">${fmtN(c.dias)} dias<span class="sub">${c.ult.toLocaleDateString('pt-BR')}</span></td><td class="num" title="${esc(c.perfil)}">${fmtN(c.n)}<span class="sub">${esc(turnosTxt)}</span></td><td class="num">${c.pontos?`<span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}">⭐ ${fmtN(c.pontos)}</span>`:'<span class="muted">—</span>'}</td><td class="num">${fmtR(c.gasto)}<span class="sub">ticket ${fmtR(c.tk)}</span></td></tr>`;});
+      <td class="num">${fmtN(c.dias)} dias<span class="sub">${c.ult.toLocaleDateString('pt-BR')}</span></td><td class="num" title="${esc(c.perfil)}">${fmtN(c.n)}<span class="sub">${esc(turnosTxt)}</span></td><td class="num">${c.pontos?`<span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}">${FID_IC} ${fidCurto(c.pontos)}</span>`:'<span class="muted">—</span>'}</td><td class="num">${fmtR(c.gasto)}<span class="sub">ticket ${fmtR(c.tk)}</span></td></tr>`;});
   if(!F2.length) h+=`<tr><td colspan="${cols.length}" class="muted" style="padding:20px">Nenhum cliente com esses filtros.</td></tr>`;
   $('#tbCli').innerHTML=h;
   $('#tbCli').querySelectorAll('th.sort').forEach(th=>th.onclick=()=>{const k=th.dataset.k; ordCli = ordCli.k===k?{k,dir:-ordCli.dir}:{k,dir:(k==='nome'||k==='perfil'||k==='bairro'||k==='seg')?1:-1}; renderClientes();});
@@ -1300,8 +1306,8 @@ function renderClientes(){
 }
 ['#busca','#fPerfil','#fBai','#fContato','#soWhats','#fPts'].forEach(s=>$(s).addEventListener(s==='#busca'?'input':'change',()=>{pag=0;renderClientes();}));
 $('#btnCsv').onclick=()=>{
-  const linhas=[['Nome','Telefone','WhatsApp','Grupo','Dias sem pedir','Pedidos','Total gasto','Ticket medio','Ultimo pedido','Turnos','Bairro','Pontos','Contatado em']];
-  ultimaLista.forEach(c=>linhas.push([c.nome,c.tel||'',waLink(c)||'',(SEGS.find(s=>s.id===c.seg)||{}).nome,c.dias,c.n,c.gasto.toFixed(2).replace('.',','),c.tk.toFixed(2).replace('.',','),c.ult.toLocaleDateString('pt-BR'),c.perfil,c.bairro,c.pontos,(cInfo(c.id)||{}).txt||'']));
+  const linhas=[['Nome','Telefone','WhatsApp','Grupo','Dias sem pedir','Pedidos','Total gasto','Ticket medio','Ultimo pedido','Turnos','Bairro',FID_NOME,'Contatado em']];
+  ultimaLista.forEach(c=>linhas.push([c.nome,c.tel||'',waLink(c)||'',(SEGS.find(s=>s.id===c.seg)||{}).nome,c.dias,c.n,c.gasto.toFixed(2).replace('.',','),c.tk.toFixed(2).replace('.',','),c.ult.toLocaleDateString('pt-BR'),c.perfil,c.bairro,FID_CB?String(c.pontos).replace('.',','):c.pontos,(cInfo(c.id)||{}).txt||'']));
   const csv='﻿'+linhas.map(l=>l.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download='clientes_'+(segSel||'todos')+'.csv'; a.click();
@@ -1390,7 +1396,7 @@ function preencher(tipo, o){
   const sug=o.sug?(SUG_SABOR.has(tipo)?falaSabor(o.sug):falaItem(o.sug)):'';
   const oferta=cpTexto(tipo,'oferta').replace(/\{sugestao\}/g,sug);
   return juntarPreps(cpTexto(tipo,'msg').replace(/\{nome\}/g,o.nome).replace(/\{favorito\}/g,falaFav(o.fav)).replace(/\{sugestao\}/g,sug)
-    .replace(/\{base\}/g,falaItem(o.base||o.fav)).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,o.pontos||0)).replace(/\s+([!.,?])/g,'$1');
+    .replace(/\{base\}/g,falaItem(o.base||o.fav)).replace(/\{oferta\}/g,oferta).replace(/\{pontos\}/g,fidFmt(o.pontos||0)).replace(/\{cashback\}/g,fidFmt(o.pontos||0))).replace(/\s+([!.,?])/g,'$1');
 }
 function msgPromo(r, rec){
   const c=D.clientes[r.cli];
@@ -1486,7 +1492,7 @@ function msgPromoCasa(p,cli){
   const c=D.clientes[cli]; const pf=PERF[cli]||[]; const sab=p.sabores||[];
   const sp=saborNaPromo(p,pf[0])?'Aquela pizza de '+falaSabor(pf[0]):(sab.length?'Pizza grande de '+(sab.length>1?sab.slice(0,-1).join(', ')+' ou '+sab[sab.length-1]:sab[0]):'');
   return juntarPreps(String(p.msg||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,falaFav(pf[0])).replace(/\{sabor_promo\}/g,sp)
-    .replace(/\{oferta\}/g,p.oferta||'').replace(/\{pontos\}/g,c.pontos||0)).replace(/\s+([!.,?])/g,'$1');
+    .replace(/\{oferta\}/g,p.oferta||'').replace(/\{pontos\}/g,fidFmt(c.pontos||0)).replace(/\{cashback\}/g,fidFmt(c.pontos||0))).replace(/\s+([!.,?])/g,'$1');
 }
 function itensPromoHoje(pc,hoje,out){
   promosHoje().forEach(({p,k})=>{ const L=out['promo_'+k];
@@ -1777,7 +1783,7 @@ function renderAlertas(focoId){
   $('#gvLista').innerHTML=L.map(a=>{ const c=a.cliente||{}; const msg=msgAlerta(a); const w=c.tel?waLink(c,msg):null;
     return `<div class="al p${a.prio} ${a.id===focoId?'foco':''}" data-id="${esc(a.id)}">
       <div class="cab">${ICONE[a.tipo]||'•'} ${esc(ROTULO[a.tipo]||a.tipo)} ${a.prio===1?'<span class="urg">· urgente</span>':''}<span style="margin-left:auto;text-transform:none;letter-spacing:0;font-weight:500">${esc(quandoTxt(a.criado))}</span></div>
-      <h4>${esc(a.titulo)}</h4><p>${esc(a.texto)}</p>${c.pontos?`<div class="al-pts">⭐ ${fmtN(c.pontos)} pontos acumulados</div>`:''}
+      <h4>${esc(a.titulo)}</h4><p>${esc(a.texto)}</p>${c.pontos?`<div class="al-pts">${FID_IC} ${FID_CB?fidFmt(c.pontos)+' de cashback para usar':fmtN(c.pontos)+' pontos acumulados'}</div>`:''}
       <div class="acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}" data-wa="${esc(a.id)}">WhatsApp</a>`:''}
         ${c.chave?`<button data-perfil="${esc(c.chave)}">Perfil</button>`:''}<button class="ok" data-ac="feito" data-id="${esc(a.id)}">✓ Feito</button><button data-ac="ignorar" data-id="${esc(a.id)}">Dispensar</button></div></div>`; }).join('');
   $('#gvLista').querySelectorAll('button[data-ac]').forEach(b=>b.onclick=()=>resolverAlerta(b.dataset.id,b.dataset.ac));
@@ -1875,8 +1881,8 @@ function iaAbrir(a){
   $('#iaTxt').value=ref; $('#iaPub').classList.add('hidden'); $('#iaCopiarPub').classList.add('hidden');
   $('#iaOk').classList.add('hidden'); $('#iaOutra').classList.toggle('hidden',!IA_ON); $('#iaInstr').value=''; $('#iaInstrBox').classList.toggle('hidden',!IA_ON); $('#iaChips').classList.toggle('hidden',!IA_ON);
   if(typeof prepararEnvioModal==='function') prepararEnvioModal(cli);
-  const pt=$('#iaPts'); if(c.pontos){ pt.innerHTML=`<span>⭐ <b>${fmtN(c.pontos)}</b> pontos acumulados${c.cashback?` · R$ ${fmtN(c.cashback)} de cashback`:''}</span><button id="iaAddPts">Incluir os pontos na mensagem</button>`; pt.className='ia-pts';
-    $('#iaAddPts').onclick=()=>{ const ta=$('#iaTxt'); const frase=`Ah, e você tem ${fmtN(c.pontos)} pontos acumulados com a gente, dá pra usar no próximo pedido pelo app! 😉`; if(!ta.value.includes(fmtN(c.pontos)+' pontos')) ta.value=ta.value.trim()+' '+frase; $('#iaAddPts').textContent='Incluído ✓'; $('#iaAddPts').disabled=true; }; }
+  const pt=$('#iaPts'); if(c.pontos){ pt.innerHTML=`<span>${FID_IC} <b>${fidFmt(c.pontos)}</b> ${FID_CB?'de cashback':'pontos acumulados'}</span><button id="iaAddPts">Incluir os pontos na mensagem</button>`; pt.className='ia-pts';
+    $('#iaAddPts').onclick=()=>{ const ta=$('#iaTxt'); const frase=FID_CB?`Ah, e você tem ${fidFmt(c.pontos)} de cashback com a gente, dá pra usar no próximo pedido pelo app! 😉`:`Ah, e você tem ${fmtN(c.pontos)} pontos acumulados com a gente, dá pra usar no próximo pedido pelo app! 😉`; if(!ta.value.includes(fmtN(c.pontos)+' pontos')) ta.value=ta.value.trim()+' '+frase; $('#iaAddPts').textContent='Incluído ✓'; $('#iaAddPts').disabled=true; }; }
   else pt.className='ia-pts hidden';
   $('#iaModal').classList.remove('hidden');
   if(IA_ON) iaGerar(false); else { $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem pronta. Pode editar antes de enviar.'; }
@@ -2074,7 +2080,7 @@ function preencherTpl(tpl, op, cli){
   if(op.startsWith('casa:')){ const p=PROMOS[+op.slice(5)]||{}; oferta=p.oferta||''; const sab=p.sabores||[];
     sp=saborNaPromo(p,pf[0])?'Aquela pizza de '+falaSabor(pf[0]):(sab.length?'Pizza grande de '+(sab.length>1?sab.slice(0,-1).join(', ')+' ou '+sab[sab.length-1]:sab[0]):''); }
   return juntarPreps(tpl.replace(/\{nome\}/g,primeiroNome(c)).replace(/\{favorito\}/g,falaFav(pf[0])).replace(/\{sugestao\}/g,sug).replace(/\{base\}/g,base||falaItem(pf[0]))
-    .replace(/\{oferta\}/g,oferta).replace(/\{sabor_promo\}/g,sp).replace(/\{pontos\}/g,c.pontos||0).replace(/\{bairro\}/g,bairroCli(cli)||'')).replace(/\s+([!.,?])/g,'$1').trim();
+    .replace(/\{oferta\}/g,oferta).replace(/\{sabor_promo\}/g,sp).replace(/\{pontos\}/g,fidFmt(c.pontos||0)).replace(/\{cashback\}/g,fidFmt(c.pontos||0)).replace(/\{bairro\}/g,bairroCli(cli)||'')).replace(/\s+([!.,?])/g,'$1').trim();
 }
 function publicoEnvio(){
   const f=$('#evFonte').value; const pc=porCliente(); let clis=[];
@@ -2219,9 +2225,12 @@ if(AO_VIVO) setTimeout(()=>api('/api/envios').then(r=>{ EV.estado=r; $('#qEnv').
 
 
 // ------------------------------------------------------------ PONTOS e LEMBRETES
-const PTS_DESTAQUE=100;
+const PTS_DESTAQUE=FID_CB?10:100;
+function opcoesFid(){ if(!FID_CB) return; ['#hPts','#fPts','#pPts','#evPts'].forEach(id=>{ const el=$(id); if(!el) return; el.title='Filtrar pelo saldo de cashback';
+  el.innerHTML='<option value="">Qualquer cashback</option><option value="0.01">Com cashback</option><option value="5">R$ 5 ou mais</option><option value="10">R$ 10 ou mais</option><option value="20">R$ 20 ou mais</option><option value="50">R$ 50 ou mais</option><option value="sem">Sem cashback</option>'; }); }
+opcoesFid();
 function okPts(p,v){ p=+p||0; if(!v) return true; if(v==='sem') return p<=0; return p>=+v; }
-function ptsTag(c){ return c&&c.pontos?` <span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}" title="Pontos de fidelidade">⭐ ${fmtN(c.pontos)} pts</span>`:''; }
+function ptsTag(c){ return c&&c.pontos?` <span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}" title="${FID_CB?'Saldo de cashback para usar no próximo pedido':'Pontos de fidelidade'}">${FID_IC} ${fidCurto(c.pontos)}</span>`:''; }
 let LEMB=[]; const LP={f:'pend'};
 function lembDe(chave){ return LEMB.filter(l=>l.chave===chave&&!l.feito); }
 function pinBtn(cli){ const c=D.clientes[cli]; if(!c||!AO_VIVO) return ''; const n=lembDe(c.chave);
@@ -2263,17 +2272,17 @@ $('#lbBusca').oninput=()=>{ const q=semAc($('#lbBusca').value.trim()); const R=$
   R.classList.remove('hidden'); R.querySelectorAll('[data-lbc]').forEach(d=>d.onclick=()=>{ R.classList.add('hidden'); $('#lbBusca').value=''; abrirLembrete(+d.dataset.lbc); }); };
 // popup de lembrete
 let LB_CTX=null;
-const LB_ACOES=['Mandar mensagem','Oferecer cupom','Avisar dos pontos','Ligar para o cliente','Perguntar como foi o pedido','Convidar para pedir pelo app'];
+const LB_ACOES=['Mandar mensagem','Oferecer cupom',FID_CB?'Avisar do cashback':'Avisar dos pontos','Ligar para o cliente','Perguntar como foi o pedido','Convidar para pedir pelo app'];
 function abrirLembrete(cli, editar){
   if(!AO_VIVO){ alert('Os lembretes funcionam quando o painel é aberto pelo atalho Painel Mariá.'); return; }
   const c=D.clientes[cli]; if(!c) return; LB_CTX={cli, id:editar?editar.id:null, quando:editar?editar.quando:''};
   $('#lbTitulo').textContent='📌 '+(c.nome||'Cliente'); const pc=porCliente().get(cli);
-  $('#lbInfo').innerHTML=[c.tel?esc(fmtTel(c.tel)):'',c.pontos?`<span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}">⭐ ${fmtN(c.pontos)} pontos</span>`:'',pc?`${fmtN(pc.n)} pedidos · último há ${diasEntre(pc.ult,new Date())} dias`:''].filter(Boolean).join(' · ');
+  $('#lbInfo').innerHTML=[c.tel?esc(fmtTel(c.tel)):'',c.pontos?`<span class="pts ${c.pontos>=PTS_DESTAQUE?'alto':''}">${FID_IC} ${fidFmt(c.pontos)}${FID_CB?' de cashback':''}</span>`:'',pc?`${fmtN(pc.n)} pedidos · último há ${diasEntre(pc.ult,new Date())} dias`:''].filter(Boolean).join(' · ');
   const ab=lembDe(c.chave).filter(l=>!editar||l.id!==editar.id);
   $('#lbAbertos').innerHTML=ab.length?'<div class="lb-grupo" style="margin-top:4px">Já salvos</div>'+ab.map(l=>`<div class="lb-item"><div class="t"><span>${esc(l.texto||'')}</span><span class="q">${esc(quandoLabel(l.quando))}</span></div><div class="ac"><button data-lbm="feito" data-id="${l.id}">✓ Feito</button><button data-lbm="apagar" data-id="${l.id}">Apagar</button></div></div>`).join(''):'';
   $('#lbAbertos').querySelectorAll('[data-lbm]').forEach(b=>b.onclick=()=>{ if(b.dataset.lbm==='apagar'&&!confirmar(b)) return; lembAcao({acao:b.dataset.lbm,id:+b.dataset.id}).then(()=>abrirLembrete(cli)); });
   $('#lbAcoes').innerHTML=LB_ACOES.map(t=>`<button>${esc(t)}</button>`).join('');
-  $('#lbAcoes').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const ta=$('#lbTexto'); let t=b.textContent; if(t==='Avisar dos pontos'&&c.pontos) t+=` (tem ${fmtN(c.pontos)})`; ta.value=ta.value.trim()?ta.value.trim()+'\n'+t:t; ta.focus(); });
+  $('#lbAcoes').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const ta=$('#lbTexto'); let t=b.textContent; if((t==='Avisar dos pontos'||t==='Avisar do cashback')&&c.pontos) t+=` (tem ${fidFmt(c.pontos)})`; ta.value=ta.value.trim()?ta.value.trim()+'\n'+t:t; ta.focus(); });
   const ds=[['','Sem data'],[hojeStr(),'Hoje'],[hojeStr(new Date(Date.now()+864e5)),'Amanhã'],[hojeStr(new Date(Date.now()+3*864e5)),'Em 3 dias'],[hojeStr(new Date(Date.now()+7*864e5)),'Daqui a 1 semana']];
   const outro=LB_CTX.quando&&!ds.some(d=>d[0]===LB_CTX.quando);
   $('#lbQuando').innerHTML=ds.map(([v,l])=>`<button data-q="${v}" class="${LB_CTX.quando===v?'on':''}">${l}</button>`).join('')+`<input type="date" id="lbData" value="${outro?LB_CTX.quando:''}" style="font:inherit;font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px">`;
@@ -2401,7 +2410,7 @@ function listaAcao(d){ return api('/api/listas',d).then(r=>{ if(r.listas){ LISTA
 function salvarComoLista(titulo, descricao, gs){ const itens=[]; gs.forEach(g=>g.ids.forEach(i=>{ const c=D.clientes[i]; if(c) itens.push({chave:c.chave, cliente_id:c.id, nome:c.nome, grupo:gs.length>1?g.titulo:'', nota:(g.notas||{})[i]||''}); }));
   return listaAcao({acao:'salvar', titulo, descricao, origem:'ia', itens}).then(r=>r.id); }
 function abrirLista(id){ LS.sel=id; LS.g=''; LS.busca=''; LS.marc=new Set(); irPara('listas'); if(aba==='listas') renderListas(); }
-const LS_ORD={grupo:'Agrupar pelo motivo', sumido:'Sumido há mais tempo', recente:'Pediu mais recente', pedidos:'Mais pedidos', gasto:'Mais gasto', pontos:'Mais pontos', nome:'Nome'};
+const LS_ORD={grupo:'Agrupar pelo motivo', sumido:'Sumido há mais tempo', recente:'Pediu mais recente', pedidos:'Mais pedidos', gasto:'Mais gasto', pontos:FID_CB?'Mais cashback':'Mais pontos', nome:'Nome'};
 function renderListas(){
   const M=$('#lsMain');
   if(!AO_VIVO){ $('#lsListas').innerHTML=''; M.innerHTML='<div class="ch-vazio">As listas ficam salvas no sistema. Abra pelo atalho <b>Mariá Gestão</b>.</div>'; return; }
@@ -2462,7 +2471,7 @@ function renderListas(){
       listaAcao({acao:'mover_itens', id:l.id, grupo:nome.trim(), itens:marcados().map(x=>({chave:x.chave}))}).then(()=>{ LS.marc=new Set(); renderListas(); }); }
     else if(t==='tirar'){ if(!confirm('Tirar '+LS.marc.size+' cliente(s) desta lista?')) return; listaAcao({acao:'remover_itens', id:l.id, itens:marcados().map(x=>({chave:x.chave, grupo:x.grupo||''}))}).then(()=>{ LS.marc=new Set(); renderListas(); }); }
     else if(t==='limpar'){ LS.marc=new Set(); renderListas(); }
-    else if(t==='csv'){ const lin=[['Grupo','Cliente','Telefone','Por quê','Pedidos','Último pedido (dias)','Gasto','Pontos','Favorito']];
+    else if(t==='csv'){ const lin=[['Grupo','Cliente','Telefone','Por quê','Pedidos','Último pedido (dias)','Gasto',FID_NOME,'Favorito']];
       it.forEach(x=>{ const c=x.cli!=null?D.clientes[x.cli]:{}; const p=x.p; lin.push([x.grupo||'',c.nome||x.nome||'',c.tel?fmtTel(c.tel):'',x.nota||'',p?p.n:'',p?diasEntre(p.ult,new Date()):'',p?Math.round(p.v):'',c.pontos||'',x.cli!=null&&PERF[x.cli]?limparNome(PERF[x.cli][0]||''):'']); });
       baixarArquivo((l.titulo||'lista').replace(/[^\wÀ-ú -]+/g,'').trim()+'.csv','﻿'+lin.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'),'text/csv'); }
     else if(t==='apagar'){ if(!confirmar(b)) return; listaAcao({acao:'apagar', id:l.id}); } });
@@ -2791,7 +2800,7 @@ function insightCliente(cli){
     else if(pf[4]&&d<=pf[4]) out.push(`Está no ritmo: pede a cada ${pf[4]} dias.`); }
   const st=situacaoCanal(cli); if(st&&st.tipo==='migrou') out.push(st.curto+'.');
   if(pf[1]!=null&&pf[3]>=0.4) out.push(`Costuma pedir ${['no domingo','na segunda','na terça','na quarta','na quinta','na sexta','no sábado'][pf[1]]}${pf[2]!=null?' (melhor hora para mandar: '+pf[2]+'h)':''}.`);
-  if(c&&c.pontos>=PTS_DESTAQUE) out.push(`Tem ${fmtN(c.pontos)} pontos para usar.`);
+  if(c&&c.pontos>=PTS_DESTAQUE) out.push(FID_CB?`Tem ${fidFmt(c.pontos)} de cashback para usar.`:`Tem ${fmtN(c.pontos)} pontos para usar.`);
   const e=envDe(cli); if(e&&e.st==='pausado') out.push('Mensagens pausadas: '+e.mot+'.');
   const lb=c?lembDe(c.chave):[]; if(lb.length) out.push('📌 '+lb.map(l=>l.texto).join(' / '));
   return out;
@@ -2803,7 +2812,7 @@ function mostrarCartao(a){
   hc.innerHTML=`<h4>${esc(c.nome||'(sem nome)')}</h4><div class="muted" style="margin-bottom:6px">${[seg?seg.nome:'',c.app?'só '+c.app:'',bairroCli(cli)].filter(Boolean).map(esc).join(' · ')}</div>
     ${x?`<div class="l"><span>Pedidos</span><span>${fmtN(x.n)} · ${fmtR0(x.v)}</span></div><div class="l"><span>Último pedido</span><span>há ${diasEntre(x.ult,new Date())} dias</span></div>`:''}
     ${pf[0]?`<div class="l"><span>Favorito</span><span>${esc(limparNome(pf[0]))}</span></div>`:''}
-    ${c.pontos?`<div class="l"><span>Pontos</span><span>⭐ ${fmtN(c.pontos)}</span></div>`:''}
+    ${c.pontos?`<div class="l"><span>${FID_NOME}</span><span>${FID_IC} ${fidFmt(c.pontos)}</span></div>`:''}
     ${e?`<div class="l"><span>Mensagens</span><span>${esc(envTexto(e)||'pode receber')}</span></div>`:''}
     ${ins.length?`<div class="ins">${ins.map(esc).join('<br>')}</div>`:''}
     <div class="bts"><button data-hc="perfil">Perfil</button>${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}">WhatsApp</a>`:''}${AO_VIVO?`<button data-hc="pin">📌</button>`:''}${IA_ON?`<button class="ia" data-hc="ia">✨ O que fazer com ele?</button>`:''}</div>`;
@@ -2868,7 +2877,7 @@ function renderPerfil(c, cli, psAll, RAll){
     return {dia:best, share:dw[best]/ok.length, hora:Math.round(hm), ritmo:iv.length?Math.round(iv[Math.floor(iv.length/2)]):null}; })();
   const seg=dias!=null?SEGS.find(s=>s.f(n,dias)):null;
   const ci=cInfo(c.id);
-  const msg=($('#msg').value||CFG.mensagem||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{pontos\}/g,c.pontos||0);
+  const msg=($('#msg').value||CFG.mensagem||'').replace(/\{nome\}/g,primeiroNome(c)).replace(/\{pontos\}/g,fidFmt(c.pontos||0)).replace(/\{cashback\}/g,fidFmt(c.pontos||0));
   const w=waLink(c,msg);
   const cad=R&&R.cadastro||{};
   const bairro=(()=>{ const m={}; ps.forEach(p=>{ if(p.b>=0) m[p.b]=(m[p.b]||0)+1; }); const k=Object.keys(m).sort((a,b)=>m[b]-m[a])[0]; return k!=null?D.bairros[k]:''; })();
@@ -2891,7 +2900,7 @@ function renderPerfil(c, cli, psAll, RAll){
   let h=`<div class="pf-topo"><i class="b1"></i><i class="b2"></i><button class="pf-fechar" id="pfFechar" title="Fechar">✕</button>
     <div class="pf-id"><div class="pf-av">${esc(iniciais(c.nome))}</div><div><h2>${esc(c.nome||'(sem nome)')}</h2>
       <div class="meta">${[c.tel?fmtTel(c.tel):'sem telefone', bairro, (cad.cadastro||c.cad)?'cliente desde '+new Date((cad.cadastro||c.cad)+'T12:00').toLocaleDateString('pt-BR'):(pri?'1º pedido em '+pri.toLocaleDateString('pt-BR'):'')].filter(Boolean).map(esc).join(' · ')}</div>
-      <div class="pf-tags">${seg?`<span class="y">${esc(seg.nome)}</span>`:''}${c.app?`<span>só ${esc(c.app)}</span>`:''}${(cad.pontos||c.pontos)?`<span>${fmtN(cad.pontos||c.pontos)} pontos</span>`:''}${(cad.nascimento||c.nasc)?`<span>🎂 ${new Date((cad.nascimento||c.nasc).slice(0,10)+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>`:''}${ci?`<span>contatado em ${esc(ci.txt)}</span>`:''}</div></div></div>
+      <div class="pf-tags">${seg?`<span class="y">${esc(seg.nome)}</span>`:''}${c.app?`<span>só ${esc(c.app)}</span>`:''}${c.pontos?`<span>${FID_IC} ${fidFmt(c.pontos)}${FID_CB?' de cashback':''}</span>`:''}${(cad.nascimento||c.nasc)?`<span>🎂 ${new Date((cad.nascimento||c.nasc).slice(0,10)+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>`:''}${ci?`<span>contatado em ${esc(ci.txt)}</span>`:''}</div></div></div>
     <div class="pf-acoes">${w?`<a class="wa" target="_blank" rel="noopener" href="${esc(w)}" title="${esc(msg)}">WhatsApp</a>`:''}${c.tel?`<button id="pfCopiar">Copiar telefone</button>`:''}${cli>=0?`<button id="pfLembrar">📌 ${lembDe(c.chave).length?'Lembretes ('+lembDe(c.chave).length+')':'Lembrar depois'}</button>`:''}${cad.email?`<button disabled style="cursor:default">${esc(cad.email)}</button>`:''}</div></div>
   <div class="pf-corpo">
     ${tsCli.length>1&&cli>=0?`<div class="pf-filtro"><span>Ver pedidos de</span><div class="seg" id="pfTurno">${[['all','Todos os turnos']].concat(tsCli.map(t=>[t,D.turnos[t]])).map(([v,l])=>`<button data-v="${v}" class="${String(PF_T)===String(v)?'on':''}">${esc(l)}</button>`).join('')}</div></div>`:''}

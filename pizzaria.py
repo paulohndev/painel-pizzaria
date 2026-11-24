@@ -176,6 +176,7 @@ def carregar_config():
         "turnos": turnos,
         "dias_ativo": cp.getint("clientes", "dias_ativo", fallback=45),
         "pedidos_fiel": cp.getint("clientes", "pedidos_fiel", fallback=4),
+        "fidelidade": (cp.get("painel", "fidelidade", fallback="cashback").strip().lower() or "cashback"),
         "mensagem": cp.get("clientes", "mensagem", fallback="").strip().replace("Aqui é da pizzaria. ", ""),
         "ia": {k: cp.get("ia", k, fallback="").strip() for k in ("provedor", "chave", "modelo", "modelo_forte", "dados_pessoais")},
         "whatsapp": {k: cp.get("whatsapp", k, fallback="").strip() for k in ("provedor", "instancia", "token", "client_token", "url", "apikey")},
@@ -607,7 +608,7 @@ def montar_dados(db, cfg, nome_loja):
                     if cad.get("nome") or (cust.get("name") and not reg["nome"]):
                         reg["nome"] = (cad.get("nome") or cust.get("name") or "").strip()
                     if cad:
-                        reg.update({"pontos": cad.get("pontos", 0), "nasc": cad.get("nasc"), "id": cid})
+                        reg.update({"pontos": cad.get("pontos", 0), "cashback": cad.get("cashback", 0), "nasc": cad.get("nasc"), "id": cid})
                 elif reg.get("app") and reg["app"] != CANAIS.get(canal):
                     reg["app"] = "iFood/99"
             end = d.get("delivery_address") or {}
@@ -735,7 +736,7 @@ def montar_dados(db, cfg, nome_loja):
         "nomes_it": lista_nome,
         "itens_dia": [list(k) + [round(v[0], 2), round(v[1], 2)] for k, v in itens_dia.items()],
         "sabores_dia": [list(k) + [round(v[0], 2), round(v[1], 2)] for k, v in sabores_dia.items()],
-        "config": {"dias_ativo": cfg["dias_ativo"], "pedidos_fiel": cfg["pedidos_fiel"], "mensagem": cfg["mensagem"]},
+        "config": {"dias_ativo": cfg["dias_ativo"], "pedidos_fiel": cfg["pedidos_fiel"], "mensagem": cfg["mensagem"], "fidelidade": cfg.get("fidelidade", "cashback")},
         "sem_detalhe": sem_detalhe,
         "cupons": lista_cupom,
         "avaliacoes": avaliacoes,

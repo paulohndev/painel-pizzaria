@@ -327,6 +327,17 @@ DATA DA ÚLTIMA MENSAGEM EM TODO LUGAR (versão 2.17)
   - A Zoe agora enxerga o histórico de mensagens: não sugere quem recebeu
     mensagem recentemente e diz a data da última mensagem de cada um.
 
+CASHBACK NO LUGAR DOS PONTOS (v2.18.0)
+- A casa agora usa cashback (saldo em R$) no Cardápio Web, então o app mostra o cashback
+  onde antes mostrava pontos: etiqueta 💰 R$ x nos clientes, coluna e CSV "Cashback",
+  filtros "Com cashback / R$ 5+ / R$ 10+ / R$ 20+ / R$ 50+ / Sem cashback", alertas,
+  perfil do cliente, listas e lembrete "Avisar do cashback".
+- Nas mensagens use {cashback} (vira "R$ 12,50"). Modelos antigos com {pontos} também
+  passam a mostrar o cashback.
+- A Zoe sabe que a casa usa cashback e não fala mais em pontos com clientes.
+- Os saldos vêm do Cardápio Web na atualização diária de clientes (depois das 6h).
+- Para voltar ao modo antigo: em config.ini, seção [painel], fidelidade = pontos
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".

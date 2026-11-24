@@ -42,8 +42,11 @@ def contexto_cliente(D, cli, perfil):
     rows = [p for p in D["pedidos"] if p[5] == cli]
     ok = [p for p in rows if not p[7]]
     linhas = ["Primeiro nome: %s" % (primeiro_nome(c.get("nome")) or "(sem nome)")]
-    if c.get("pontos"):
-        linhas.append("Pontos de fidelidade acumulados: %s (só mencione se a mensagem de referência falar de pontos)" % c.get("pontos"))
+    if (D.get("config") or {}).get("fidelidade", "cashback") == "pontos":
+        if c.get("pontos"):
+            linhas.append("Pontos de fidelidade acumulados: %s (só mencione se a mensagem de referência falar de pontos)" % c.get("pontos"))
+    elif c.get("cashback"):
+        linhas.append("Saldo de cashback para usar no próximo pedido: R$ %.2f (a casa usa cashback, não pontos; só mencione se fizer sentido na mensagem)" % float(c.get("cashback") or 0))
     if ok:
         datas = sorted(datetime.strptime(p[0], "%Y-%m-%d %H:%M") for p in ok)
         gasto = sum(p[4] or 0 for p in ok)
@@ -621,7 +624,7 @@ FERRAMENTAS_ACAO = [
                     "required": ["id", "instrucao"]}},
     {"name": "preparar_envio",
      "description": "Prepara um envio de WhatsApp para muitos clientes na tela Envios. NÃO envia: o dono revisa e confirma. Cada mensagem é "
-                    "personalizada pela IA na hora do envio a partir do texto modelo. Variáveis: {nome}, {favorito}, {pontos}, {bairro}.",
+                    "personalizada pela IA na hora do envio a partir do texto modelo. Variáveis: {nome}, {favorito}, {cashback}, {bairro}.",
      "parameters": {"type": "object", "properties": {"ids": {"type": "array", "items": {"type": "integer"}}, "texto": {"type": "string"},
                                                      "titulo": {"type": "string"}}, "required": ["ids", "texto"]}},
     {"name": "gerar_relatorio",
@@ -662,6 +665,7 @@ FERRAMENTAS_ACAO = [
 
 GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_clientes, salvar_lista, criar_lembrete, escrever_mensagem, preparar_envio, "
               "gerar_relatorio, abrir_perfil e abrir_pagina.\n"
+              "- FIDELIDADE: a casa usa CASHBACK (saldo em reais, coluna clientes.cashback), não mais pontos. Não fale em pontos com clientes; a coluna pontos é do programa antigo. "
               "- MENSAGENS JÁ MANDADAS: antes de sugerir mandar mensagem para alguém, consulte a tabela mensagens_clientes (ultima_mensagem, situacao, pode_mandar_a_partir). NÃO sugira quem está com situacao aguardar, pausado, na fila ou não quer receber; se o dono pedir alguém assim, avise a data da última mensagem e a partir de quando pode mandar. Ao listar clientes para contato, diga quando cada um recebeu a última mensagem (se recebeu). "
               "- Quando citar clientes específicos, chame mostrar_clientes. Se houver motivos diferentes, SEPARE EM GRUPOS com títulos que digam "
               "o critério (nunca misture tudo num grupo só). Dê uma nota curta por cliente quando ajudar.\n"
