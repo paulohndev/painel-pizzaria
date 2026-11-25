@@ -275,6 +275,17 @@ a.cli:hover{color:var(--red2);border-bottom-color:var(--sun)}
 .pf-barra b{display:block;height:100%}
 .pf-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut)}
 .pf-leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.idc{border:1px solid var(--line,#eee);border-radius:14px;padding:10px 12px;margin:8px 0;background:#fff}
+.idc .t{font-weight:700;font-size:13.5px}.idc .o{font-size:13.5px;margin:3px 0;color:var(--ink)}
+.idc .p{font-size:12.5px;color:#555}.idc .c{font-size:12px;color:#1F5FA8;margin-top:3px}
+.idc .r{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:6px;flex-wrap:wrap}
+.idc .custo{font-size:11.5px;color:#666;background:#F4F4F4;border-radius:999px;padding:2px 8px}
+.idc button,.id-zoe{border:1px solid #BCD3EE;background:#fff;border-radius:999px;padding:4px 11px;font-size:12px;cursor:pointer}
+.id-zoe{background:#1F5FA8;color:#fff;border-color:#1F5FA8;margin-top:4px}
+.id-res{font-size:13px;color:#444;margin:2px 0 6px}
+.id-zoe-tag{font-size:11px;background:#EEE6FF;color:#5B2DB3;border-radius:999px;padding:1px 7px;margin-left:6px;font-weight:600}
+.ia-ideias{display:flex;gap:6px;flex-wrap:wrap;font-size:12.5px;margin:-4px 0 10px;align-items:center}
+.ia-ideias button{border:1px solid #E5D3A8;background:#FFF8EE;border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer}
 .pf-sug{border-left:4px solid var(--sun);padding:8px 12px;margin:6px 0;background:#FFF8EE;border-radius:0 12px 12px 0;font-size:13px}
 .pf-sug b{display:block;font-size:13.5px}
 .pf-ped{border-bottom:1px solid var(--line2);padding:10px 0}
@@ -815,6 +826,11 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
       <p class="desc">As promoções fixas da Mariá. O painel reconhece nos pedidos quem usou cada uma e, no dia da promoção, monta em <b>Hoje</b> a lista de quem tem mais chance de aproveitar. Na mensagem, <b>{sabor_promo}</b> vira o sabor favorito do cliente quando ele está na promoção.</p>
       <div id="pcLista"></div>
     </div>
+    <div class="card" style="margin-bottom:16px" id="idLojaCard">
+      <h2>💡 Ideias de promoções novas</h2>
+      <p class="desc">O app olha os dias e turnos mais fracos, os itens que saem juntos e ainda não viraram combo, os grupos de clientes que sumiram e o uso dos cupons. A Zoe pode transformar isso em promoções prontas para criar no Cardápio Web.</p>
+      <div id="idLoja"><button class="id-zoe" id="idLojaVer" style="background:#fff;color:#1F5FA8">Ver as oportunidades</button></div>
+    </div>
     <div class="card">
       <h2>Promoções sugeridas para cada cliente</h2>
       <p class="desc">O app olha o que cada cliente costuma pedir, quando pede e há quanto tempo não pede, e sugere uma ação por cliente (a mais importante). Escolha uma campanha para ver a lista.</p>
@@ -947,6 +963,7 @@ html.embutido #area,html.embutido body.fixo #area{margin-left:0}
   <div class="ia-freq hidden" id="iaFreq"></div>
   <div class="ia-pts hidden" id="iaPts"></div>
   <div class="ia-cup hidden" id="iaCup"></div>
+  <div class="ia-ideias hidden" id="iaIdeias"></div>
   <div class="ia-instr" id="iaInstrBox"><input id="iaInstr" placeholder="Diga à Zoe o que você quer dizer (ex.: fala da Quinta do Clone, bem descontraído, sem emoji)"><button id="iaInstrBtn">✨ Escrever</button></div>
   <div class="ia-chips" id="iaChips"><button>Mais curta</button><button>Mais descontraída</button><button>Mais carinhosa</button><button>Sem emoji</button><button>Falar da promoção de hoje</button><button>Lembrar do cashback</button><button>Convidar para pedir pelo app</button></div>
   <div class="ia-status" id="iaStatus"></div>
@@ -1878,7 +1895,7 @@ function decidirVinculo(app, principal, decisao, btn){
 const IA_ON = !!(AO_VIVO && D && D.ia && D.ia.ativa);
 const TEL_IDX={}; (D&&D.clientes||[]).forEach((c,i)=>{ if(c.tel&&c.uniu_em==null) TEL_IDX[c.tel.slice(-11)]=i; });
 let IA_CTX=null; const IA_CACHE={};
-function iaAbrir(a){
+function iaAbrir(a, instrIni){
   const u=new URL(a.href); const num=(u.pathname.match(/\d+/)||[''])[0]; const ref=u.searchParams.get('text')||'';
   const cli=TEL_IDX[num.slice(-11)]; if(cli==null) return false;
   const c=D.clientes[cli]; const row=a.closest('tr,.al,.pf-topo,.pf-sec');
@@ -1892,9 +1909,9 @@ function iaAbrir(a){
   const pt=$('#iaPts'); if(c.pontos){ pt.innerHTML=`<span>${FID_IC} <b>${fidFmt(c.pontos)}</b> ${FID_CB?'de cashback':'pontos acumulados'}</span><button id="iaAddPts">Incluir os pontos na mensagem</button>`; pt.className='ia-pts';
     $('#iaAddPts').onclick=()=>{ const ta=$('#iaTxt'); const frase=FID_CB?`Ah, e você tem ${fidFmt(c.pontos)} de cashback com a gente, dá pra usar no próximo pedido pelo app! 😉`:`Ah, e você tem ${fmtN(c.pontos)} pontos acumulados com a gente, dá pra usar no próximo pedido pelo app! 😉`; if(!ta.value.includes(fmtN(c.pontos)+' pontos')) ta.value=ta.value.trim()+' '+frase; $('#iaAddPts').textContent='Incluído ✓'; $('#iaAddPts').disabled=true; }; }
   else pt.className='ia-pts hidden';
-  iaCupom(c);
+  iaCupom(c); iaIdeias(c);
   $('#iaModal').classList.remove('hidden');
-  if(IA_ON) iaGerar(false); else { $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem pronta. Pode editar antes de enviar.'; }
+  if(IA_ON){ if(instrIni){ $('#iaInstr').value=instrIni; iaGerar(true, instrIni); } else iaGerar(false); } else { $('#iaStatus').className='ia-status'; $('#iaStatus').textContent='Mensagem pronta. Pode editar antes de enviar.'; }
   return true;
 }
 // sugestão de cupom (regras locais: ticket, ritmo e há quanto tempo não pede; não gasta crédito da Zoe)
@@ -1920,6 +1937,13 @@ function iaCupom(c){
     box.className='ia-cup';
     const todos=[x,...alt]; box.querySelectorAll('.cup-bts button').forEach(b=>b.onclick=()=>usar(todos[+b.dataset.i]));
   }).catch(()=>{});
+}
+function iaIdeias(c){
+  const box=$('#iaIdeias'); box.className='ia-ideias hidden'; if(!AO_VIVO||!IA_ON) return; const ctx=IA_CTX;
+  const pinta=r=>{ if(IA_CTX!==ctx||!r||!(r.ideias||[]).length) return; const L=r.ideias.filter(x=>x.instr&&!/^cupom/.test(x.tipo)).slice(0,3); if(!L.length) return;
+    box.innerHTML='<span>💡 Ideias:</span>'+L.map((x,i)=>`<button data-i="${i}" title="${esc(x.oferta+' · '+x.porque)}">${esc(x.ic+' '+x.titulo)}</button>`).join('');
+    box.className='ia-ideias'; box.querySelectorAll('button').forEach(b=>b.onclick=()=>{ const ins=L[+b.dataset.i].instr; $('#iaInstr').value=ins; iaGerar(true, ins); }); };
+  ideiasDe(c.chave).then(r=>{ if(!r.erro) pinta(r); }).catch(()=>{});
 }
 function iaEditado(){ const t=$('#iaTxt').value.trim(); return !!(IA_CTX&&t&&t!==(IA_CTX.gerado||'').trim()&&t!==(IA_CTX.ref||'').trim()); }
 function iaBotaoOutra(){ const b=$('#iaOutra'); if(!b||b.disabled) return; b.textContent=iaEditado()?'✨ Reescrever a partir do meu texto':'✨ Escrever outra'; }
@@ -2955,6 +2979,7 @@ function renderPerfil(c, cli, psAll, RAll){
     ${secCanais(c,cli)}
     ${secPromos(cli)}
     ${cli>=0&&c.tel?'<div class="pf-sec" id="pfEnv"><h3>Mensagens</h3><div class="pf-carregando">Carregando…</div></div>':''}
+    ${cli>=0&&AO_VIVO?'<div class="pf-sec" id="pfIdeias"><h3>💡 O que oferecer</h3><div class="pf-carregando">Pensando nas ofertas para este cliente…</div></div>':''}
     ${sugs.length?`<div class="pf-sec"><h3>Sugestões para este cliente</h3>${sugs.map(x=>`<div class="pf-sug"><b>${esc(x.t)}</b>${esc(x.m)}</div>`).join('')}</div>`:''}
     ${R&&R.enderecos&&R.enderecos.length?`<div class="pf-sec"><h3>Endereços</h3>${R.enderecos.map(e=>`<div class="linha"><span>${esc(e.texto)}${e.complemento?`<span class="sub">${esc(e.complemento)}${e.referencia?' · '+esc(e.referencia):''}</span>`:''}</span><span>${fmtN(e.vezes)} pedido${e.vezes>1?'s':''}<span class="sub">último ${new Date(e.ultimo+'T12:00').toLocaleDateString('pt-BR')}</span></span></div>`).join('')}</div>`:''}
     <div class="pf-sec"><h3>Pedidos</h3><div id="pfPedidos">${pedidosPerfil(ps,R)}</div></div>
@@ -2964,11 +2989,59 @@ function renderPerfil(c, cli, psAll, RAll){
   $('#pfFechar').onclick=fecharPerfil;
   const pl=$('#pfLembrar'); if(pl) pl.onclick=()=>abrirLembrete(cli);
   if(cli>=0&&c.tel) secEnvios(c,cli);
+  if(cli>=0&&AO_VIVO) secIdeias(c,cli);
   $('#perfil').querySelectorAll('#pfTurno button').forEach(b=>b.onclick=()=>{ PF_T=b.dataset.v==='all'?'all':+b.dataset.v; const k=PF_CTX; renderPerfil(k.c,k.cli,k.ps,k.R); });
   const cp=$('#pfCopiar'); if(cp) cp.onclick=()=>{ try{ navigator.clipboard.writeText(c.tel); cp.textContent='Copiado ✓'; }catch(e){} };
   $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open'));
   $('#perfil').querySelectorAll('button[data-vinc]').forEach(b=>b.onclick=()=>decidirVinculo(b.dataset.a,b.dataset.p,b.dataset.vinc,b));
   const mais=$('#pfMais'); if(mais) mais.onclick=()=>{ $('#pfPedidos').innerHTML=pedidosPerfil(ps,R,true); $('#perfil').querySelectorAll('.pf-ped .cab').forEach(el=>el.onclick=()=>el.parentElement.classList.toggle('open')); };
+}
+// ---------------------------------------------------------- ideias de promoções novas (para a casa)
+function ideiasLoja(){
+  const box=$('#idLoja'); if(!box) return; if(!AO_VIVO){ box.innerHTML='<div class="pf-carregando">Abra o painel pelo vigia para ver as ideias.</div>'; return; }
+  box.innerHTML='<div class="pf-carregando"><span class="gira"></span> Olhando as vendas…</div>';
+  api('/api/ideias/loja',{}).then(r=>{
+    const L=r.ideias||[];
+    box.innerHTML=(L.length?L.map(x=>`<div class="idc"><div class="t">${esc(x.ic)} ${esc(x.titulo)}</div><div class="p">${esc(x.fato)}</div><div class="c">👉 ${esc(x.proposta)}</div></div>`).join(''):'<div class="pf-carregando">Nada fora do normal agora.</div>')
+      +(IA_ON?'<button class="id-zoe" id="idLojaZoe">✨ Zoe, cria promoções novas com isso</button><div id="idLojaZ"></div>':'');
+    const z=$('#idLojaZoe'); if(z) z.onclick=()=>{ z.disabled=true; z.innerHTML='<span class="gira"></span> A Zoe está criando as promoções…';
+      api('/api/ia/ideias_loja',{}).then(q=>{ z.disabled=false; z.textContent='✨ Pedir outras à Zoe';
+        if(q.erro){ $('#idLojaZ').innerHTML='<div class="pf-carregando">'+esc(q.erro)+'</div>'; return; }
+        $('#idLojaZ').innerHTML='<h3 style="margin:14px 0 4px">Promoções sugeridas pela Zoe</h3>'+q.promocoes.map(p=>`<div class="idc"><div class="t">✨ ${esc(p.nome)}<span class="id-zoe-tag">Zoe</span></div>
+          <div class="o">${esc(p.oferta)}</div><div class="p"><b>Quando:</b> ${esc(p.quando)} · <b>Para quem:</b> ${esc(p.publico)}</div><div class="p">${esc(p.porque)}</div>
+          <div class="c">👉 ${esc(p.como)}</div>${p.meta?`<div class="p"><b>Meta:</b> ${esc(p.meta)}</div>`:''}</div>`).join('');
+      }).catch(()=>{ z.disabled=false; z.textContent='✨ Tentar de novo'; }); };
+  }).catch(()=>{ box.innerHTML='<div class="pf-carregando">Não consegui calcular agora.</div>'; });
+}
+{ const b=$('#idLojaVer'); if(b) b.onclick=ideiasLoja; }
+// ---------------------------------------------------------- ideias de oferta (o que oferecer a cada cliente)
+const IDEIAS_CACHE={}, IDEIAS_PEND={};
+function ideiasDe(ch){ if(IDEIAS_CACHE[ch]) return Promise.resolve(IDEIAS_CACHE[ch]);
+  return IDEIAS_PEND[ch]=IDEIAS_PEND[ch]||api('/api/ideias/cliente',{chave:ch}).then(r=>{ delete IDEIAS_PEND[ch]; if(!r.erro) IDEIAS_CACHE[ch]=r; return r; }, e=>{ delete IDEIAS_PEND[ch]; throw e; }); }
+function fmtCusto(v){ return v==null?'':v>0?'custo ~'+fmtR(v)+' por pedido':'sem custo'; }
+function cardIdeia(x,i,zoe){ return `<div class="idc"><div class="t">${esc(x.ic||'💡')} ${esc(x.titulo)}${zoe?'<span class="id-zoe-tag">Zoe</span>':''}</div>
+  <div class="o">${esc(x.oferta||'')}</div><div class="p">${esc(x.porque||'')}</div>${x.como?`<div class="c">👉 ${esc(x.como)}</div>`:''}
+  <div class="r"><span class="custo">${esc(fmtCusto(x.custo))}</span>${x.instr||x.instrucao?`<button data-id="${i}">✍️ Escrever mensagem com isso</button>`:''}</div></div>`; }
+function escreverComIdeia(cli, instr){
+  const c=D.clientes[cli]; if(!c||!c.tel) return;
+  const a=document.createElement('a'); a.href=waLink(c,''); a.style.display='none'; document.body.appendChild(a);
+  if(typeof fecharPerfil==='function') fecharPerfil();
+  iaAbrir(a, instr); a.remove();
+}
+function secIdeias(c,cli){
+  const box=$('#pfIdeias'); if(!box) return;
+  const desenha=(r,zoe)=>{
+    const L=zoe?r.ofertas.map(o=>Object.assign({ic:'✨',instr:o.instrucao},o)):(r.ideias||[]);
+    box.innerHTML=`<h3>💡 O que oferecer</h3>${r.resumo?`<div class="id-res">${esc(r.resumo)}</div>`:''}${L.length?L.map((x,i)=>cardIdeia(x,i,zoe)).join(''):'<div class="pf-carregando">Sem ideias para este cliente agora.</div>'}
+      ${IA_ON?`<button class="id-zoe" id="idZoe">${zoe?'✨ Pedir outras à Zoe':'✨ Zoe, pensa em ofertas para este cliente'}</button>`:''}${zoe?' <button class="id-zoe" id="idVolta" style="background:#fff;color:#1F5FA8">Ver as do sistema</button>':''}`;
+    box.querySelectorAll('.idc button[data-id]').forEach(b=>b.onclick=()=>{ const x=L[+b.dataset.id]; escreverComIdeia(cli, x.instr||x.instrucao); });
+    const z=$('#idZoe'); if(z) z.onclick=()=>{ z.disabled=true; z.innerHTML='<span class="gira"></span> A Zoe está pensando…';
+      api('/api/ia/ideias',{chave:c.chave}).then(q=>{ if(q.erro){ z.disabled=false; z.textContent='✨ Tentar de novo'; box.insertAdjacentHTML('beforeend',`<div class="pf-carregando">${esc(q.erro)}</div>`); return; }
+        q.resumo=(IDEIAS_CACHE[c.chave]||{}).resumo; desenha(q,true); }).catch(()=>{ z.disabled=false; z.textContent='✨ Tentar de novo'; }); };
+    const v=$('#idVolta'); if(v) v.onclick=()=>desenha(IDEIAS_CACHE[c.chave],false);
+  };
+  ideiasDe(c.chave).then(r=>{ if(!box.isConnected) return; if(r.erro){ box.innerHTML='<h3>💡 O que oferecer</h3><div class="pf-carregando">'+esc(r.erro)+'</div>'; return; }
+    desenha(r,false); }).catch(()=>{ box.remove(); });
 }
 function secEnvios(c,cli){
   const box=$('#pfEnv'); if(!box) return; const e=envDe(cli);

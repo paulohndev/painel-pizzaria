@@ -1,12 +1,12 @@
 {
- "versao": "2.19.0",
- "notas": "Zoe: calendário e dias certos das promoções; sugestão de cupom por cliente",
+ "versao": "2.20.0",
+ "notas": "Ideias de oferta por cliente (combos, cupons, promoções) e ideias de promoções novas com a Zoe",
  "arquivos": {
   "Abrir painel (Windows).bat": "3b6be5c28408ddae160bd8581bfb23b9bf0daabab6fc1461d7c1e19f337cf79e",
   "Atualizar painel (Mac).command": "8374f74cffabedfb673cc103dfadb75b6f707961988937d4236fbf4bb4dcce73",
   "Atualizar painel (Windows).bat": "b5620e18dba7eb2cbec937418d20289ef2c1301a15bc6674bfc8661c2f1323af",
   "Desligar vigia (Windows).bat": "efe9129025c368ab602ab07eb6a894f284cae760e5ae8cb125d7f3bab0122147",
-  "LEIA-ME.txt": "449da8c85dcbba65edb9e4b41bab6672cfc256ddbbb0daa7a7de23abceca1699",
+  "LEIA-ME.txt": "1bdb7f70414e1418ca90ee62f618237da33990266584c43c7f42e33a426c744d",
   "Ligar vigia e alertas (Windows).bat": "d65006df57e1e9dc4b99a85056bd1935e2a259f59efcd53d1567aab8d40592e2",
   "Reiniciar vigia (Windows).bat": "5e84e856b54c774385eca8a458844393e02e6d2d8054062012349a2bc95d5ce6",
   "Testar com dados de exemplo (Mac).command": "d8e8d2680408a9f1d50560a7126927c08e93ac61c8113893e8b11fffedf5fb8e",
@@ -25,12 +25,13 @@
   "gestao_fichas.html": "45c42ac9910612268c5a12a49ef6d74cf73b4045461ad8da6cca9213eddc7a61",
   "gestao_painel.html": "54753bdc63735d998fc1a26e05909b44d89950ad9239e94e3df3ec84678ebb3d",
   "ia.py": "2ead90b313218d2e91ab790d592a641d5e332b5aa9d7d8c5d1d78c915a9ffa30",
-  "ia_painel.py": "0472463d9f3492a179146b173160e7c41c1e7e0e17d0c6daee1d074e8a61a847",
+  "ia_painel.py": "03f7f3cab933b15571571f2744fe8aa29912fa22e1477e886436455e207df040",
   "iniciar.py": "6068c885ba6d072f7c94c2b2e671702685d54b8b7b7b74f9c2cfbec838781c3e",
-  "painel_modelo.html": "3ee3cb5dac605e8a988cb4dbaa66e7794ea8b1de2b67bf1b8969c39ea1a8dce2",
-  "pizzaria.py": "4c5d6c63bb243fbe35135c0570383e617c0e93b90ad409506e1501db36cd2ff3",
+  "ofertas.py": "3ec45496d5a6d34b43861e10ef3228e8ed9b2e5a8d0f917db81e4dd07ab64ac1",
+  "painel_modelo.html": "8557593c278df20c5b47374db6bf5089e3816936f2d6fe5f89f27c2c9be38ebe",
+  "pizzaria.py": "f7758a4eddc641811ae84f4b0a423329d59e88818caf7c4612ae8293f5885fec",
   "recomendacoes.py": "e6d035078f786a79cb72a072b51ba8c938fc8f0678ff6adc45b29dc5ab8ea998",
-  "vigia.py": "846cfd2174e33a112defc87e0c7372d0c3218ad5fbdd4aa6c9f85eb809daaac6",
+  "vigia.py": "1590ce5102def971f76ff88ee44fe4a28155d05a2175484be25ad3c9ee3c5126",
   "whatsapp.py": "99efb7f81425bc431395d3e47c169527dd293fb19a5b73f6aa766528dd5f19fe"
  }
 }

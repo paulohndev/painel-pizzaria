@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 from statistics import median
 
 import pizzaria as P
+import ofertas as OF
 from ia import ErroIA
 
 DIAS = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"]  # weekday() do Python
@@ -267,6 +268,102 @@ def sugerir_cupom(D, cli, agora=None):
         aviso = "Este cupom não vale hoje: " + esc["regra"].split("(hoje NÃO vale; ")[-1].rstrip(")") + "."
     return {"cupom": esc, "motivo": motivo, "aviso": aviso,
             "alternativas": [{"cod": x["cod"], "desc": x["desc"], "regra": x["regra"], "estado": x["estado"]} for x in alt]}
+
+
+# ------------------------------------------------------------------ ideias de oferta (Zoe)
+
+def _catalogo_txt(D, n=70):
+    out = []
+    for x in D.get("catalogo") or []:
+        if x.get("p") or x.get("pp"):
+            out.append("%s [%s] R$ %.2f%s" % (x["n"], x.get("cat", ""), x["p"], (" (promo R$ %.2f)" % x["pp"]) if x.get("pp") else ""))
+    return "; ".join(out[:n])
+
+
+def _promos_txt(D):
+    dn = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"]
+    return "; ".join("%s: %s (%s)" % (x.get("nome"), x.get("oferta") or "", ", ".join(dn[d] for d in x.get("dias") or []) or "todo dia")
+                     for x in D.get("promos_casa") or [] if isinstance(x, dict) and x.get("ativa", True) is not False)
+
+
+SIS_IDEIAS = ("Você é a Zoe, consultora de vendas da " + CASA + ". O dono quer saber O QUE OFERECER a um cliente específico. "
+              "Pense como um bom gerente de delivery: use os padrões reais do cliente (o que pede, quanto gasta, de quanto em quanto tempo, "
+              "em que dia e turno, se leva bebida/sobremesa/borda, se só pede com desconto) e o cardápio com preços.\n"
+              "Regras:\n"
+              "- Dê exatamente 3 ofertas, da melhor para a pior, todas diferentes entre si (ex.: um combo montado para ele, um cupom, "
+              "uma novidade sem custo). Pode melhorar as ideias prontas do sistema ou criar outras.\n"
+              "- Quem está no ritmo não precisa de desconto: prefira mimo, novidade ou combo que já existe. Desconto só para atrasado, sumido "
+              "ou novo, e proporcional ao ticket (em geral 8% a 20%).\n"
+              "- Preços: use os preços do cardápio e o que ele costuma pagar; diga o preço normal e o da oferta. Nunca prometa item que não "
+              "está no cardápio.\n"
+              "- Se precisa criar cupom ou promoção no Cardápio Web, diga exatamente como (código sugerido, valor, validade, dias, 1 uso).\n"
+              "- Respeite os dias: promoção de dia certo só naquele dia; use o calendário.\n"
+              "- Português do Brasil, direto, sem enrolação.\n"
+              'Responda APENAS com JSON: {"ofertas": [{"titulo": "...", "oferta": "o que o cliente recebe, com preço", '
+              '"porque": "1-2 frases com os dados dele", "como": "o que o dono precisa fazer/criar", "custo": número em reais por pedido ou 0, '
+              '"instrucao": "instrução curta para escrever a mensagem ao cliente"}]}')
+
+SIS_IDEIAS_LOJA = ("Você é a Zoe, consultora de vendas da " + CASA + ". O dono quer PROMOÇÕES NOVAS para a casa, baseadas nos dados. "
+                   "Use os fatos (dias fracos, pares que vendem juntos, grupos de clientes parados, uso de cupons), o cardápio com preços e as "
+                   "promoções que já existem (não repita nenhuma).\n"
+                   "Regras:\n"
+                   "- Dê de 3 a 5 promoções, da mais promissora para a menos. Cada uma com nome curto e chamativo (como 'Segunda Maluca'), "
+                   "dias e horário, a oferta com preço (normal x promoção), para quem é, por que (com os números), como criar no Cardápio "
+                   "Web e uma meta simples para saber se deu certo.\n"
+                   "- Desconto sustentável: em geral até 15-20%; prefira combos, brindes baratos ou upgrade em vez de desconto em tudo.\n"
+                   "- Pode sugerir cupons para grupos (ex.: quem sumiu e ama calabresa).\n"
+                   "- Português do Brasil.\n"
+                   'Responda APENAS com JSON: {"promocoes": [{"nome": "...", "quando": "dias e horário", "oferta": "...", "publico": "...", '
+                   '"porque": "...", "como": "...", "meta": "..."}]}')
+
+
+def _json_de(txt, chave):
+    m = re.search(r"\{.*\}", txt or "", re.S)
+    try:
+        j = json.loads(m.group(0)) if m else {}
+    except ValueError:
+        j = {}
+    v = j.get(chave) if isinstance(j, dict) else None
+    return v if isinstance(v, list) else []
+
+
+def ideias_zoe(ia, D, cli, perfil, notas=None):
+    agora = datetime.now()
+    loc = OF.ideias_cliente(D, cli, perfil, agora, sugerir_cupom=sugerir_cupom)
+    prontas = "\n".join("- %s: %s (por quê: %s; como: %s)" % (i["titulo"], i["oferta"], i["porque"], i["como"]) for i in loc["ideias"])
+    pedido = ("Hoje é %s, %s. Calendário: %s.\nCliente: %s\n%s\n\nIdeias que o sistema já calculou:\n%s\n\nPromoções da casa: %s\n%s\n"
+              "Cardápio (itens com preço): %s%s" % (
+                  DIAS[agora.weekday()], agora.strftime("%d/%m %H:%M"), calendario(agora),
+                  primeiro_nome(D["clientes"][cli].get("nome")) or "(sem nome)", loc.get("fatos", ""), prontas or "(nenhuma)",
+                  _promos_txt(D), cupons_texto(D, agora), _catalogo_txt(D),
+                  ("\nAnotações do dono: " + " / ".join(notas)[:500]) if notas else ""))
+    txt = ia.gerar(SIS_IDEIAS, pedido, max_tokens=1400, forte=True)
+    out = []
+    for o in _json_de(txt, "ofertas")[:3]:
+        if isinstance(o, dict) and o.get("titulo"):
+            try:
+                custo = float(o.get("custo") or 0)
+            except (TypeError, ValueError):
+                custo = 0
+            x = {k: str(o.get(k) or "")[:400] for k in ("titulo", "oferta", "porque", "como", "instrucao")}
+            x["custo"] = custo
+            out.append(x)
+    if not out:
+        raise ErroIA("A Zoe não devolveu ideias desta vez. Tente de novo.")
+    return {"ofertas": out}
+
+
+def ideias_loja_zoe(ia, D):
+    agora = datetime.now()
+    pedido = ("Hoje é %s, %s.\nFatos das vendas:\n%s\n\nPromoções que já existem: %s\n%s\nCardápio (itens com preço): %s" % (
+        DIAS[agora.weekday()], agora.strftime("%d/%m/%Y"), OF.ideias_loja_txt(D, agora) or "(sem destaques)",
+        _promos_txt(D), cupons_texto(D, agora), _catalogo_txt(D, 120)))
+    txt = ia.gerar(SIS_IDEIAS_LOJA, pedido, max_tokens=2200, forte=True)
+    out = [{k: str(o.get(k) or "")[:500] for k in ("nome", "quando", "oferta", "publico", "porque", "como", "meta")}
+           for o in _json_de(txt, "promocoes")[:5] if isinstance(o, dict) and o.get("nome")]
+    if not out:
+        raise ErroIA("A Zoe não devolveu ideias desta vez. Tente de novo.")
+    return {"promocoes": out}
 
 
 # ------------------------------------------------------------------ mensagens
@@ -788,6 +885,15 @@ FERRAMENTAS_ACAO = [
                          "required": ["titulo", "ids", "texto"]}},
                                                      "quando": {"type": "string", "description": "Data AAAA-MM-DD (opcional)"}},
                     "required": ["grupos"]}},
+    {"name": "ideias_cliente",
+     "description": "O que oferecer a UM cliente: combo do cardápio que combina, combo personalizado (favorito + o que ele nunca leva), "
+                    "cupom (existente ou novo a criar), promoção da casa que combina, novidade sem custo ou mimo. Vem com os padrões dele "
+                    "(ritmo, dia, turno, bebida/sobremesa, ticket). Use para 'o que ofereço pra fulano'.",
+     "parameters": {"type": "object", "properties": {"id": {"type": "integer"}}, "required": ["id"]}},
+    {"name": "ideias_promocoes",
+     "description": "Fatos para criar PROMOÇÕES NOVAS para a casa: dias/turnos fracos, itens que saem juntos e não viraram combo, grupos de "
+                    "clientes parados por favorito, cupons vencidos e mais usados. Use para 'que promoção nova eu crio'.",
+     "parameters": {"type": "object", "properties": {}}},
     {"name": "sugerir_cupom",
      "description": "Sugere qual cupom cadastrado no Cardápio Web oferecer a UM cliente (pelo ticket médio, ritmo de pedidos e há quanto "
                     "tempo não pede) e diz se o cupom vale hoje ou está vencido. Use antes de escrever mensagem com cupom.",
@@ -840,7 +946,7 @@ FERRAMENTAS_ACAO = [
      "parameters": {"type": "object", "properties": {"pagina": {"type": "string"}}, "required": ["pagina"]}},
 ]
 
-GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_clientes, sugerir_cupom, salvar_lista, criar_lembrete, escrever_mensagem, preparar_envio, "
+GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_clientes, ideias_cliente, ideias_promocoes, sugerir_cupom, salvar_lista, criar_lembrete, escrever_mensagem, preparar_envio, "
               "gerar_relatorio, abrir_perfil e abrir_pagina.\n"
               "- CUPONS: as regras de cada cupom (dias, horário, validade, mínimo) estão em cadastro_loja tipo='cupons'. Para sugerir "
               "cupom a um cliente, use a ferramenta sugerir_cupom (ou o ticket médio dele e há quanto tempo não pede "
@@ -866,7 +972,7 @@ GUIA_ACOES = ("\nVocê também AGE no sistema com as ferramentas mostrar_cliente
 
 
 def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete=None, extra="", salvar_lista=None, escrever=None,
-              reservas=None):
+              reservas=None, perfil_de=None):
     msgs = [{"role": m.get("role"), "content": str(m.get("content") or "")[:6000]} for m in mensagens[-14:]
             if m.get("role") in ("user", "assistant") and m.get("content")]
     if not msgs or msgs[-1]["role"] != "user":
@@ -946,6 +1052,15 @@ def perguntar(ia, D, mensagens, api=None, liberar=False, tela="", fazer_lembrete
             acoes.append({"tipo": "lembretes", "grupos": [{"titulo": g["titulo"], "texto": g["texto"], "ids": g["ids"]} for g in gs],
                           "ids": [i for g in gs for i in g["ids"]], "quando": q})
             return "%d lembrete(s) criado(s) em %d grupo(s)." % (total, len(gs))
+        if nome == "ideias_cliente":
+            ids = ids_ok([args.get("id")])
+            if not ids:
+                return "Cliente não encontrado."
+            pf = perfil_de(ids[0]) if perfil_de else None
+            r = OF.ideias_cliente(D, ids[0], pf, sugerir_cupom=sugerir_cupom)
+            return json.dumps({"resumo": r["resumo"], "fatos": r.get("fatos"), "ideias": r["ideias"]}, ensure_ascii=False)
+        if nome == "ideias_promocoes":
+            return json.dumps(OF.ideias_loja(D), ensure_ascii=False)
         if nome == "sugerir_cupom":
             ids = ids_ok([args.get("id")])
             if not ids:

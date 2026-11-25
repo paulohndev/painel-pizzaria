@@ -50,6 +50,7 @@ if not JANELA or sys.stdout is None:
 import pizzaria as P  # noqa: E402
 import alertas  # noqa: E402
 import ia_painel  # noqa: E402
+import ofertas  # noqa: E402
 import envios as E  # noqa: E402
 import gestao as G  # noqa: E402
 from whatsapp import Whats, ErroWhats, numero_br  # noqa: E402
@@ -637,6 +638,23 @@ class Painel(BaseHTTPRequestHandler):
                     ESTADO["alertas"] = [a for a in ESTADO["alertas"] if a["id"] != aid]
                     ESTADO["versao"] += 1
                 return self._json({"ok": True})
+            if u.path in ("/api/ideias/cliente", "/api/ideias/loja"):  # regras locais, não gasta crédito da IA
+                with ESTADO["trava"]:
+                    Dc = ESTADO["D"]
+                    cli = ESTADO["por_chave"].get(str(dado.get("chave") or ""))
+                if Dc is None:
+                    return self._json({"erro": "O painel ainda está carregando."})
+                try:
+                    if u.path == "/api/ideias/loja":
+                        return self._json(ofertas.ideias_loja(Dc))
+                    if cli is None:
+                        return self._json({"erro": "Cliente não encontrado."})
+                    r = ofertas.ideias_cliente(Dc, cli, perfil_cliente(Dc["clientes"][cli]["chave"]), sugerir_cupom=ia_painel.sugerir_cupom)
+                    r.pop("fatos", None)
+                    return self._json(r)
+                except Exception as e:
+                    log("Ideias: erro (%s)" % e)
+                    return self._json({"erro": "Não consegui calcular as ideias agora."})
             if u.path == "/api/cupom/sugestao":  # regras locais, não gasta crédito da IA
                 with ESTADO["trava"]:
                     Dc = ESTADO["D"]
@@ -964,6 +982,19 @@ def ia_post(caminho, dado):
             return r, 200
         if caminho == "/api/ia/resumo":
             return ia_resumo(gerar=True, novo=bool(dado.get("novo")))
+        if caminho == "/api/ia/ideias":
+            with ESTADO["trava"]:
+                cli = ESTADO["por_chave"].get(str(dado.get("chave") or ""))
+            if cli is None:
+                return {"erro": "Cliente não encontrado."}, 200
+            _h, notas = contexto_mensagem(D, cli)
+            r = ia_painel.ideias_zoe(ia, D, cli, perfil_cliente(D["clientes"][cli]["chave"]), notas)
+            log("IA: ideias de oferta para 1 cliente")
+            return r, 200
+        if caminho == "/api/ia/ideias_loja":
+            r = ia_painel.ideias_loja_zoe(ia, D)
+            log("IA: ideias de promoções novas")
+            return r, 200
         if caminho == "/api/ia/mensagem":
             chave = str(dado.get("chave") or "")
             with ESTADO["trava"]:
@@ -1059,7 +1090,8 @@ def ia_post(caminho, dado):
                 return (r.get("texto") or "").strip()
             r = ia_painel.perguntar(ia, D, dado.get("mensagens") or [], api=ESTADO.get("api_ia"), liberar=liberar,
                                     tela=str(dado.get("tela") or "")[:3500], fazer_lembrete=fazer_lembrete,
-                                    salvar_lista=salvar_lista, escrever=escrever, reservas=reservas_zoe)
+                                    salvar_lista=salvar_lista, escrever=escrever, reservas=reservas_zoe,
+                                    perfil_de=lambda i: perfil_cliente(D["clientes"][i]["chave"]))
             log("IA: pergunta respondida (%d consulta(s), %d ação(ões))" % (r["consultas"], len(r["acoes"])))
             return r, 200
         return {"erro": "não encontrado"}, 404

@@ -552,6 +552,25 @@ def cupons_loja(db):
     return out
 
 
+def catalogo_resumo(db):
+    """Itens ativos do cardápio com preço (para as ideias de combo e oferta)."""
+    try:
+        j = json.loads(meta_get(db, "catalogo_json") or "{}")
+    except ValueError:
+        return []
+    out = []
+    for cat in (j.get("categories") or []) if isinstance(j, dict) else []:
+        if str(cat.get("status") or "ACTIVE").upper() != "ACTIVE":
+            continue
+        for it in cat.get("items") or []:
+            if str(it.get("status") or "ACTIVE").upper() != "ACTIVE" or not it.get("name"):
+                continue
+            pp = it.get("promotional_price") if it.get("promotional_price_active") else None
+            out.append({"n": it["name"].strip(), "cat": (cat.get("name") or "").strip(), "p": float(it.get("price") or 0),
+                        "pp": float(pp) if pp else None})
+    return out[:600]
+
+
 def montar_dados(db, cfg, nome_loja):
     turnos = cfg["turnos"]
     nomes_turno = [t["nome"] for t in turnos] + ["Outro horário"]
@@ -770,6 +789,7 @@ def montar_dados(db, cfg, nome_loja):
         "sem_detalhe": sem_detalhe,
         "cupons": lista_cupom,
         "cupons_loja": cupons_loja(db),
+        "catalogo": catalogo_resumo(db),
         "avaliacoes": avaliacoes,
         "abertos": abertos,
         "vinc_sug": sugestoes,

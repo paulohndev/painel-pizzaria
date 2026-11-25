@@ -351,6 +351,22 @@ ZOE: DIAS CERTOS E SUGESTÃO DE CUPOM (v2.19.0)
 - A sugestão não gasta crédito da Zoe. No chat, peça "qual cupom mando pra Fulana?".
 - A lista de cupons vem do Cardápio Web na atualização diária.
 
+IDEIAS DE OFERTA E PROMOÇÕES NOVAS (v2.20.0)
+- No perfil de cada cliente há "💡 O que oferecer": o app olha o que ele pede, quanto gasta,
+  de quanto em quanto tempo, em que dia e turno, e se leva bebida/sobremesa/borda, e sugere:
+  combo do cardápio que combina, combo personalizado (favorito + o que ele nunca leva, com
+  preço), cupom (um que já existe ou um novo para criar, com código e valor), promoção da
+  casa que combina, sabor novo / outro turno, ou um mimo para cliente fiel no ritmo.
+  Cada ideia mostra o porquê, o que você precisa fazer no Cardápio Web e o custo por pedido.
+- "✍️ Escrever mensagem com isso" abre a mensagem já escrita pela Zoe com aquela oferta.
+  Se a ideia é um cupom NOVO, crie o cupom no Cardápio Web antes de mandar.
+- "✨ Zoe, pensa em ofertas para este cliente" pede 3 ofertas criadas pela Zoe (gasta crédito).
+- Na janela de mensagem aparecem as ideias como atalhos ("💡 Ideias").
+- Em Promoções há "💡 Ideias de promoções novas": dias e turnos fracos, itens que saem juntos
+  e ainda não são combo, grupos de clientes que sumiram e uso dos cupons. O botão da Zoe
+  transforma isso em promoções prontas (nome, dias, oferta, público, como criar e meta).
+- No chat: "o que ofereço pra Fulana?" ou "que promoção nova eu crio?".
+
 VIGIA E ALERTAS EM TEMPO REAL
 -----------------------------
 Dê dois cliques UMA VEZ em "Ligar vigia e alertas (Windows).bat".
